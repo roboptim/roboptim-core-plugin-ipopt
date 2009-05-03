@@ -191,11 +191,11 @@ void initialize_problem (T& pb, const G0& g0, const G1& g1)
   // Set bound for all variables.
   // 1. < x_i < 5. (x_i in [1.;5.])
   for (Function::size_type i = 0; i < pb.function ().n; ++i)
-    pb.argBounds ()[i] = T::makeBound (1., 5.);
+    pb.argBounds ()[i] = Function::makeBound (1., 5.);
 
   // Add constraints.
-  pb.addConstraint (&g0, T::makeUpperBound (25.));
-  pb.addConstraint (&g1, T::makeBound (40., 40.));
+  pb.addConstraint (&g0, Function::makeUpperBound (25.));
+  pb.addConstraint (&g1, Function::makeBound (40., 40.));
 
   // Set the starting point.
   Function::vector_t start (pb.function ().n);
