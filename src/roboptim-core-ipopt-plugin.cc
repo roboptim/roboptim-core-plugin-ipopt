@@ -37,6 +37,9 @@ namespace roboptim
 
   namespace detail
   {
+    TNLP::LinearityType cfsqp_tag (const LinearFunction& f);
+    TNLP::LinearityType cfsqp_tag (const Function& f);
+
     /// \internal
     /// Set "linear" tag to linear functions.
     TNLP::LinearityType cfsqp_tag (const LinearFunction& f)
@@ -332,6 +335,47 @@ namespace roboptim
         return true;
       }
 
+
+#define SWITCH_ERROR(NAME, ERROR)		\
+      case NAME:				\
+      solver_.result_ = SolverError (ERROR);	\
+      break
+
+#define SWITCH_FATAL(NAME)			\
+      case NAME:				\
+      assert (0);				\
+      break
+
+#define MAP_IPOPT_ERRORS(MACRO)						\
+      MACRO(MAXITER_EXCEEDED, "Max iteration exceeded");		\
+      MACRO(STOP_AT_TINY_STEP,						\
+	    "Algorithm proceeds with very little progress");		\
+      MACRO(LOCAL_INFEASIBILITY,					\
+	    "Algorithm converged to a point of local infeasibility");	\
+      MACRO(DIVERGING_ITERATES, "Iterate diverges");			\
+      MACRO(RESTORATION_FAILURE, "Restoration phase failed");		\
+      MACRO(ERROR_IN_STEP_COMPUTATION,					\
+	    "Unrecoverable error while Ipopt tried to compute"		\
+	    " the search direction");					\
+      MACRO(INVALID_NUMBER_DETECTED,					\
+	    "Ipopt received an invalid number");			\
+      MACRO(INTERNAL_ERROR, "Unknown internal error");			\
+      MACRO(TOO_FEW_DEGREES_OF_FREEDOM, "Two few degrees of freedom");	\
+      MACRO(INVALID_OPTION, "Invalid option");				\
+      MACRO(OUT_OF_MEMORY, "Out of memory");				\
+      MACRO(CPUTIME_EXCEEDED, "Cpu time exceeded")
+
+
+#define MAP_IPOPT_FATALS(MACRO)						\
+      MACRO(USER_REQUESTED_STOP)
+
+#define FILL_RESULT()					\
+      array_to_vector (res.x, x);			\
+      res.lambda.resize (m);				\
+      array_to_vector (res.lambda, lambda);		\
+      res.value (0) = obj_value
+
+
       virtual void
       finalize_solution(SolverReturn status,
                         Index n, const Number* x, const Number* z_L,
@@ -350,80 +394,31 @@ namespace roboptim
           case SUCCESS:
             {
               Result res (n, 1);
-              array_to_vector (res.x, x);
-              res.lambda.resize (m);
-              array_to_vector (res.lambda, lambda);
-              res.value (0) = obj_value;
+	      FILL_RESULT ();
               solver_.result_ = res;
               break;
             }
-
-          case MAXITER_EXCEEDED:
-            solver_.result_ = SolverError ("Max iteration exceeded.");
-            break;
-
-          case STOP_AT_TINY_STEP:
-            solver_.result_ = SolverError
-              ("Algorithm proceeds with very little progress.");
-            break;
-
           case STOP_AT_ACCEPTABLE_POINT:
             {
               ResultWithWarnings res (n, 1);
-              array_to_vector (res.x, x);
-              array_to_vector (res.lambda, lambda);
-              res.value (0) = obj_value;
-              res.warnings.push_back (SolverWarning ("Acceptable point."));
+	      FILL_RESULT ();
+              res.warnings.push_back (SolverWarning ("Acceptable point"));
               solver_.result_ = res;
               break;
             }
 
-          case LOCAL_INFEASIBILITY:
-            solver_.result_ = SolverError
-              ("Algorithm converged to a point of local infeasibility.");
-            break;
-
-          case USER_REQUESTED_STOP:
-            // Should never happen.
-            assert (0);
-            break;
-
-          case DIVERGING_ITERATES:
-            solver_.result_ = SolverError ("Iterate diverges.");
-            break;
-
-          case RESTORATION_FAILURE:
-            solver_.result_ = SolverError ("Restoration phase failed.");
-            break;
-
-          case ERROR_IN_STEP_COMPUTATION:
-            solver_.result_ =
-              SolverError
-("Unrecoverable error while IPOPT tried to compute the search direction.");
-            break;
-
-          case INVALID_NUMBER_DETECTED:
-            solver_.result_ =
-              SolverError ("IPOPT received an invalid number.");
-            break;
-
-          case INTERNAL_ERROR:
-            solver_.result_ = SolverError ("Unknown internal error.");
-            break;
-
-	  case TOO_FEW_DEGREES_OF_FREEDOM:
-	    solver_.result_ = SolverError ("Two few degrees of freedom.");
-	    break;
-
-	  case INVALID_OPTION:
-	    solver_.result_ = SolverError ("Invalid option.");
-            break;
-
-	  case OUT_OF_MEMORY:
-	    solver_.result_ = SolverError ("Out of memory.");
-	    break;
-          }
+	    MAP_IPOPT_ERRORS(SWITCH_ERROR);
+	    MAP_IPOPT_FATALS(SWITCH_FATAL);
+	  }
+	assert (solver_.result_.which () != IpoptSolver::SOLVER_NO_SOLUTION);
       }
+
+#undef FILL_RESULT
+#undef SWITCH_ERROR
+#undef SWITCH_FATAL
+#undef MAP_IPOPT_ERRORS
+#undef MAP_IPOPT_FATALS
+
 
       virtual bool
       intermediate_callback (AlgorithmMode mode,
@@ -479,6 +474,61 @@ namespace roboptim
   {
   }
 
+
+#define SWITCH_ERROR(NAME, ERROR)		\
+  case NAME:					\
+  result_ = SolverError (ERROR);		\
+  break
+
+#define SWITCH_FATAL(NAME)			\
+  case NAME:					\
+  assert (0);					\
+  break
+
+#define SWITCH_OK(NAME, CASES)			\
+  case NAME:					\
+  {						\
+    int status = app_->OptimizeTNLP (nlp_);	\
+    switch (status)				\
+      {						\
+	CASES;					\
+      }						\
+  }						\
+  break
+
+#define MAP_IPOPT_ERRORS(MACRO)						\
+  MACRO (Infeasible_Problem_Detected,					\
+	 "Infeasible problem detected");				\
+  MACRO (Search_Direction_Becomes_Too_Small,				\
+	 "Search direction too small");					\
+  MACRO (Diverging_Iterates, "Diverging iterates");			\
+  MACRO (Maximum_Iterations_Exceeded,					\
+	 "Maximum iterations exceeded");				\
+  MACRO (Restoration_Failed, "Restoration failed");			\
+  MACRO (Error_In_Step_Computation, "Error in step computation");	\
+  MACRO (Not_Enough_Degrees_Of_Freedom,					\
+	 "Not enough degrees of freedom");				\
+  MACRO (Invalid_Problem_Definition,					\
+	 "Invalid problem definition");					\
+  MACRO (Invalid_Option, "Invalid option");				\
+  MACRO (Invalid_Number_Detected, "Invalid number detected");		\
+  MACRO (Unrecoverable_Exception, "Unrecoverable exception");		\
+  MACRO (Insufficient_Memory, "Insufficient memory");			\
+  MACRO (Internal_Error, "Internal error");				\
+  MACRO (Maximum_CpuTime_Exceeded, "Maximum CPU time exceeded")
+
+#define MAP_IPOPT_FATALS(MACRO)						\
+  MACRO(User_Requested_Stop);						\
+  MACRO(NonIpopt_Exception_Thrown)
+
+#define MAP_IPOPT_OKS(MACRO)						\
+  MACRO (Solve_Succeeded, MAP_IPOPT_ERRORS(SWITCH_ERROR);		\
+	 MAP_IPOPT_FATALS(SWITCH_FATAL));				\
+  MACRO (Solved_To_Acceptable_Level,MAP_IPOPT_ERRORS(SWITCH_ERROR);	\
+	 MAP_IPOPT_FATALS(SWITCH_FATAL));				\
+  MACRO (Feasible_Point_Found,MAP_IPOPT_ERRORS(SWITCH_ERROR);		\
+	 MAP_IPOPT_FATALS(SWITCH_FATAL))
+
   void
   IpoptSolver::solve () throw ()
   {
@@ -486,70 +536,20 @@ namespace roboptim
 
     switch (status)
       {
-      case Solve_Succeeded:
-        app_->OptimizeTNLP (nlp_);
-        break;
-
-      case Solved_To_Acceptable_Level:
-        //FIXME: turn that into a ResultWithWarnings.
-        app_->OptimizeTNLP (nlp_);
-        break;
-      case Infeasible_Problem_Detected:
-        result_ = SolverError ("Ipopt: infeasible problem detected.");
-        break;
-      case Search_Direction_Becomes_Too_Small:
-        result_ = SolverError ("Ipopt: search direction too small.");
-        break;
-      case Diverging_Iterates:
-        result_ = SolverError ("Ipopt: diverging iterates.");
-        break;
-      case User_Requested_Stop:
-        // Should never happen.
-        assert (0);
-        break;
-      case Feasible_Point_Found:
-        //FIXME: turn that into a ResultWithWarnings.
-        app_->OptimizeTNLP (nlp_);
-        break;
-
-      case Maximum_Iterations_Exceeded:
-        result_ = SolverError ("Ipopt: maximum iterations exceeded.");
-        break;
-      case Restoration_Failed:
-        result_ = SolverError ("Ipopt: restoration failed.");
-        break;
-      case Error_In_Step_Computation:
-        result_ = SolverError ("Ipopt: error in step computation.");
-        break;
-      case Not_Enough_Degrees_Of_Freedom:
-        result_ = SolverError ("Ipopt: not enough degrees of freedom.");
-        break;
-      case Invalid_Problem_Definition:
-        //FIXME: replace by assert (0)?
-        result_ = SolverError ("Ipopt: invalid problem definition.");
-        break;
-      case Invalid_Option:
-        result_ = SolverError ("Ipopt: invalid option.");
-        break;
-      case Invalid_Number_Detected:
-        result_ = SolverError ("Ipopt: invalid number detected.");
-        break;
-
-      case Unrecoverable_Exception:
-        result_ = SolverError ("Ipopt: unrecoverable exception.");
-        break;
-      case NonIpopt_Exception_Thrown:
-        // Should never happen.
-        assert (0);
-        break;
-      case Insufficient_Memory:
-        result_ = SolverError ("Ipopt: insufficient memory.");
-        break;
-      case Internal_Error:
-        result_ = SolverError ("Ipopt: internal error.");
-        break;
+	MAP_IPOPT_OKS (SWITCH_OK);
+	MAP_IPOPT_ERRORS (SWITCH_ERROR);
+	MAP_IPOPT_FATALS (SWITCH_FATAL);
       }
+    assert (result_.which () != SOLVER_NO_SOLUTION);
   }
+
+#undef SWITCH_ERROR
+#undef SWITCH_FATAL
+#undef SWITCH_OK
+#undef MAP_IPOPT_ERRORS
+#undef MAP_IPOPT_FATALS
+#undef MAP_IPOPT_OKS
+
 
   Ipopt::SmartPtr<Ipopt::IpoptApplication>
   IpoptSolver::getIpoptApplication () throw ()
@@ -564,6 +564,9 @@ extern "C"
   using namespace roboptim;
   typedef IpoptSolver::parent_t solver_t;
 
+  solver_t* create (const IpoptSolver::problem_t& pb);
+  void destroy (solver_t* p);
+
   solver_t* create (const IpoptSolver::problem_t& pb)
   {
     return new IpoptSolver (pb);
@@ -574,3 +577,8 @@ extern "C"
     delete p;
   }
 }
+
+
+// Local Variables:
+// compile-command: "cd ../_build && make -k"
+// End:
