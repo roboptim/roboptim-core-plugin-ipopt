@@ -32,7 +32,7 @@ m4_pattern_forbid([^IPOPT_])
 AC_DEFUN([IPOPT_LIB],
 [
  # Need gfortran library to work.
- AC_SEARCH_LIBS([specific__tan_r10], [gfortran], $1, $2)
+ AC_SEARCH_LIBS([main], [gfortran], $1, $2)
 
  # Detect pthread.
  ACX_PTHREAD
