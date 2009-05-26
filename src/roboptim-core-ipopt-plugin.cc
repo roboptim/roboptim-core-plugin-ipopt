@@ -68,7 +68,7 @@ namespace roboptim
                     Index& nnz_h_lag, TNLP::IndexStyleEnum& index_style)
         throw ()
       {
-        n = solver_.problem ().function ().n;
+        n = solver_.problem ().function ().inputSize ();
         m = solver_.problem ().constraints ().size ();
         nnz_jac_g = n * m; //FIXME: use a dense matrix for now.
         nnz_h_lag = n * n; //FIXME: use a dense matrix for now.
@@ -81,7 +81,7 @@ namespace roboptim
                        Index m, Number* g_l, Number* g_u)
         throw ()
       {
-        assert (solver_.problem ().function ().n - n == 0);
+        assert (solver_.problem ().function ().inputSize () - n == 0);
         assert (solver_.problem ().constraints ().size () - m == 0);
 
         typedef IpoptSolver::problem_t::bounds_t::const_iterator citer_t;
@@ -116,7 +116,7 @@ namespace roboptim
       virtual bool
       get_variables_linearity (Index n, LinearityType* var_types) throw ()
       {
-        assert (solver_.problem ().function ().n - n == 0);
+        assert (solver_.problem ().function ().inputSize () - n == 0);
 
         //FIXME: detect from problem.
         for (Index i = 0; i < n; ++i)
@@ -141,7 +141,7 @@ namespace roboptim
                           Number* lambda)
         throw ()
       {
-        assert (solver_.problem ().function ().n - n == 0);
+        assert (solver_.problem ().function ().inputSize () - n == 0);
         assert (solver_.problem ().constraints ().size () - m == 0);
 
         //FIXME: handle all modes.
@@ -188,7 +188,7 @@ namespace roboptim
       eval_f (Index n, const Number* x, bool new_x, Number& obj_value)
         throw ()
       {
-        assert (solver_.problem ().function ().n - n == 0);
+        assert (solver_.problem ().function ().inputSize () - n == 0);
 
         IpoptSolver::vector_t x_ (n);
         array_to_vector (x_, x);
@@ -200,7 +200,7 @@ namespace roboptim
       eval_grad_f (Index n, const Number* x, bool new_x, Number* grad_f)
         throw ()
       {
-        assert (solver_.problem ().function ().n - n == 0);
+        assert (solver_.problem ().function ().inputSize () - n == 0);
 
         IpoptSolver::vector_t x_ (n);
         array_to_vector (x_, x);
@@ -216,7 +216,7 @@ namespace roboptim
               Index m, Number* g)
         throw ()
       {
-        assert (solver_.problem ().function ().n - n == 0);
+        assert (solver_.problem ().function ().inputSize () - n == 0);
         assert (solver_.problem ().constraints ().size () - m == 0);
 
         IpoptSolver::vector_t x_ (n);
@@ -239,7 +239,7 @@ namespace roboptim
                  Index *jCol, Number* values)
         throw ()
       {
-        assert (solver_.problem ().function ().n - n == 0);
+        assert (solver_.problem ().function ().inputSize () - n == 0);
         assert (solver_.problem ().constraints ().size () - m == 0);
 
         if (!values)
@@ -257,8 +257,9 @@ namespace roboptim
           {
             IpoptSolver::vector_t x_ (n);
             array_to_vector (x_, x);
-            Function::matrix_t jac (solver_.problem ().constraints ().size (),
-                                    solver_.problem ().function ().n);
+            Function::matrix_t jac
+	      (solver_.problem ().constraints ().size (),
+	       solver_.problem ().function ().inputSize ());
             jacobian_from_gradients<TwiceDerivableFunction>
               (jac, solver_.problem ().constraints (), x_);
 
@@ -297,7 +298,7 @@ namespace roboptim
               Index* jCol, Number* values)
         throw ()
       {
-        assert (solver_.problem ().function ().n - n == 0);
+        assert (solver_.problem ().function ().inputSize () - n == 0);
         assert (solver_.problem ().constraints ().size () - m == 0);
 
         //FIXME: check if a hessian is provided.
@@ -322,8 +323,8 @@ namespace roboptim
             IpoptSolver::vector_t lambda_ (m);
             array_to_vector (lambda_, lambda);
 
-            Function::matrix_t h (solver_.problem ().function ().n,
-                                     solver_.problem ().function ().n);
+            Function::matrix_t h (solver_.problem ().function ().inputSize (),
+				  solver_.problem ().function ().inputSize ());
             compute_hessian (h, x_, obj_factor, lambda);
 
             int idx = 0;
@@ -385,7 +386,7 @@ namespace roboptim
                         IpoptCalculatedQuantities* ip_cq)
         throw ()
       {
-        assert (solver_.problem ().function ().n - n == 0);
+        assert (solver_.problem ().function ().inputSize () - n == 0);
         assert (solver_.problem ().constraints ().size () - m == 0);
 
         switch (status)

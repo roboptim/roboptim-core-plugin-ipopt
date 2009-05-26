@@ -15,7 +15,7 @@ Problem:
   Infinity value (for all functions): inf
 A solution has been found: 
 Result: 
-  Dimension: 4
+  Size (input, output): 4, 1
   X: [4](1,4.743,3.82115,1.37941)
   Value: [1](14.5723)
   Lambda: [2](-0.552294,0.161469)

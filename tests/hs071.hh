@@ -29,30 +29,27 @@ struct F : public TwiceDerivableFunction
   {
   }
 
-  virtual vector_t
-  operator () (const vector_t& x) const throw ()
+  void
+  impl_compute (result_t& result, const argument_t& x) const throw ()
   {
-    vector_t res (m);
-    res (0) = x[0] * x[3] * (x[0] + x[1] + x[2]) + x[3];
-    return res;
+    result.clear ();
+    result (0) = x[0] * x[3] * (x[0] + x[1] + x[2]) + x[3];
   }
 
-  virtual gradient_t
-  gradient (const vector_t& x, int) const throw ()
+  void
+  impl_gradient (gradient_t& grad, const argument_t& x, int) const throw ()
   {
-    gradient_t grad (n);
-
+    grad.clear ();
     grad[0] = x[0] * x[3] + x[3] * (x[0] + x[1] + x[2]);
     grad[1] = x[0] * x[3];
     grad[2] = x[0] * x[3] + 1;
     grad[3] = x[0] * (x[0] + x[1] + x[2]);
-    return grad;
   }
 
-  virtual hessian_t
-  hessian (const vector_t& x, int) const throw ()
+  void
+  impl_hessian (hessian_t& h, const argument_t& x, int) const throw ()
   {
-    matrix_t h (n, n);
+    h.clear ();
     h (0, 0) = 2 * x[3];
     h (0, 1) = x[3];
     h (0, 2) = x[3];
@@ -72,7 +69,6 @@ struct F : public TwiceDerivableFunction
     h (3, 1) = x[0];
     h (3, 2) = x[0];
     h (3, 3) = 0.;
-    return h;
   }
 };
 
@@ -83,30 +79,27 @@ struct G0 : public TwiceDerivableFunction
   {
   }
 
-  virtual vector_t
-  operator () (const vector_t& x) const throw ()
+  void
+  impl_compute (result_t& res, const argument_t& x) const throw ()
   {
-    vector_t res (m);
+    res.clear ();
     res (0) = x[0] * x[1] * x[2] * x[3];
-    return res;
   }
 
-  virtual gradient_t
-  gradient (const vector_t& x, int) const throw ()
+  void
+  impl_gradient (gradient_t& grad, const argument_t& x, int) const throw ()
   {
-    gradient_t grad (n);
-
+    grad.clear ();
     grad[0] = x[1] * x[2] * x[3];
     grad[1] = x[0] * x[2] * x[3];
     grad[2] = x[0] * x[1] * x[3];
     grad[3] = x[0] * x[1] * x[2];
-    return grad;
   }
 
-  virtual hessian_t
-  hessian (const vector_t& x, int) const throw ()
+  void
+  impl_hessian (hessian_t& h, const argument_t& x, int) const throw ()
   {
-    matrix_t h (n, n);
+    h.clear ();
     h (0, 0) = 0.;
     h (0, 1) = x[2] * x[3];
     h (0, 2) = x[1] * x[3];
@@ -126,7 +119,6 @@ struct G0 : public TwiceDerivableFunction
     h (3, 1) = x[0] * x[2];
     h (3, 2) = x[0] * x[1];
     h (3, 3) = 0.;
-    return h;
   }
 };
 
@@ -137,30 +129,27 @@ struct G1 : public TwiceDerivableFunction
   {
   }
 
-  virtual vector_t
-  operator () (const vector_t& x) const throw ()
+  void
+  impl_compute (result_t& res, const argument_t& x) const throw ()
   {
-    vector_t res (m);
+    res.clear ();
     res (0) = x[0]*x[0] + x[1]*x[1] + x[2]*x[2] + x[3]*x[3];
-    return res;
   }
 
-  virtual gradient_t
-  gradient (const vector_t& x, int) const throw ()
+  void
+  impl_gradient (gradient_t& grad, const argument_t& x, int) const throw ()
   {
-    gradient_t grad (n);
-
+    grad.clear ();
     grad[0] = 2 * x[0];
     grad[1] = 2 * x[1];
     grad[2] = 2 * x[2];
     grad[3] = 2 * x[3];
-    return grad;
   }
 
-  virtual hessian_t
-  hessian (const vector_t& x, int) const throw ()
+  void
+  impl_hessian (hessian_t& h, const argument_t& x, int) const throw ()
   {
-    matrix_t h (n, n);
+    h.clear ();
     h (0, 0) = 2.;
     h (0, 1) = 0.;
     h (0, 2) = 0.;
@@ -180,7 +169,6 @@ struct G1 : public TwiceDerivableFunction
     h (3, 1) = 0.;
     h (3, 2) = 0.;
     h (3, 3) = 2.;
-    return h;
   }
 };
 
@@ -190,7 +178,7 @@ void initialize_problem (T& pb, const G0& g0, const G1& g1)
 {
   // Set bound for all variables.
   // 1. < x_i < 5. (x_i in [1.;5.])
-  for (Function::size_type i = 0; i < pb.function ().n; ++i)
+  for (Function::size_type i = 0; i < pb.function ().inputSize (); ++i)
     pb.argBounds ()[i] = Function::makeBound (1., 5.);
 
   // Add constraints.
@@ -198,7 +186,7 @@ void initialize_problem (T& pb, const G0& g0, const G1& g1)
   pb.addConstraint (&g1, Function::makeBound (40., 40.));
 
   // Set the starting point.
-  Function::vector_t start (pb.function ().n);
+  Function::vector_t start (pb.function ().inputSize ());
   start[0] = 1., start[1] = 5., start[2] = 5., start[3] = 1.;
   pb.startingPoint () = start;
 }
