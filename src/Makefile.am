@@ -15,12 +15,16 @@ roboptim_core_ipopt_plugin_la_LIBADD = $(ROBOPTIMCORE_LIBS)
 roboptim_core_ipopt_plugin_la_LIBADD += -lipopt
 
 # Fix yet another Ipopt problem...
-# Ipopt may use Lapack but does not link against it if it is needed.
+# Ipopt may use libraries like pthreads and lapack
+# but does not link against them even if they are needed.
 # The plug-in have to do it to avoid installing libraries with
 # undefined symbols.
 # The work around is to link against lapack here, hopefully it will
 # be solved upstream and this useless dependency will be removed.
-roboptim_core_ipopt_plugin_la_LIBADD += -llapack
+roboptim_core_ipopt_plugin_la_LIBADD +=			\
+			$(PTHREAD_LIBS) 		\
+			-llapack -lblas -lm -ldl	\
+			-lgfortranbegin -lgfortran
 
 
 roboptim_core_ipopt_plugin_la_LDFLAGS = -module -version-info 1:1:0

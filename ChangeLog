@@ -1,5 +1,10 @@
 2009-06-02  Thomas Moulard  <thomas.moulard@gmail.com>
 
+	Link against all Ipopt dependencies.
+	* src/Makefile.am: Here.
+
+2009-06-02  Thomas Moulard  <thomas.moulard@gmail.com>
+
 	Make Libtool support more robust, link against roboptim-core.
 	* .gitignore: Remove committed files from ignore list.
 	* build-aux/bootstrap: Remove force flag from autoreconf call.
