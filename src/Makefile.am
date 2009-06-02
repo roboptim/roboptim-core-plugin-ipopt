@@ -7,8 +7,12 @@ lib_LTLIBRARIES = roboptim-core-ipopt-plugin.la
 
 roboptim_core_ipopt_plugin_la_SOURCES = doc.hh roboptim-core-ipopt-plugin.cc
 
-roboptim_core_ipopt_plugin_la_LIBADD = -lipopt
 
+# Link against roboptim-core.
+roboptim_core_ipopt_plugin_la_LIBADD = $(ROBOPTIMCORE_LIBS)
+
+# Link against Ipopt.
+roboptim_core_ipopt_plugin_la_LIBADD += -lipopt
 
 # Fix yet another Ipopt problem...
 # Ipopt may use Lapack but does not link against it if it is needed.

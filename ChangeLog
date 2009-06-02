@@ -1,3 +1,22 @@
+2009-06-02  Thomas Moulard  <thomas.moulard@gmail.com>
+
+	Make Libtool support more robust, link against roboptim-core.
+	* .gitignore: Remove committed files from ignore list.
+	* build-aux/bootstrap: Remove force flag from autoreconf call.
+	* build-aux/config.guess: New.
+	* build-aux/config.sub: New.
+	* build-aux/depcomp: New.
+	* build-aux/install-sh: New.
+	* build-aux/libtool.m4: New.
+	* build-aux/ltmain.sh: New.
+	* build-aux/ltoptions.m4: New.
+	* build-aux/ltsugar.m4: New.
+	* build-aux/ltversion.m4: New.
+	* build-aux/lt~obsolete.m4: New.
+	* build-aux/missing: New.
+	* configure.ac: Remove unneeded macro.
+	* src/Makefile.am: Link against roboptim-core.
+
 2009-05-27  Thomas Moulard  <thomas.moulard@gmail.com>
 
 	Distribute pkg.m4.
