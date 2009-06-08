@@ -1,3 +1,13 @@
+2009-06-08  Thomas Moulard  <thomas.moulard@gmail.com>
+
+	Update to new interface.
+	* include/roboptim/core/plugin/ipopt.hh,
+	* src/doc.hh,
+	* src/roboptim-core-ipopt-plugin.cc,
+	* tests/hs071.hh: Update to new interface and document.
+	* tests/plugin.stdout,
+	* tests/simple.stdout: Regenerate.
+
 2009-06-02  Thomas Moulard  <thomas.moulard@gmail.com>
 
 	Remove pkg.m4.

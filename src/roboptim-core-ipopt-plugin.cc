@@ -15,11 +15,6 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with roboptim.  If not, see <http://www.gnu.org/licenses/>.
 
-
-/**
- * \brief Implementation of the Ipopt class.
- */
-
 #include <cassert>
 #include <cstring>
 
@@ -84,9 +79,9 @@ namespace roboptim
         assert (solver_.problem ().function ().inputSize () - n == 0);
         assert (solver_.problem ().constraints ().size () - m == 0);
 
-        typedef IpoptSolver::problem_t::bounds_t::const_iterator citer_t;
-        for (citer_t it = solver_.problem ().argBounds ().begin ();
-             it != solver_.problem ().argBounds ().end (); ++it)
+        typedef IpoptSolver::problem_t::intervals_t::const_iterator citer_t;
+        for (citer_t it = solver_.problem ().argumentBounds ().begin ();
+             it != solver_.problem ().argumentBounds ().end (); ++it)
           *(x_l++) = (*it).first, *(x_u++) = (*it).second;
 
         for (citer_t it = solver_.problem ().bounds ().begin ();
@@ -105,7 +100,7 @@ namespace roboptim
       {
         use_x_scaling = true, use_g_scaling = true;
 
-        memcpy (x_scaling, &solver_.problem ().argScales ()[0],
+        memcpy (x_scaling, &solver_.problem ().argumentScales ()[0],
                 n * sizeof (double));
 
         for (Index i = 0; i < m; ++i)

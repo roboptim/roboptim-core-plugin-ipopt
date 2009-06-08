@@ -34,3 +34,12 @@
    To discuss about this package, please use <a
    href="https://lists.sourceforge.net/mailman/listinfo/roboptim-user">roboptim-user@lists.sourceforge.net</a>.
 */
+
+/// \namespace roboptim
+/// \brief Meta-functions, functions and solvers related classes.
+
+/// \defgroup roboptim_meta_function Mathematical abstract functions
+/// \defgroup roboptim_function Mathematical functions
+/// \defgroup roboptim_problem Optimization problems
+/// \defgroup roboptim_solver Optimization solvers
+/// \defgroup roboptim_visualization Visualization

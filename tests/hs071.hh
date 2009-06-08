@@ -37,7 +37,7 @@ struct F : public TwiceDerivableFunction
   }
 
   void
-  impl_gradient (gradient_t& grad, const argument_t& x, int) const throw ()
+  impl_gradient (gradient_t& grad, const argument_t& x, size_type) const throw ()
   {
     grad.clear ();
     grad[0] = x[0] * x[3] + x[3] * (x[0] + x[1] + x[2]);
@@ -47,7 +47,7 @@ struct F : public TwiceDerivableFunction
   }
 
   void
-  impl_hessian (hessian_t& h, const argument_t& x, int) const throw ()
+  impl_hessian (hessian_t& h, const argument_t& x, size_type) const throw ()
   {
     h.clear ();
     h (0, 0) = 2 * x[3];
@@ -87,7 +87,7 @@ struct G0 : public TwiceDerivableFunction
   }
 
   void
-  impl_gradient (gradient_t& grad, const argument_t& x, int) const throw ()
+  impl_gradient (gradient_t& grad, const argument_t& x, size_type) const throw ()
   {
     grad.clear ();
     grad[0] = x[1] * x[2] * x[3];
@@ -97,7 +97,7 @@ struct G0 : public TwiceDerivableFunction
   }
 
   void
-  impl_hessian (hessian_t& h, const argument_t& x, int) const throw ()
+  impl_hessian (hessian_t& h, const argument_t& x, size_type) const throw ()
   {
     h.clear ();
     h (0, 0) = 0.;
@@ -137,7 +137,7 @@ struct G1 : public TwiceDerivableFunction
   }
 
   void
-  impl_gradient (gradient_t& grad, const argument_t& x, int) const throw ()
+  impl_gradient (gradient_t& grad, const argument_t& x, size_type) const throw ()
   {
     grad.clear ();
     grad[0] = 2 * x[0];
@@ -147,7 +147,7 @@ struct G1 : public TwiceDerivableFunction
   }
 
   void
-  impl_hessian (hessian_t& h, const argument_t& x, int) const throw ()
+  impl_hessian (hessian_t& h, const argument_t& x, size_type) const throw ()
   {
     h.clear ();
     h (0, 0) = 2.;
@@ -179,11 +179,11 @@ void initialize_problem (T& pb, const G0& g0, const G1& g1)
   // Set bound for all variables.
   // 1. < x_i < 5. (x_i in [1.;5.])
   for (Function::size_type i = 0; i < pb.function ().inputSize (); ++i)
-    pb.argBounds ()[i] = Function::makeBound (1., 5.);
+    pb.argumentBounds ()[i] = Function::makeInterval (1., 5.);
 
   // Add constraints.
-  pb.addConstraint (&g0, Function::makeUpperBound (25.));
-  pb.addConstraint (&g1, Function::makeBound (40., 40.));
+  pb.addConstraint (&g0, Function::makeLowerInterval (25.));
+  pb.addConstraint (&g1, Function::makeInterval (40., 40.));
 
   // Set the starting point.
   Function::vector_t start (pb.function ().inputSize ());
