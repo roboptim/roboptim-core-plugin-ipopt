@@ -1,6 +1,11 @@
 2009-06-10  Thomas Moulard  <thomas.moulard@gmail.com>
 
 	Synchronize.
+	* doc/sf-upload.sh.in: Here.
+
+2009-06-10  Thomas Moulard  <thomas.moulard@gmail.com>
+
+	Synchronize.
 	* build-aux/boost.m4: New.
 	* build-aux/deb.mk: New.
 	* build-aux/doxygen.m4: New.
