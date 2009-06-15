@@ -29,11 +29,9 @@
 int run_test ()
 {
   F f;
-  G0 g0;
-  G1 g1;
 
   IpoptSolver::problem_t pb (f);
-  initialize_problem (pb, g0, g1);
+  initialize_problem (pb);
 
   // Initialize solver
   IpoptSolver solver (pb);

@@ -19,6 +19,7 @@
 #ifndef OPTIMIZATION_TESTS_HS071_HH
 # define OPTIMIZATION_TESTS_HS071_HH
 # include <utility>
+# include <boost/make_shared.hpp>
 # include <roboptim/core/twice-derivable-function.hh>
 
 using namespace roboptim;
@@ -174,7 +175,7 @@ struct G1 : public TwiceDerivableFunction
 
 
 template <typename T>
-void initialize_problem (T& pb, const G0& g0, const G1& g1)
+void initialize_problem (T& pb)
 {
   // Set bound for all variables.
   // 1. < x_i < 5. (x_i in [1.;5.])
@@ -182,8 +183,11 @@ void initialize_problem (T& pb, const G0& g0, const G1& g1)
     pb.argumentBounds ()[i] = Function::makeInterval (1., 5.);
 
   // Add constraints.
-  pb.addConstraint (&g0, Function::makeLowerInterval (25.));
-  pb.addConstraint (&g1, Function::makeInterval (40., 40.));
+  pb.addConstraint (boost::make_shared<G0> (),
+		    Function::makeLowerInterval (25.));
+
+  pb.addConstraint (boost::make_shared<G1> (),
+		    Function::makeInterval (40., 40.));
 
   // Set the starting point.
   Function::vector_t start (pb.function ().inputSize ());

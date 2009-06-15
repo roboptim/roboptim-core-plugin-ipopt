@@ -17,6 +17,7 @@
 
 #ifndef ROBOPTIM_CORE_IPOPT_HH
 # define ROBOPTIM_CORE_IPOPT_HH
+# include <boost/mpl/vector.hpp>
 # include <coin/IpSmartPtr.hpp>
 # include <roboptim/core/solver.hh>
 # include <roboptim/core/twice-derivable-function.hh>
@@ -47,14 +48,14 @@ namespace roboptim
   /// \warning Ipopt needs twice derivable functions, so be sure
   /// to provide hessians in your function's problems.
   class IpoptSolver : public Solver<TwiceDerivableFunction,
-                                    const TwiceDerivableFunction*>
+				    boost::mpl::vector<TwiceDerivableFunction> >
   {
   public:
     friend class detail::MyTNLP;
 
     /// \brief Parent type.
-    typedef Solver<TwiceDerivableFunction, const TwiceDerivableFunction*>
-    parent_t;
+    typedef Solver<TwiceDerivableFunction,
+		   boost::mpl::vector<TwiceDerivableFunction> > parent_t;
 
     /// \brief Instantiate the solver from a problem.
     ///

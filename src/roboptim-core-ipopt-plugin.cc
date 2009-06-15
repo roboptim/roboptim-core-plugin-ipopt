@@ -35,6 +35,12 @@ namespace roboptim
     TNLP::LinearityType cfsqp_tag (const LinearFunction& f);
     TNLP::LinearityType cfsqp_tag (const Function& f);
 
+    void
+    jacobianFromGradients
+    (DerivableFunction::matrix_t& jac,
+     const IpoptSolver::problem_t::constraints_t& c,
+     const TwiceDerivableFunction::vector_t& x);
+
     /// \internal
     /// Set "linear" tag to linear functions.
     TNLP::LinearityType cfsqp_tag (const LinearFunction& f)
@@ -48,6 +54,28 @@ namespace roboptim
     {
       return TNLP::NON_LINEAR;
     }
+
+    /// \internal
+    /// Concatenate jacobians.
+    void
+    jacobianFromGradients
+    (DerivableFunction::matrix_t& jac,
+     const IpoptSolver::problem_t::constraints_t& c,
+     const TwiceDerivableFunction::vector_t& x)
+    {
+      using namespace boost;
+      for (unsigned i = 0; i < jac.size1 (); ++i)
+	{
+	  shared_ptr<TwiceDerivableFunction> g =
+	    get<shared_ptr<TwiceDerivableFunction> > (c[i]);
+	  DerivableFunction::jacobian_t grad = g->jacobian (x);
+
+	  for (unsigned j = 0; j < jac.size2 (); ++j)
+	    jac (i, j) = grad(0, j);
+	}
+    }
+
+
 
     /// \internal
     /// Ipopt non linear problem definition.
@@ -122,10 +150,16 @@ namespace roboptim
       virtual bool
       get_function_linearity (Index m, LinearityType* const_types) throw ()
       {
+	using namespace boost;
         assert (solver_.problem ().constraints ().size () - m == 0);
 
         for (Index i = 0; i < m; ++i)
-          const_types[i] = cfsqp_tag (*solver_.problem ().constraints ()[i]);
+	  {
+	    shared_ptr<TwiceDerivableFunction> f =
+	      get<shared_ptr<TwiceDerivableFunction> >
+	      (solver_.problem ().constraints ()[i]);
+	    const_types[i] = cfsqp_tag (*f);
+	  }
         return true;
       }
 
@@ -211,6 +245,7 @@ namespace roboptim
               Index m, Number* g)
         throw ()
       {
+	using namespace boost;
         assert (solver_.problem ().function ().inputSize () - n == 0);
         assert (solver_.problem ().constraints ().size () - m == 0);
 
@@ -223,7 +258,11 @@ namespace roboptim
         int i = 0;
         for (citer_t it = solver_.problem ().constraints ().begin ();
              it != solver_.problem ().constraints ().end (); ++it, ++i)
-          g_[i] = (**it) (x_)[0];
+	  {
+	    shared_ptr<TwiceDerivableFunction> g =
+	      get<shared_ptr<TwiceDerivableFunction> > (*it);
+	    g_[i] = (*g) (x_)[0];
+	  }
         vector_to_array(g, g_);
         return true;
       }
@@ -234,6 +273,7 @@ namespace roboptim
                  Index *jCol, Number* values)
         throw ()
       {
+	using namespace boost;
         assert (solver_.problem ().function ().inputSize () - n == 0);
         assert (solver_.problem ().constraints ().size () - m == 0);
 
@@ -255,13 +295,11 @@ namespace roboptim
             Function::matrix_t jac
 	      (solver_.problem ().constraints ().size (),
 	       solver_.problem ().function ().inputSize ());
-            jacobian_from_gradients<TwiceDerivableFunction>
-              (jac, solver_.problem ().constraints (), x_);
-
+            jacobianFromGradients (jac, solver_.problem ().constraints (), x_);
             int idx = 0;
             for (int i = 0; i < m; ++i)
-              for (int j = 0; j < n; ++j)
-                values[idx++] = jac (i, j);
+	      for (int j = 0; j < n; ++j)
+		values[idx++] = jac (i, j);
           }
 
         return true;
@@ -283,7 +321,11 @@ namespace roboptim
         int i = 0;
         for (citer_t it = solver_.problem ().constraints ().begin ();
              it != solver_.problem ().constraints ().end (); ++it)
-          h += lambda[i++] * (*it)->hessian (x, 0);
+	  {
+	    shared_ptr<TwiceDerivableFunction> g =
+	      get<shared_ptr<TwiceDerivableFunction> > (*it);
+	    h += lambda[i++] * g->hessian (x, 0);
+	  }
       }
 
       virtual bool

@@ -18,6 +18,7 @@
 #include <iostream>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/variant/get.hpp>
+#include <boost/mpl/vector.hpp>
 
 #include <roboptim/core/solver-factory.hh>
 
@@ -25,16 +26,15 @@
 #include "hs071.hh"
 
 using namespace roboptim;
-typedef Solver<TwiceDerivableFunction, const TwiceDerivableFunction*> solver_t;
+typedef Solver<TwiceDerivableFunction,
+	       boost::mpl::vector<TwiceDerivableFunction> > solver_t;
 
 int run_test ()
 {
   F f;
-  G0 g0;
-  G1 g1;
 
   solver_t::problem_t pb (f);
-  initialize_problem (pb, g0, g1);
+  initialize_problem (pb);
 
   // Initialize solver
   SolverFactory<solver_t> factory ("ipopt", pb);

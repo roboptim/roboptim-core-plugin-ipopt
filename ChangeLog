@@ -1,3 +1,13 @@
+2009-06-15  Thomas Moulard  <thomas.moulard@gmail.com>
+
+	Generalize constraints.
+	* include/roboptim/core/plugin/ipopt.hh,
+	* src/roboptim-core-ipopt-plugin.cc,
+	* tests/hs071.hh,
+	* tests/plugin.cc,
+	* tests/simple.cc:
+	Update to new generalized constraint system.
+
 2009-06-11  Thomas Moulard  <thomas.moulard@gmail.com>
 
 	Fix build-chain when headers are in non-standard directories.
