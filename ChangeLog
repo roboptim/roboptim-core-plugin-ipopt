@@ -1,5 +1,12 @@
 2009-06-15  Thomas Moulard  <thomas.moulard@gmail.com>
 
+	Regenerate reference.
+	Display has been updated in roboptim-core.
+	* tests/plugin.stdout,
+	* tests/simple.stdout: Regenerate.
+
+2009-06-15  Thomas Moulard  <thomas.moulard@gmail.com>
+
 	Generalize constraints.
 	* include/roboptim/core/plugin/ipopt.hh,
 	* src/roboptim-core-ipopt-plugin.cc,

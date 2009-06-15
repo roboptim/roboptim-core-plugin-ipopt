@@ -6,10 +6,12 @@ Problem:
   Constraint 0
       Bounds: (25, inf)
       Scales: 1
+      Initial value: [1](25)
       
   Constraint 1
       Bounds: (40, 40)
       Scales: 1
+      Initial value: [1](52)
       
   Starting point: [4](1,5,5,1)
   Starting value: [1](12)
