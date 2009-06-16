@@ -34,7 +34,8 @@ int run_test ()
   F f;
 
   solver_t::problem_t pb (f);
-  initialize_problem (pb);
+  initialize_problem<solver_t::problem_t,
+    roboptim::TwiceDerivableFunction> (pb);
 
   // Initialize solver
   SolverFactory<solver_t> factory ("ipopt", pb);

@@ -31,7 +31,8 @@ int run_test ()
   F f;
 
   IpoptSolver::problem_t pb (f);
-  initialize_problem (pb);
+  initialize_problem<IpoptSolver::problem_t,
+    roboptim::TwiceDerivableFunction> (pb);
 
   // Initialize solver
   IpoptSolver solver (pb);

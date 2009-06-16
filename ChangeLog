@@ -1,5 +1,12 @@
 2009-06-16  Thomas Moulard  <thomas.moulard@gmail.com>
 
+	Fix test suite.
+	* tests/hs071.hh,
+	* tests/plugin.cc,
+	* tests/simple.cc: Here.
+
+2009-06-16  Thomas Moulard  <thomas.moulard@gmail.com>
+
 	Synchronize with share.
 	* tests/hs071.hh: Here.
 

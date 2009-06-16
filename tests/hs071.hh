@@ -173,7 +173,7 @@ struct G1 : public TwiceDerivableFunction
 };
 
 
-template <typename T>
+template <typename T, typename NLF>
 void initialize_problem (T& pb)
 {
   // Set bound for all variables.
@@ -185,8 +185,10 @@ void initialize_problem (T& pb)
   boost::shared_ptr<G0> g0 (new G0 ());
   boost::shared_ptr<G1> g1 (new G1 ());
 
-  pb.addConstraint (g0, Function::makeLowerInterval (25.));
-  pb.addConstraint (g1, Function::makeInterval (40., 40.));
+  pb.addConstraint (boost::static_pointer_cast<NLF> (g0),
+		    Function::makeLowerInterval (25.));
+  pb.addConstraint (boost::static_pointer_cast<NLF> (g1),
+		    Function::makeInterval (40., 40.));
 
   // Set the starting point.
   Function::vector_t start (pb.function ().inputSize ());
