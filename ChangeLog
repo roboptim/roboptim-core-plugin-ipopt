@@ -1,3 +1,8 @@
+2009-06-16  Thomas Moulard  <thomas.moulard@gmail.com>
+
+	Synchronize with share.
+	* tests/hs071.hh: Here.
+
 2009-06-15  Thomas Moulard  <thomas.moulard@gmail.com>
 
 	Regenerate reference.
