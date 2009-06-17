@@ -3,6 +3,10 @@
 # Link against Ipopt.
 IPOPT_LIBS = -lipopt
 
+# Add pthread CFLAGS as GCC needs -pthread /both/ at compile
+#  and link time.
+IPOPT_LIBS += $(PTHREAD_CFLAGS)
+
 # Fix yet another Ipopt problem...
 # Ipopt may use libraries like pthreads and lapack
 # but does not link against them even if they are needed.
