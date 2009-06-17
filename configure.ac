@@ -91,9 +91,5 @@ AC_CONFIG_FILES([
     tests/package.m4
 ])
 
-AC_CONFIG_FILES([doc/Doxyfile])
-
-AC_CONFIG_FILES([doc/sf-upload.sh], [chmod +x doc/sf-upload.sh])
-
 # Write files.
 AC_OUTPUT

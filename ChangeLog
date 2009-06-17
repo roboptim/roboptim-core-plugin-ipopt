@@ -1,5 +1,10 @@
 2009-06-17  Thomas Moulard  <thomas.moulard@gmail.com>
 
+	Use new documentation rules.
+	* configure.ac: Here.
+
+2009-06-17  Thomas Moulard  <thomas.moulard@gmail.com>
+
 	Make compilation more robust.
 	* src/Makefile.am: Use PTHREAD_CFLAGS.
 
