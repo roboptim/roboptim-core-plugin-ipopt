@@ -1,5 +1,6 @@
 include $(top_srcdir)/build-aux/init.mk
 include $(top_srcdir)/build-aux/autotest.mk
+include $(top_srcdir)/ipopt.mk
 
 # Add pthread CFLAGS.
 AM_CPPFLAGS += $(PTHREAD_CFLAGS)
@@ -23,9 +24,9 @@ COMMON_SOURCES = common.hh hs071.hh
 
 # Simple
 check_PROGRAMS = simple
-simple_SOURCES = simple.cc $(COMMON_SOURCES)
-simple_LDADD = $(ROBOPTIMCORE_LIBS) \
-	$(top_builddir)/src/roboptim-core-ipopt-plugin.la
+simple_SOURCES = simple.cc $(COMMON_SOURCES)  \
+	$(top_builddir)/src/roboptim-core-ipopt-plugin.cc
+simple_LDADD = $(ROBOPTIMCORE_LIBS) $(IPOPT_LIBS)
 
 # Plug-in
 check_PROGRAMS += plugin

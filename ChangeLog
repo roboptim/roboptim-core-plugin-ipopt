@@ -1,5 +1,13 @@
 2009-06-17  Thomas Moulard  <thomas.moulard@gmail.com>
 
+	Fix Libtool warning.
+	* ipopt.mk: New.
+	* src/Makefile.am,
+	* tests/Makefile.am: Do not link directly against a module
+	but against sources.
+
+2009-06-17  Thomas Moulard  <thomas.moulard@gmail.com>
+
 	Make compilation more robust.
 	* tests/Makefile.am: Here.
 
