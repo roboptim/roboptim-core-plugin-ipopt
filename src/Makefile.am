@@ -1,5 +1,8 @@
 include $(top_srcdir)/build-aux/init.mk
 
+# Add pthread CFLAGS.
+AM_CPPFLAGS += $(PTHREAD_CFLAGS)
+
 # Add RobOptim flags.
 AM_CPPFLAGS += $(ROBOPTIMCORE_CFLAGS)
 

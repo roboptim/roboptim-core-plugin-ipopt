@@ -1,3 +1,8 @@
+2009-06-17  Thomas Moulard  <thomas.moulard@gmail.com>
+
+	Make compilation more robust.
+	* src/Makefile.am: Use PTHREAD_CFLAGS.
+
 2009-06-16  Thomas Moulard  <thomas.moulard@gmail.com>
 
 	Fix test suite.
