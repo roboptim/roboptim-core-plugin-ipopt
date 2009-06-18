@@ -306,7 +306,7 @@ namespace roboptim
       }
 
       /// Compute Ipopt hessian from several hessians.
-      void compute_hessian (Function::matrix_t& h,
+      void compute_hessian (TwiceDerivableFunction::hessian_t& h,
                             const IpoptSolver::vector_t& x,
                             Number obj_factor,
                             const Number* lambda)
@@ -357,8 +357,9 @@ namespace roboptim
             IpoptSolver::vector_t x_ (n);
             array_to_vector (x_, x);
 
-            Function::matrix_t h (solver_.problem ().function ().inputSize (),
-				  solver_.problem ().function ().inputSize ());
+            TwiceDerivableFunction::hessian_t h
+	      (solver_.problem ().function ().inputSize (),
+	       solver_.problem ().function ().inputSize ());
             compute_hessian (h, x_, obj_factor, lambda);
 
             int idx = 0;

@@ -1,5 +1,11 @@
 2009-06-18  Thomas Moulard  <thomas.moulard@gmail.com>
 
+	Use symmetric matrices in Hessian computation.
+	* src/roboptim-core-ipopt-plugin.cc: Replace generic matrices
+	by symmetric matrices in Hessian computation.
+
+2009-06-18  Thomas Moulard  <thomas.moulard@gmail.com>
+
 	Remove useless copy.
 	* src/roboptim-core-ipopt-plugin.cc: Remove useless lambda copy.
 
