@@ -350,15 +350,12 @@ namespace roboptim
                   iRow[idx] = i, jCol[idx] = j;
                   ++idx;
                 }
-            assert(idx == nele_hess);
+            assert (idx == nele_hess);
           }
         else
           {
             IpoptSolver::vector_t x_ (n);
             array_to_vector (x_, x);
-
-            IpoptSolver::vector_t lambda_ (m);
-            array_to_vector (lambda_, lambda);
 
             Function::matrix_t h (solver_.problem ().function ().inputSize (),
 				  solver_.problem ().function ().inputSize ());
@@ -368,6 +365,7 @@ namespace roboptim
             for (int i = 0; i < n; ++i)
               for (int j = 0; j < n; ++j)
                 values[idx++] = h (i, j);
+            assert (idx == nele_hess);
           }
 
         return true;
