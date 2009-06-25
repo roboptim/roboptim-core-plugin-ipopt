@@ -408,6 +408,8 @@ namespace roboptim
 
 #define FILL_RESULT()					\
       array_to_vector (res.x, x);			\
+      res.constraints.resize (m);			\
+      array_to_vector (res.constraints, g);		\
       res.lambda.resize (m);				\
       array_to_vector (res.lambda, lambda);		\
       res.value (0) = obj_value

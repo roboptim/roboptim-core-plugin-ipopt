@@ -1,3 +1,11 @@
+2009-06-25  Thomas Moulard  <thomas.moulard@gmail.com>
+
+	Copy constraints final values in result object.
+	* src/roboptim-core-ipopt-plugin.cc: Copy constraints final
+	value in result.
+	* tests/plugin.stdout,
+	* tests/simple.stdout: Regenerate.
+
 2009-06-18  Thomas Moulard  <thomas.moulard@gmail.com>
 
 	Use symmetric matrices in Hessian computation.
