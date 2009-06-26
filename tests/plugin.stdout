@@ -1,14 +1,16 @@
 Problem:
-  Twice derivable function
+  a * d * (a + b + c) + d (twice derivable function)
   Argument's bounds: (1, 5), (1, 5), (1, 5), (1, 5)
   Argument's scales: 1, 1, 1, 1
   Number of constraints: 2
   Constraint 0
+      a * b * c * d (twice derivable function)
       Bounds: (25, inf)
       Scales: 1
       Initial value: [1](25)
       
   Constraint 1
+      a * a + b * b + c * c + d * d (twice derivable function)
       Bounds: (40, 40)
       Scales: 1
       Initial value: [1](52)

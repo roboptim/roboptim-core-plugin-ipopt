@@ -25,7 +25,7 @@ using namespace roboptim;
 
 struct F : public TwiceDerivableFunction
 {
-  F () : TwiceDerivableFunction (4, 1)
+  F () : TwiceDerivableFunction (4, 1, "a * d * (a + b + c) + d")
   {
   }
 
@@ -75,7 +75,7 @@ struct F : public TwiceDerivableFunction
 struct G0 : public TwiceDerivableFunction
 {
   G0 ()
-    : TwiceDerivableFunction (4, 1)
+    : TwiceDerivableFunction (4, 1, "a * b * c * d")
   {
   }
 
@@ -125,7 +125,7 @@ struct G0 : public TwiceDerivableFunction
 struct G1 : public TwiceDerivableFunction
 {
   G1 ()
-    : TwiceDerivableFunction (4, 1)
+    : TwiceDerivableFunction (4, 1, "a * a + b * b + c * c + d * d")
   {
   }
 

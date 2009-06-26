@@ -1,3 +1,10 @@
+2009-06-26  Thomas Moulard  <thomas.moulard@gmail.com>
+
+	Add titles to functions.
+	* tests/hs071.hh: Add titles.
+	* tests/plugin.stdout,
+	* tests/simple.stdout: Regenerate.
+
 2009-06-25  Thomas Moulard  <thomas.moulard@gmail.com>
 
 	Copy constraints final values in result object.
