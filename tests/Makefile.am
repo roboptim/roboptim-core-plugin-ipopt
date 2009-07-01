@@ -8,6 +8,9 @@ AM_CPPFLAGS += $(PTHREAD_CFLAGS)
 # Add RobOptim flags.
 AM_CPPFLAGS += $(ROBOPTIMCORE_CFLAGS)
 
+# Search for headers in shared tests.
+AM_CPPFLAGS += -I$(srcdir)/shared-tests
+
 # Add available warnings flags.
 AM_CXXFLAGS += $(WARNING_CXXFLAGS)
 
@@ -18,7 +21,7 @@ EXTRA_DIST += package.m4.in
 CLEANFILES += atconfig
 
 # Source which are shared by all tests.
-COMMON_SOURCES = common.hh hs071.hh
+COMMON_SOURCES = common.hh shared-tests/hs071.hh
 
 # Define tests.
 

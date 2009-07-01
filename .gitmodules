@@ -1,0 +1,9 @@
+[submodule "tests/shared-tests"]
+	path = tests/shared-tests
+	url = sourceforge:roboptim
+[submodule "doc"]
+	path = doc
+	url = sourceforge:roboptim
+[submodule "build-aux"]
+	path = build-aux
+	url = sourceforge:roboptim
