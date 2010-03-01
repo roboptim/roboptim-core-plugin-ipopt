@@ -1,5 +1,11 @@
 2010-03-01  Thomas Moulard  <thomas.moulard@gmail.com>
 
+	Add rpm SPEC file.
+	* Makefile.am: Enable rpm rules.
+	* roboptim-core-ipopt-plugin.spec.in: New.
+
+2010-03-01  Thomas Moulard  <thomas.moulard@gmail.com>
+
 	Update documentation.
 	* .gitmodules: Remove old doc submodule.
 	* doc/Doxyfile.extra.in: New.

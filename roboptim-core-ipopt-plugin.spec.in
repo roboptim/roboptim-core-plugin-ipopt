@@ -1,0 +1,77 @@
+Name: @PACKAGE_TARNAME@
+Version: @PACKAGE_VERSION@
+Release: 1%{?dist}
+Summary: The Ipopt plug-in for RobOptim
+
+Group: Development/Libraries
+License: LGPLv3+
+URL: http://roboptim.sourceforge.net/
+Source0: http://dl.sf.net/sourceforge/%{name}/%{name}-%{version}.tar.gz
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+BuildRequires: roboptim-core-devel, boost-devel, libtool-ltdl-devel, doxygen
+# Not yet packaged: ipopt-devel
+
+%description
+Provide a plug-in to enable the use of Ipopt as a RobOptim back-end
+
+%package devel
+Summary: The roboptim-core-ipopt-plugin headers and development-related files
+Group: Development/Libraries
+Requires: @PACKAGE_TARNAME@ = %{version}-%{release}
+%description devel
+Headers and shared object symlinks for the RobOptim Ipopt plug-in
+
+
+%package doc
+Summary: API documentation
+Group: Documentation
+Requires: @PACKAGE_TARNAME@ = %{version}-%{release}
+%description doc
+Documentation for the RobOptim Ipopt plug-in
+
+
+
+
+
+%prep
+%setup -q
+
+%build
+%configure --docdir=%{_datadir}/doc/%{name}-%{version} --disable-static
+sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
+sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
+
+make %{?_smp_mflags}
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+
+# Get rid of Libtool files as they should not be installed.
+rm $RPM_BUILD_ROOT/%{_libdir}/*.la
+
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root,-)
+%{_libdir}/*.so.*
+
+%files devel
+%defattr(-,root,root,-)
+%{_includedir}/*
+%{_libdir}/*.so
+
+%files doc
+%defattr(-,root,root,-)
+%doc AUTHORS COPYING README NEWS
+%{_datadir}/doc/%{name}-%{version}/*
+
+%post -p /sbin/ldconfig
+%postun -p /sbin/ldconfig
+
+%changelog
+* Thu Mar 01 2010 Thomas Moulard <thomas.moulard@gmail.com> - 0.2-1
+- initial work
