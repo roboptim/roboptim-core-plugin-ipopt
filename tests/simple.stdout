@@ -1,23 +1,35 @@
-Problem:
-  a * d * (a + b + c) + d (twice derivable function)
-  Argument's bounds: (1, 5), (1, 5), (1, 5), (1, 5)
-  Argument's scales: 1, 1, 1, 1
-  Number of constraints: 2
-  Constraint 0
-      a * b * c * d (twice derivable function)
-      Bounds: (25, inf)
-      Scales: 1
-      Initial value: [1](25)
-      
-  Constraint 1
-      a * a + b * b + c * c + d * d (twice derivable function)
-      Bounds: (40, 40)
-      Scales: 1
-      Initial value: [1](52)
-      
-  Starting point: [4](1,5,5,1)
-  Starting value: [1](12)
-  Infinity value (for all functions): inf
+Solver:
+  Problem:
+    a * d * (a + b + c) + d (twice derivable function)
+    Argument's bounds: (1, 5), (1, 5), (1, 5), (1, 5)
+    Argument's scales: 1, 1, 1, 1
+    Number of constraints: 2
+    Constraint 0
+        a * b * c * d (twice derivable function)
+        Bounds: (25, inf)
+        Scales: 1
+        Initial value: [1](25)
+        
+    Constraint 1
+        a * a + b * b + c * c + d * d (twice derivable function)
+        Bounds: (40, 40)
+        Scales: 1
+        Initial value: [1](52) (constraint not satisfied)
+        
+    Starting point: [4](1,5,5,1)
+    Starting value: [1](12)
+    Infinity value (for all functions): inf
+  Parameters:
+    ipopt.file_print_level (verbosity level for output file): 5
+    ipopt.mu_strategy (update strategy for barrier parameter): adaptive
+    ipopt.option_file_name (file name of options file (to overwrite default)): 
+    ipopt.output_file (file name of desired output file (leave unset for no file output)): 
+    ipopt.print_level (output verbosity level): 5
+    ipopt.print_options_documentation (switch to print all algorithmic options): no
+    ipopt.print_user_options (print all options set by the user): no
+    ipopt.tol (desired convergence tolerance (relative)): 1e-07
+    max-iterations (number of iterations): 3000
+    
 A solution has been found: 
 Result: 
   Size (input, output): 4, 1

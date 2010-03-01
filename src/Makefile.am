@@ -10,7 +10,10 @@ AM_CPPFLAGS += $(ROBOPTIMCORE_CFLAGS)
 # Add available warnings flags.
 AM_CXXFLAGS += $(WARNING_CXXFLAGS)
 
-lib_LTLIBRARIES = roboptim-core-ipopt-plugin.la
+# Define plug-in directory.
+plugindir = $(libdir)/roboptim-core
+
+plugin_LTLIBRARIES = roboptim-core-ipopt-plugin.la
 
 roboptim_core_ipopt_plugin_la_SOURCES = doc.hh roboptim-core-ipopt-plugin.cc
 

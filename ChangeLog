@@ -1,3 +1,19 @@
+2010-03-01  Thomas Moulard  <thomas.moulard@gmail.com>
+
+	Upgrade to RobOptim core 0.5.6.
+
+        CAUTION: starting from now, $(libdir)/roboptim-core /MUST/
+        be in your LT_LIBRARY_PATH! It is also recommended to remove
+        manually your old $(libdir)/roboptim-core-ipopt* files.
+
+	* configure.ac: Require newer roboptim-core.
+	* include/roboptim/core/plugin/ipopt.hh:
+	Declare parameters management methods.
+	* src/Makefile.am: Install plug-in in separate directory.
+	* src/roboptim-core-ipopt-plugin.cc: Management parameters properly.
+	* tests/plugin.stdout,
+	* tests/simple.stdout: Regenerate.
+
 2009-08-24  Thomas Moulard  <thomas.moulard@gmail.com>
 
 	Update to new SourceForge URLs.

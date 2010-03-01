@@ -18,6 +18,9 @@
 #include <cassert>
 #include <cstring>
 
+#include <boost/foreach.hpp>
+#include <boost/variant/apply_visitor.hpp>
+
 #include <coin/IpIpoptApplication.hpp>
 #include <coin/IpTNLP.hpp>
 
@@ -501,12 +504,110 @@ namespace roboptim
       nlp_ (new MyTNLP (*this)),
       app_ (new IpoptApplication (false, false))
   {
-    // Set default options.
-    app_->Options ()->SetNumericValue ("tol", 1e-7);
-    app_->Options ()->SetStringValue ("mu_strategy", "adaptive");
-    app_->Options ()->SetStringValue ("output_file", "");
+    // Initialize parameters.
+    initializeParameters ();
+  }
 
-    //app_->Options ()->SetStringValue ("nlp_scaling_method", "user-scaling");
+#define DEFINE_PARAMETER(KEY, DESCRIPTION, VALUE)	\
+  do {							\
+    parameters_[KEY].description = DESCRIPTION;		\
+    parameters_[KEY].value = VALUE;			\
+  } while (0)
+
+  void
+  IpoptSolver::initializeParameters () throw ()
+  {
+    parameters_.clear ();
+
+    // Shared parameters.
+    DEFINE_PARAMETER ("max-iterations", "number of iterations", 3000);
+
+    // IPOPT specific.
+    // Much more options are available for Ipopt, see ``Options reference'' of
+    // Ipopt documentation.
+
+    //  Output
+    DEFINE_PARAMETER ("ipopt.print_level", "output verbosity level", 5);
+    DEFINE_PARAMETER ("ipopt.print_user_options",
+		      "print all options set by the user", "no");
+    DEFINE_PARAMETER ("ipopt.print_options_documentation",
+		      "switch to print all algorithmic options", "no");
+    DEFINE_PARAMETER
+      ("ipopt.output_file",
+       "file name of desired output file (leave unset for no file output)", "");
+    DEFINE_PARAMETER ("ipopt.file_print_level",
+		      "verbosity level for output file", 5);
+    DEFINE_PARAMETER ("ipopt.option_file_name",
+		      "file name of options file (to overwrite default)", "");
+
+    //  Termination
+    DEFINE_PARAMETER ("ipopt.tol",
+		      "desired convergence tolerance (relative)", 1e-7);
+
+    //  Barrier parameter
+    DEFINE_PARAMETER ("ipopt.mu_strategy",
+		      "update strategy for barrier parameter", "adaptive");
+
+  }
+
+#undef DEFINE_PARAMETER
+
+
+  namespace
+  {
+    struct IpoptParametersUpdater
+      : public boost::static_visitor<>
+    {
+      explicit IpoptParametersUpdater
+      (const Ipopt::SmartPtr<Ipopt::IpoptApplication>& app,
+       const std::string& key)
+	: app (app),
+	  key (key)
+
+      {}
+      void
+      operator () (const Function::value_type& val) const
+      {
+	app->Options ()->SetNumericValue (key, val);
+      }
+
+      void
+      operator () (const int& val) const
+      {
+	app->Options ()->SetNumericValue (key, val);
+      }
+
+      void
+      operator () (const std::string& val) const
+      {
+	app->Options ()->SetStringValue (key, val);
+      }
+
+    private:
+      const Ipopt::SmartPtr<Ipopt::IpoptApplication>& app;
+      const std::string& key;
+    };
+  } // end of anonymous namespace.
+
+  void
+  IpoptSolver::updateParameters () throw ()
+  {
+    const std::string prefix = "ipopt.";
+    typedef const std::pair<const std::string, Parameter> const_iterator_t;
+    BOOST_FOREACH (const_iterator_t& it, parameters_)
+      {
+	if (it.first.substr (0, prefix.size ()) == prefix)
+	  {
+	    boost::apply_visitor
+	      (IpoptParametersUpdater
+	       (app_, it.first.substr (prefix.size ())), it.second.value);
+	  }
+      }
+
+    // Remap standardized parameters.
+    boost::apply_visitor
+      (IpoptParametersUpdater
+       (app_, "max_iter"), parameters_["max-iterations"].value);
   }
 
   IpoptSolver::~IpoptSolver () throw ()
@@ -571,6 +672,8 @@ namespace roboptim
   void
   IpoptSolver::solve () throw ()
   {
+    // Read parameters and forward them to Ipopt.
+    updateParameters ();
     ApplicationReturnStatus status = app_->Initialize ("");
 
     switch (status)
@@ -603,15 +706,21 @@ extern "C"
   using namespace roboptim;
   typedef IpoptSolver::parent_t solver_t;
 
-  solver_t* create (const IpoptSolver::problem_t& pb);
-  void destroy (solver_t* p);
+  ROBOPTIM_DLLEXPORT unsigned getSizeOfProblem ();
+  ROBOPTIM_DLLEXPORT solver_t* create (const IpoptSolver::problem_t& pb);
+  ROBOPTIM_DLLEXPORT void destroy (solver_t* p);
 
-  solver_t* create (const IpoptSolver::problem_t& pb)
+  ROBOPTIM_DLLEXPORT unsigned getSizeOfProblem ()
+  {
+    return sizeof (IpoptSolver::problem_t);
+  }
+
+  ROBOPTIM_DLLEXPORT solver_t* create (const IpoptSolver::problem_t& pb)
   {
     return new IpoptSolver (pb);
   }
 
-  void destroy (solver_t* p)
+  ROBOPTIM_DLLEXPORT void destroy (solver_t* p)
   {
     delete p;
   }

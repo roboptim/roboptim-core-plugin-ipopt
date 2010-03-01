@@ -17,10 +17,16 @@
 
 #ifndef ROBOPTIM_CORE_IPOPT_HH
 # define ROBOPTIM_CORE_IPOPT_HH
+# include <roboptim/core/sys.hh>
+# include <roboptim/core/portability.hh>
+
 # include <boost/mpl/vector.hpp>
+
 # include <coin/IpSmartPtr.hpp>
+
 # include <roboptim/core/solver.hh>
 # include <roboptim/core/twice-derivable-function.hh>
+
 
 /// \brief Ipopt classes.
 namespace Ipopt
@@ -47,8 +53,9 @@ namespace roboptim
   ///
   /// \warning Ipopt needs twice derivable functions, so be sure
   /// to provide hessians in your function's problems.
-  class IpoptSolver : public Solver<TwiceDerivableFunction,
-				    boost::mpl::vector<TwiceDerivableFunction> >
+  class ROBOPTIM_DLLEXPORT IpoptSolver
+    : public Solver<TwiceDerivableFunction,
+		    boost::mpl::vector<TwiceDerivableFunction> >
   {
   public:
     friend class detail::MyTNLP;
@@ -74,6 +81,16 @@ namespace roboptim
     virtual Ipopt::SmartPtr<Ipopt::IpoptApplication> getIpoptApplication ()
       throw ();
   private:
+    /// \brief Initialize parameters.
+    ///
+    /// Add solver parameters. Called during construction.
+    void initializeParameters () throw ();
+
+    /// \brief Read parameters and update associated options in Ipopt.
+    ///
+    /// Called before solving problem.
+    void updateParameters () throw ();
+
     /// \brief Smart pointer to the Ipopt non linear problem description.
     Ipopt::SmartPtr<Ipopt::TNLP> nlp_;
     /// \brief Smart pointer to the Ipopt application instance.
