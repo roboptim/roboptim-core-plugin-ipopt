@@ -1,5 +1,12 @@
 2010-03-01  Thomas Moulard  <thomas.moulard@gmail.com>
 
+	Update buildchain.
+	* .gitignore: Ignore more files (like ``.version'').
+	* Makefile.am: Factorize rules.
+	* build-aux: Synchronize.
+
+2010-03-01  Thomas Moulard  <thomas.moulard@gmail.com>
+
 	Upgrade to RobOptim core 0.5.6.
 
         CAUTION: starting from now, $(libdir)/roboptim-core /MUST/
