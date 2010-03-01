@@ -1,5 +1,13 @@
 2010-03-01  Thomas Moulard  <thomas.moulard@gmail.com>
 
+	Update documentation.
+	* .gitmodules: Remove old doc submodule.
+	* doc/Doxyfile.extra.in: New.
+	* doc/Makefile.am: New.
+	* doc: Remove.
+
+2010-03-01  Thomas Moulard  <thomas.moulard@gmail.com>
+
 	Update buildchain.
 	* .gitignore: Ignore more files (like ``.version'').
 	* Makefile.am: Factorize rules.
