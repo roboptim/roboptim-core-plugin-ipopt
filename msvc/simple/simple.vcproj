@@ -19,7 +19,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="..\roboptim-core-plugin-ipopt\roboptim-core-ipopt-plugin.vsprops"
+			InheritedPropertySheets="..\roboptim-core-plugin-ipopt\roboptim-core-ipopt-plugin.vsprops;..\roboptim-core-plugin-ipopt\roboptim-core.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -94,7 +94,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="..\roboptim-core-plugin-ipopt\roboptim-core-ipopt-plugin.vsprops"
+			InheritedPropertySheets="..\roboptim-core-plugin-ipopt\roboptim-core-ipopt-plugin.vsprops;..\roboptim-core-plugin-ipopt\roboptim-core.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>

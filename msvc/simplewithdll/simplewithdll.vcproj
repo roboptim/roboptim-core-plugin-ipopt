@@ -18,7 +18,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="..\roboptim-core-plugin-ipopt\roboptim-core-ipopt-plugin.vsprops"
+			InheritedPropertySheets="..\roboptim-core-plugin-ipopt\roboptim-core-ipopt-plugin.vsprops;..\roboptim-core-plugin-ipopt\roboptim-core.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -92,7 +92,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="..\roboptim-core-plugin-ipopt\roboptim-core-ipopt-plugin.vsprops"
+			InheritedPropertySheets="..\roboptim-core-plugin-ipopt\roboptim-core-ipopt-plugin.vsprops;..\roboptim-core-plugin-ipopt\roboptim-core.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"

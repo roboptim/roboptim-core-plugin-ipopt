@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="INSTALL"
 	ProjectGUID="{D33006C5-3F63-488A-99CB-8C08109EA5F9}"
 	RootNamespace="INSTALL"
@@ -19,7 +19,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="10"
-			InheritedPropertySheets="..\roboptim-core-plugin-ipopt\roboptim-core-ipopt-plugin.vsprops"
+			InheritedPropertySheets="..\roboptim-core-plugin-ipopt\roboptim-core-ipopt-plugin.vsprops;..\roboptim-core-plugin-ipopt\roboptim-core.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -33,7 +33,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="set root_directory=%ROB_OPTIM_INSTALL_DIR%&#x0D;&#x0A;&#x0D;&#x0A;XCOPY ..\..\include %root_directory%\include /S /E /C /I /F /K /Y /EXCLUDE:excludedFiles.txt&#x0D;&#x0A;XCOPY ..\roboptim-core-plugin-ipopt\Debug\roboptim-core-ipopt-plugind.dll    %root_directory%\bin\   /S /E /C /I /F /K /Y&#x0D;&#x0A;XCOPY ..\roboptim-core-plugin-ipopt\Debug\roboptim-core-ipopt-plugind.pdb %root_directory%\bin\   /S /E /C /I /F /K /Y&#x0D;&#x0A;XCOPY ..\roboptim-core-plugin-ipopt\Debug\roboptim-core-ipopt-plugind.lib    %root_directory%\lib\   /S /E /C /I /F /K /Y&#x0D;&#x0A;"
+				CommandLine="set root_directory=%ROB_OPTIM_INSTALL_DIR%&#x0D;&#x0A;&#x0D;&#x0A;XCOPY ..\..\include %root_directory%\include /S /E /C /I /F /K /Y /EXCLUDE:excludedFiles.txt&#x0D;&#x0A;XCOPY ..\roboptim-core-plugin-ipopt\Debug\roboptim-core-ipopt-plugind.dll    %root_directory%\bin\   /S /E /C /I /F /K /Y&#x0D;&#x0A;XCOPY ..\roboptim-core-plugin-ipopt\Debug\roboptim-core-ipopt-plugind.pdb %root_directory%\bin\   /S /E /C /I /F /K /Y&#x0D;&#x0A;XCOPY ..\roboptim-core-plugin-ipopt\Debug\roboptim-core-ipopt-plugind.lib    %root_directory%\lib\   /S /E /C /I /F /K /Y&#x0D;&#x0A;XCOPY ..\roboptim-core-plugin-ipopt\roboptim-core-ipopt-plugin.vsprops %root_directory%\share\msvc  /S /C /I /F /K /Y&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -41,7 +41,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="10"
-			InheritedPropertySheets="..\roboptim-core-plugin-ipopt\roboptim-core-ipopt-plugin.vsprops"
+			InheritedPropertySheets="..\roboptim-core-plugin-ipopt\roboptim-core-ipopt-plugin.vsprops;..\roboptim-core-plugin-ipopt\roboptim-core.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -56,7 +56,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="set root_directory=%ROB_OPTIM_INSTALL_DIR%&#x0D;&#x0A;&#x0D;&#x0A;XCOPY ..\..\include %root_directory%\include /S /E /C /I /F /K /Y /EXCLUDE:excludedFiles.txt&#x0D;&#x0A;XCOPY ..\roboptim-core-plugin-ipopt\Release\roboptim-core-ipopt-plugin.dll %root_directory%\bin\   /S /E /C /I /F /K /Y&#x0D;&#x0A;XCOPY ..\roboptim-core-plugin-ipopt\Release\roboptim-core-ipopt-plugin.lib %root_directory%\lib\   /S /E /C /I /F /K /Y&#x0D;&#x0A;"
+				CommandLine="set root_directory=%ROB_OPTIM_INSTALL_DIR%&#x0D;&#x0A;&#x0D;&#x0A;XCOPY ..\..\include %root_directory%\include /S /E /C /I /F /K /Y /EXCLUDE:excludedFiles.txt&#x0D;&#x0A;XCOPY ..\roboptim-core-plugin-ipopt\Release\roboptim-core-ipopt-plugin.dll %root_directory%\bin\   /S /E /C /I /F /K /Y&#x0D;&#x0A;XCOPY ..\roboptim-core-plugin-ipopt\Release\roboptim-core-ipopt-plugin.lib %root_directory%\lib\   /S /E /C /I /F /K /Y&#x0D;&#x0A;XCOPY ..\roboptim-core-plugin-ipopt\roboptim-core-ipopt-plugin.vsprops %root_directory%\share\msvc  /S /C /I /F /K /Y&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>

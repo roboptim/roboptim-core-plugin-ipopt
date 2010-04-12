@@ -7,20 +7,11 @@
 	<Tool
 		Name="VCCLCompilerTool"
 		AdditionalOptions=" /D &quot;HAVE_CONFIG_H&quot;"
-		AdditionalIncludeDirectories="&quot;$(ROB_OPTIM_INSTALL_DIR)\include&quot;;&quot;$(BOOST_ROOT)&quot;;&quot;$(IPOPT_ROOT)\include&quot;"
+		AdditionalIncludeDirectories="&quot;$(IPOPT_ROOT)\include&quot;"
 	/>
 	<Tool
 		Name="VCLinkerTool"
 		AdditionalLibraryDirectories="$(ROB_OPTIM_INSTALL_DIR)/lib"
-	/>
-	<UserMacro
-		Name="ROB_OPTIM_INSTALL_DIR"
-		Value="C:\Libraries\roboptim"
-		PerformEnvironmentSet="true"
-	/>
-	<UserMacro
-		Name="BOOST_ROOT"
-		Value="C:\Libraries\Boost\boost_1_40"
 	/>
 	<UserMacro
 		Name="IPOPT_ROOT"
