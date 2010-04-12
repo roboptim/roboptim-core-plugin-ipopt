@@ -502,8 +502,14 @@ namespace roboptim
   IpoptSolver::IpoptSolver (const problem_t& pb) throw ()
     : parent_t (pb),
       nlp_ (new MyTNLP (*this)),
+#ifndef WIN32
       app_ (new IpoptApplication (false, false))
   {
+#else
+      app_ (IpoptApplicationFactory ( ))
+  {
+	app_->Jnlst()->DeleteAllJournals();
+#endif // WIN32
     // Initialize parameters.
     initializeParameters ();
   }
