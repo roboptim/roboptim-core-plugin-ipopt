@@ -499,17 +499,15 @@ namespace roboptim
 
   using namespace detail;
 
+
+  // On Microsoft Windows, working with pre-built Ipopt
+  // binaries requires the use of the IpoptApplicationFactory.
   IpoptSolver::IpoptSolver (const problem_t& pb) throw ()
     : parent_t (pb),
       nlp_ (new MyTNLP (*this)),
-#ifndef WIN32
-      app_ (new IpoptApplication (false, false))
+      app_ (IpoptApplicationFactory ())
   {
-#else
-      app_ (IpoptApplicationFactory ( ))
-  {
-	app_->Jnlst()->DeleteAllJournals();
-#endif // WIN32
+    app_->Jnlst()->DeleteAllJournals();
     // Initialize parameters.
     initializeParameters ();
   }
