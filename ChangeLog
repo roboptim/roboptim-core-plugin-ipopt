@@ -1,3 +1,9 @@
+2010-04-21  Keith Francois <francois.keith@aist.go.jp>
+
+	Add missing file required to install the headers of core-plugin-ipopt
+	* msvc/INSTALL/excludedFiles.txt: prevents the installation of some files 
+		considering their extension, required for the Install command
+
 2010-04-14  Thomas Moulard  <thomas.moulard@gmail.com>
 
 	Uniformize behavior on Windows and Unix.
