@@ -1,5 +1,11 @@
 2010-04-21  Keith Francois <francois.keith@aist.go.jp>
 
+	Add missing file required to compile the sample tests
+	* msvc/roboptim-core-plugin-ipopt/config.h: Give details on this package 
+		(version, bugreport...)
+
+2010-04-21  Keith Francois <francois.keith@aist.go.jp>
+
 	Add missing file required to install the headers of core-plugin-ipopt
 	* msvc/INSTALL/excludedFiles.txt: prevents the installation of some files 
 		considering their extension, required for the Install command
