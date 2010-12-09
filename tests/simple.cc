@@ -23,8 +23,8 @@
 
 #include <roboptim/core/plugin/ipopt.hh>
 
-#include "common.hh"
-#include "hs071.hh"
+#include "shared-tests/common.hh"
+#include "shared-tests/hs071.hh"
 
 int run_test ()
 {

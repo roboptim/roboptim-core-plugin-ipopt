@@ -22,8 +22,8 @@
 
 #include <roboptim/core/solver-factory.hh>
 
-#include "common.hh"
-#include "hs071.hh"
+#include "shared-tests/common.hh"
+#include "shared-tests/hs071.hh"
 
 using namespace roboptim;
 typedef Solver<TwiceDerivableFunction,

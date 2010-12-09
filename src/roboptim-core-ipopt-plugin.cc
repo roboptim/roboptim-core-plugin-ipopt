@@ -46,14 +46,14 @@ namespace roboptim
 
     /// \internal
     /// Set "linear" tag to linear functions.
-    TNLP::LinearityType cfsqp_tag (const LinearFunction& f)
+    TNLP::LinearityType cfsqp_tag (const LinearFunction&)
     {
       return TNLP::LINEAR;
     }
 
     /// \internal
     /// Set "non_linear" tag to non linear functions.
-    TNLP::LinearityType cfsqp_tag (const Function& f)
+    TNLP::LinearityType cfsqp_tag (const Function&)
     {
       return TNLP::NON_LINEAR;
     }
@@ -122,7 +122,7 @@ namespace roboptim
       }
 
       virtual bool
-      get_scaling_parameters (Number& obj_scaling,
+      get_scaling_parameters (Number&,
                               bool& use_x_scaling, Index n,
                               Number* x_scaling,
                               bool& use_g_scaling, Index m,
@@ -170,7 +170,7 @@ namespace roboptim
       get_starting_point (Index n, bool init_x, Number* x,
                           bool init_z, Number* z_L, Number* z_U,
                           Index m, bool init_lambda,
-                          Number* lambda)
+                          Number*)
         throw ()
       {
         assert (solver_.problem ().function ().inputSize () - n == 0);
@@ -203,7 +203,7 @@ namespace roboptim
       }
 
       virtual bool
-      get_warm_start_iterate (IteratesVector& warm_start_iterate) throw ()
+      get_warm_start_iterate (IteratesVector&) throw ()
       {
         //FIXME: implement this.
         //IteratesVector is defined in src/Algorithm/IteratesVector.hpp
@@ -217,7 +217,7 @@ namespace roboptim
       }
 
       virtual bool
-      eval_f (Index n, const Number* x, bool new_x, Number& obj_value)
+      eval_f (Index n, const Number* x, bool, Number& obj_value)
         throw ()
       {
         assert (solver_.problem ().function ().inputSize () - n == 0);
@@ -229,7 +229,7 @@ namespace roboptim
       }
 
       virtual bool
-      eval_grad_f (Index n, const Number* x, bool new_x, Number* grad_f)
+      eval_grad_f (Index n, const Number* x, bool, Number* grad_f)
         throw ()
       {
         assert (solver_.problem ().function ().inputSize () - n == 0);
@@ -244,7 +244,7 @@ namespace roboptim
       }
 
       virtual bool
-      eval_g (Index n, const Number* x, bool new_x,
+      eval_g (Index n, const Number* x, bool,
               Index m, Number* g)
         throw ()
       {
@@ -271,8 +271,8 @@ namespace roboptim
       }
 
       virtual bool
-      eval_jac_g(Index n, const Number* x, bool new_x,
-                 Index m, Index nele_jac, Index* iRow,
+      eval_jac_g(Index n, const Number* x, bool,
+                 Index m, Index, Index* iRow,
                  Index *jCol, Number* values)
         throw ()
       {
@@ -332,9 +332,9 @@ namespace roboptim
       }
 
       virtual bool
-      eval_h (Index n, const Number* x, bool new_x,
+      eval_h (Index n, const Number* x, bool,
               Number obj_factor, Index m, const Number* lambda,
-              bool new_lambda, Index nele_hess, Index* iRow,
+              bool, Index nele_hess, Index* iRow,
               Index* jCol, Number* values)
         throw ()
       {
@@ -420,11 +420,11 @@ namespace roboptim
 
       virtual void
       finalize_solution(SolverReturn status,
-                        Index n, const Number* x, const Number* z_L,
-                        const Number* z_U, Index m, const Number* g,
+                        Index n, const Number* x, const Number*,
+                        const Number*, Index m, const Number* g,
                         const Number* lambda, Number obj_value,
-                        const IpoptData* ip_data,
-                        IpoptCalculatedQuantities* ip_cq)
+                        const IpoptData*,
+                        IpoptCalculatedQuantities*)
         throw ()
       {
         assert (solver_.problem ().function ().inputSize () - n == 0);
@@ -463,15 +463,15 @@ namespace roboptim
 
 
       virtual bool
-      intermediate_callback (AlgorithmMode mode,
-                             Index iter, Number obj_value,
-                             Number inf_pr, Number inf_du,
-                             Number mu, Number d_norm,
-                             Number regularization_size,
-                             Number alpha_du, Number alpha_pr,
-                             Index ls_trials,
-                             const IpoptData* ip_data,
-                             IpoptCalculatedQuantities* ip_cq)
+      intermediate_callback (AlgorithmMode,
+                             Index, Number,
+                             Number, Number,
+                             Number, Number,
+                             Number,
+                             Number, Number,
+                             Index,
+                             const IpoptData*,
+                             IpoptCalculatedQuantities*)
         throw ()
       {
         return true;
@@ -485,8 +485,8 @@ namespace roboptim
       }
 
       virtual bool
-      get_list_of_nonlinear_variables (Index num_nonlin_vars,
-                                       Index* pos_nonlin_vars)
+      get_list_of_nonlinear_variables (Index,
+                                       Index*)
         throw ()
       {
         //FIXME: implement this.

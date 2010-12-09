@@ -42,7 +42,7 @@ namespace roboptim
   {
     /// \internal
     class MyTNLP;
-  };
+  }
 
   /// \addtogroup roboptim_problem
   /// @{
