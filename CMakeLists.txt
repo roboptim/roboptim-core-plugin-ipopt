@@ -24,7 +24,7 @@ SET(PROJECT_NAME roboptim-core-plugin-ipopt)
 SET(PROJECT_DESCRIPTION "RobOptim core IPOPT plug-in")
 SET(PROJECT_URL "http://github.com/laas/roboptim-core-plugin-ipopt")
 
-SET(${PROJECT_NAME}_HEADERS
+SET(HEADERS
   include/roboptim/core/plugin/ipopt.hh
   )
 
@@ -55,6 +55,8 @@ ENDIF()
 #FIXME: check that ipopt.so is available.
 
 ADD_REQUIRED_DEPENDENCY("roboptim-core >= 0.5")
+
+HEADER_INSTALL("${HEADERS}")
 
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(tests)
