@@ -82,9 +82,9 @@ namespace roboptim
 
     /// \internal
     /// Ipopt non linear problem definition.
-    struct MyTNLP : public TNLP
+    struct Tnlp : public TNLP
     {
-      MyTNLP (IpoptSolver& solver)
+      Tnlp (IpoptSolver& solver)
         throw ()
         : solver_ (solver)
       {}
@@ -431,217 +431,16 @@ namespace roboptim
 
   using namespace detail;
 
-
-  // On Microsoft Windows, working with pre-built Ipopt
-  // binaries requires the use of the IpoptApplicationFactory.
   IpoptSolver::IpoptSolver (const problem_t& pb) throw ()
-    : parent_t (pb),
-      nlp_ (new MyTNLP (*this)),
-      app_ (IpoptApplicationFactory ())
-  {
-    app_->Jnlst()->DeleteAllJournals();
-
-    // Initialize parameters.
-    initializeParameters ();
-  }
-
-#define DEFINE_PARAMETER(KEY, DESCRIPTION, VALUE)	\
-  do {							\
-    parameters_[KEY].description = DESCRIPTION;		\
-    parameters_[KEY].value = VALUE;			\
-  } while (0)
-
-  void
-  IpoptSolver::initializeParameters () throw ()
-  {
-    parameters_.clear ();
-
-    // Shared parameters.
-    DEFINE_PARAMETER ("max-iterations", "number of iterations", 3000);
-
-    // IPOPT specific.
-    // Much more options are available for Ipopt, see ``Options reference'' of
-    // Ipopt documentation.
-
-    //  Output
-    DEFINE_PARAMETER ("ipopt.print_level", "output verbosity level", 5);
-    DEFINE_PARAMETER ("ipopt.print_user_options",
-		      "print all options set by the user", "no");
-    DEFINE_PARAMETER ("ipopt.print_options_documentation",
-		      "switch to print all algorithmic options", "no");
-    DEFINE_PARAMETER
-      ("ipopt.output_file",
-       "file name of desired output file (leave unset for no file output)", "");
-    DEFINE_PARAMETER ("ipopt.file_print_level",
-		      "verbosity level for output file", 5);
-    DEFINE_PARAMETER ("ipopt.option_file_name",
-		      "file name of options file (to overwrite default)", "");
-
-    //  Termination
-    DEFINE_PARAMETER ("ipopt.tol",
-		      "desired convergence tolerance (relative)", 1e-7);
-
-    //  Barrier parameter
-    DEFINE_PARAMETER ("ipopt.mu_strategy",
-		      "update strategy for barrier parameter", "adaptive");
-
-  }
-
-#undef DEFINE_PARAMETER
-
-
-  namespace
-  {
-    struct IpoptParametersUpdater
-      : public boost::static_visitor<>
-    {
-      explicit IpoptParametersUpdater
-      (const Ipopt::SmartPtr<Ipopt::IpoptApplication>& app,
-       const std::string& key)
-	: app (app),
-	  key (key)
-
-      {}
-      void
-      operator () (const Function::value_type& val) const
-      {
-	app->Options ()->SetNumericValue (key, val);
-      }
-
-      void
-      operator () (const int& val) const
-      {
-	app->Options ()->SetIntegerValue (key, val);
-      }
-
-      void
-      operator () (const std::string& val) const
-      {
-	app->Options ()->SetStringValue (key, val);
-      }
-
-    private:
-      const Ipopt::SmartPtr<Ipopt::IpoptApplication>& app;
-      const std::string& key;
-    };
-  } // end of anonymous namespace.
-
-  void
-  IpoptSolver::updateParameters () throw ()
-  {
-    const std::string prefix = "ipopt.";
-    typedef const std::pair<const std::string, Parameter> const_iterator_t;
-    BOOST_FOREACH (const_iterator_t& it, parameters_)
-      {
-	if (it.first.substr (0, prefix.size ()) == prefix)
-	  {
-	    boost::apply_visitor
-	      (IpoptParametersUpdater
-	       (app_, it.first.substr (prefix.size ())), it.second.value);
-	  }
-      }
-
-    // Remap standardized parameters.
-    boost::apply_visitor
-      (IpoptParametersUpdater
-       (app_, "max_iter"), parameters_["max-iterations"].value);
-  }
-
-  IpoptSolver::~IpoptSolver () throw ()
-  {
-  }
-
-
-#define SWITCH_ERROR(NAME, ERROR)		\
-  case NAME:					\
-  result_ = SolverError (ERROR);		\
-  break
-
-#define SWITCH_FATAL(NAME)			\
-  case NAME:					\
-  assert (0);					\
-  break
-
-#define SWITCH_OK(NAME, CASES)			\
-  case NAME:					\
-  {						\
-    int status = app_->OptimizeTNLP (nlp_);	\
-    switch (status)				\
-      {						\
-	CASES;					\
-      }						\
-  }						\
-  break
-
-#define MAP_IPOPT_ERRORS(MACRO)						\
-  MACRO (Infeasible_Problem_Detected,					\
-	 "Infeasible problem detected");				\
-  MACRO (Search_Direction_Becomes_Too_Small,				\
-	 "Search direction too small");					\
-  MACRO (Diverging_Iterates, "Diverging iterates");			\
-  MACRO (Maximum_Iterations_Exceeded,					\
-	 "Maximum iterations exceeded");				\
-  MACRO (Restoration_Failed, "Restoration failed");			\
-  MACRO (Error_In_Step_Computation, "Error in step computation");	\
-  MACRO (Not_Enough_Degrees_Of_Freedom,					\
-	 "Not enough degrees of freedom");				\
-  MACRO (Invalid_Problem_Definition,					\
-	 "Invalid problem definition");					\
-  MACRO (Invalid_Option, "Invalid option");				\
-  MACRO (Invalid_Number_Detected, "Invalid number detected");		\
-  MACRO (Unrecoverable_Exception, "Unrecoverable exception");		\
-  MACRO (Insufficient_Memory, "Insufficient memory");			\
-  MACRO (Internal_Error, "Internal error");				\
-  MACRO (Maximum_CpuTime_Exceeded, "Maximum CPU time exceeded")
-
-#define MAP_IPOPT_FATALS(MACRO)						\
-  MACRO(User_Requested_Stop);						\
-  MACRO(NonIpopt_Exception_Thrown)
-
-#define MAP_IPOPT_OKS(MACRO)						\
-  MACRO (Solve_Succeeded, MAP_IPOPT_ERRORS(SWITCH_ERROR);		\
-	 MAP_IPOPT_FATALS(SWITCH_FATAL));				\
-  MACRO (Solved_To_Acceptable_Level,MAP_IPOPT_ERRORS(SWITCH_ERROR);	\
-	 MAP_IPOPT_FATALS(SWITCH_FATAL));				\
-  MACRO (Feasible_Point_Found,MAP_IPOPT_ERRORS(SWITCH_ERROR);		\
-	 MAP_IPOPT_FATALS(SWITCH_FATAL))
-
-  void
-  IpoptSolver::solve () throw ()
-  {
-    // Read parameters and forward them to Ipopt.
-    updateParameters ();
-    ApplicationReturnStatus status = app_->Initialize ("");
-
-    switch (status)
-      {
-	MAP_IPOPT_OKS (SWITCH_OK);
-	MAP_IPOPT_ERRORS (SWITCH_ERROR);
-	MAP_IPOPT_FATALS (SWITCH_FATAL);
-      }
-    assert (result_.which () != SOLVER_NO_SOLUTION);
-  }
-
-#undef SWITCH_ERROR
-#undef SWITCH_FATAL
-#undef SWITCH_OK
-#undef MAP_IPOPT_ERRORS
-#undef MAP_IPOPT_FATALS
-#undef MAP_IPOPT_OKS
-
-
-  Ipopt::SmartPtr<Ipopt::IpoptApplication>
-  IpoptSolver::getIpoptApplication () throw ()
-  {
-    return app_;
-  }
+    : parent_t (pb, Ipopt::SmartPtr<Ipopt::TNLP> (new Tnlp (*this)))
+  {}
 
 } // end of namespace roboptim
 
 extern "C"
 {
   using namespace roboptim;
-  typedef IpoptSolver::parent_t solver_t;
+  typedef IpoptSolver::solver_t solver_t;
 
   ROBOPTIM_DLLEXPORT unsigned getSizeOfProblem ();
   ROBOPTIM_DLLEXPORT solver_t* create (const IpoptSolver::problem_t& pb);

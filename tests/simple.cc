@@ -37,6 +37,10 @@ int run_test ()
   // Initialize solver
   IpoptSolverTd solver (pb);
 
+  Ipopt::SmartPtr<Ipopt::Journal> stdout_jrnl =
+    solver.getIpoptApplication ()->Jnlst ()->AddFileJournal
+    ("console", "stdout", Ipopt::J_ITERSUMMARY);
+
   // Compute the minimum and retrieve the result.
   IpoptSolverTd::result_t res = solver.minimum ();
 

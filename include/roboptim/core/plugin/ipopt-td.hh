@@ -26,12 +26,12 @@
 
 # include <roboptim/core/solver.hh>
 # include <roboptim/core/twice-derivable-function.hh>
-
+# include <roboptim/core/plugin/ipopt-common.hh>
+# include <roboptim/core/plugin/ipopt-parameters-updater.hh>
 
 /// \brief Ipopt classes.
 namespace Ipopt
 {
-  class TNLP;
   class IpoptApplication;
 } // end of namespace Ipopt
 
@@ -54,47 +54,26 @@ namespace roboptim
   /// \warning Ipopt needs twice derivable functions, so be sure
   /// to provide hessians in your function's problems.
   class ROBOPTIM_DLLEXPORT IpoptSolverTd
-    : public Solver<TwiceDerivableFunction,
-		    boost::mpl::vector<TwiceDerivableFunction> >
+    : public IpoptSolverCommon<
+    Solver <TwiceDerivableFunction,
+	    boost::mpl::vector<TwiceDerivableFunction> > >
   {
   public:
     friend class detail::TnlpTd;
 
-    /// \brief Parent type.
+    /// \brief RobOptim solver type.
     typedef Solver<TwiceDerivableFunction,
-		   boost::mpl::vector<TwiceDerivableFunction> > parent_t;
+      boost::mpl::vector<TwiceDerivableFunction> > solver_t;
+
+    /// \brief Parent type.
+    typedef IpoptSolverCommon<solver_t> parent_t;
 
     /// \brief Instantiate the solver from a problem.
     ///
     /// \param problem problem that will be solved
     explicit IpoptSolverTd (const problem_t& problem) throw ();
 
-    virtual ~IpoptSolverTd () throw ();
-
-    /// \brief Solve the problem.
-    virtual void solve () throw ();
-
-    /// \brief Get Ipopt Application object for Ipopt specific tuning.
-    ///
-    /// Consult Ipopt documentation for information regarding
-    /// IpoptApplication class.
-    virtual Ipopt::SmartPtr<Ipopt::IpoptApplication> getIpoptApplication ()
-      throw ();
-  private:
-    /// \brief Initialize parameters.
-    ///
-    /// Add solver parameters. Called during construction.
-    void initializeParameters () throw ();
-
-    /// \brief Read parameters and update associated options in Ipopt.
-    ///
-    /// Called before solving problem.
-    void updateParameters () throw ();
-
-    /// \brief Smart pointer to the Ipopt non linear problem description.
-    Ipopt::SmartPtr<Ipopt::TNLP> nlp_;
-    /// \brief Smart pointer to the Ipopt application instance.
-    Ipopt::SmartPtr<Ipopt::IpoptApplication> app_;
+    virtual ~IpoptSolverTd () throw () {}
   };
 
   /// @}

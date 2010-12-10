@@ -26,12 +26,13 @@
 
 # include <roboptim/core/solver.hh>
 # include <roboptim/core/derivable-function.hh>
+# include <roboptim/core/plugin/ipopt-common.hh>
+# include <roboptim/core/plugin/ipopt-parameters-updater.hh>
 
 
 /// \brief Ipopt classes.
 namespace Ipopt
 {
-  class TNLP;
   class IpoptApplication;
 } // end of namespace Ipopt
 
@@ -41,7 +42,7 @@ namespace roboptim
   namespace detail
   {
     /// \internal
-    class MyTNLP;
+    class Tnlp;
   }
 
   /// \addtogroup roboptim_problem
@@ -54,47 +55,26 @@ namespace roboptim
   /// \warning Ipopt needs twice derivable functions, so be sure
   /// to provide hessians in your function's problems.
   class ROBOPTIM_DLLEXPORT IpoptSolver
-    : public Solver<DerivableFunction,
-		    boost::mpl::vector<DerivableFunction> >
+    : public IpoptSolverCommon<
+    Solver<DerivableFunction,
+	   boost::mpl::vector<DerivableFunction> > >
   {
   public:
-    friend class detail::MyTNLP;
+    friend class detail::Tnlp;
+
+    /// \brief RobOptim solver type.
+    typedef Solver<DerivableFunction,
+      boost::mpl::vector<DerivableFunction> > solver_t;
 
     /// \brief Parent type.
-    typedef Solver<DerivableFunction,
-		   boost::mpl::vector<DerivableFunction> > parent_t;
+    typedef IpoptSolverCommon<solver_t> parent_t;
 
     /// \brief Instantiate the solver from a problem.
     ///
     /// \param problem problem that will be solved
     explicit IpoptSolver (const problem_t& problem) throw ();
 
-    virtual ~IpoptSolver () throw ();
-
-    /// \brief Solve the problem.
-    virtual void solve () throw ();
-
-    /// \brief Get Ipopt Application object for Ipopt specific tuning.
-    ///
-    /// Consult Ipopt documentation for information regarding
-    /// IpoptApplication class.
-    virtual Ipopt::SmartPtr<Ipopt::IpoptApplication> getIpoptApplication ()
-      throw ();
-  private:
-    /// \brief Initialize parameters.
-    ///
-    /// Add solver parameters. Called during construction.
-    void initializeParameters () throw ();
-
-    /// \brief Read parameters and update associated options in Ipopt.
-    ///
-    /// Called before solving problem.
-    void updateParameters () throw ();
-
-    /// \brief Smart pointer to the Ipopt non linear problem description.
-    Ipopt::SmartPtr<Ipopt::TNLP> nlp_;
-    /// \brief Smart pointer to the Ipopt application instance.
-    Ipopt::SmartPtr<Ipopt::IpoptApplication> app_;
+    virtual ~IpoptSolver () throw () {}
   };
 
   /// @}

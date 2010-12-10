@@ -25,6 +25,11 @@ INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 # Make Boost.Test generates the main function in test cases.
 ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK -DBOOST_TEST_MAIN)
 
+SET(COMMON_HEADERS
+  ${HEADERS}
+  shared-tests/common.hh
+  shared-tests/hs071.hh
+  )
 
 # ROBOPTIM_CORE_IPOPT_PLUGIN_TEST(NAME)
 # ------------------------
@@ -37,8 +42,7 @@ ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK -DBOOST_TEST_MAIN)
 MACRO(ROBOPTIM_CORE_IPOPT_PLUGIN_TEST NAME)
   ADD_EXECUTABLE(${NAME}
     ${NAME}.cc
-    shared-tests/common.hh
-    shared-tests/hs071.hh)
+    ${COMMON_HEADERS})
   ADD_TEST(${NAME} ${RUNTIME_OUTPUT_DIRECTORY}/${NAME})
 
   PKG_CONFIG_USE_DEPENDENCY(${NAME} roboptim-core)
@@ -52,8 +56,7 @@ ENDMACRO(ROBOPTIM_CORE_IPOPT_PLUGIN_TEST)
 # Link the dummy solver with this test to bypass the plug-in system.
 ADD_EXECUTABLE(simple
   simple.cc
-  shared-tests/common.hh
-  shared-tests/hs071.hh
+  ${COMMON_HEADERS}
   ${CMAKE_SOURCE_DIR}/src/roboptim-core-ipopt-td-plugin.cc)
 TARGET_LINK_LIBRARIES(simple ${Boost_LIBRARIES} ipopt)
 PKG_CONFIG_USE_DEPENDENCY(simple roboptim-core)
