@@ -16,7 +16,7 @@
 # Define the directory where plug-ins will be installed.
 SET(PLUGINDIR lib/roboptim-core)
 
-# Ipopt plug-in.
+# Ipopt plug-in (with only gradient computation).
 ADD_LIBRARY(roboptim-core-ipopt-plugin MODULE
   roboptim-core-ipopt-plugin.cc doc.hh
   )
@@ -26,3 +26,14 @@ SET_TARGET_PROPERTIES(roboptim-core-ipopt-plugin PROPERTIES
   SOVERSION 1.1.0)
 INSTALL(TARGETS roboptim-core-ipopt-plugin DESTINATION ${PLUGINDIR})
 PKG_CONFIG_USE_DEPENDENCY(roboptim-core-ipopt-plugin roboptim-core)
+
+# Ipopt twice differentiable (td) plug-in (require hessian computation).
+ADD_LIBRARY(roboptim-core-ipopt-td-plugin MODULE
+  roboptim-core-ipopt-td-plugin.cc doc.hh
+  )
+TARGET_LINK_LIBRARIES(roboptim-core-ipopt-td-plugin ipopt)
+SET_TARGET_PROPERTIES(roboptim-core-ipopt-td-plugin PROPERTIES
+  PREFIX ""
+  SOVERSION 1.1.0)
+INSTALL(TARGETS roboptim-core-ipopt-td-plugin DESTINATION ${PLUGINDIR})
+PKG_CONFIG_USE_DEPENDENCY(roboptim-core-ipopt-td-plugin roboptim-core)

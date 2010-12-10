@@ -54,7 +54,7 @@ ADD_EXECUTABLE(simple
   simple.cc
   shared-tests/common.hh
   shared-tests/hs071.hh
-  ${CMAKE_SOURCE_DIR}/src/roboptim-core-ipopt-plugin.cc)
+  ${CMAKE_SOURCE_DIR}/src/roboptim-core-ipopt-td-plugin.cc)
 TARGET_LINK_LIBRARIES(simple ${Boost_LIBRARIES} ipopt)
 PKG_CONFIG_USE_DEPENDENCY(simple roboptim-core)
 ADD_TEST(simple ${RUNTIME_OUTPUT_DIRECTORY}/simple)

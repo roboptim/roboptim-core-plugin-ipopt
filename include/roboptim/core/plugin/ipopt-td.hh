@@ -1,4 +1,4 @@
-// Copyright (C) 2010 by Thomas Moulard, AIST, CNRS, INRIA.
+// Copyright (C) 2009 by Thomas Moulard, AIST, CNRS, INRIA.
 //
 // This file is part of the roboptim.
 //
@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with roboptim.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef ROBOPTIM_CORE_IPOPT_HH
-# define ROBOPTIM_CORE_IPOPT_HH
+#ifndef ROBOPTIM_CORE_IPOPT_TD_HH
+# define ROBOPTIM_CORE_IPOPT_TD_HH
 # include <roboptim/core/sys.hh>
 # include <roboptim/core/portability.hh>
 
@@ -25,7 +25,7 @@
 # include <coin/IpSmartPtr.hpp>
 
 # include <roboptim/core/solver.hh>
-# include <roboptim/core/derivable-function.hh>
+# include <roboptim/core/twice-derivable-function.hh>
 
 
 /// \brief Ipopt classes.
@@ -41,7 +41,7 @@ namespace roboptim
   namespace detail
   {
     /// \internal
-    class MyTNLP;
+    class TnlpTd;
   }
 
   /// \addtogroup roboptim_problem
@@ -53,23 +53,23 @@ namespace roboptim
   ///
   /// \warning Ipopt needs twice derivable functions, so be sure
   /// to provide hessians in your function's problems.
-  class ROBOPTIM_DLLEXPORT IpoptSolver
-    : public Solver<DerivableFunction,
-		    boost::mpl::vector<DerivableFunction> >
+  class ROBOPTIM_DLLEXPORT IpoptSolverTd
+    : public Solver<TwiceDerivableFunction,
+		    boost::mpl::vector<TwiceDerivableFunction> >
   {
   public:
-    friend class detail::MyTNLP;
+    friend class detail::TnlpTd;
 
     /// \brief Parent type.
-    typedef Solver<DerivableFunction,
-		   boost::mpl::vector<DerivableFunction> > parent_t;
+    typedef Solver<TwiceDerivableFunction,
+		   boost::mpl::vector<TwiceDerivableFunction> > parent_t;
 
     /// \brief Instantiate the solver from a problem.
     ///
     /// \param problem problem that will be solved
-    explicit IpoptSolver (const problem_t& problem) throw ();
+    explicit IpoptSolverTd (const problem_t& problem) throw ();
 
-    virtual ~IpoptSolver () throw ();
+    virtual ~IpoptSolverTd () throw ();
 
     /// \brief Solve the problem.
     virtual void solve () throw ();
@@ -99,5 +99,4 @@ namespace roboptim
 
   /// @}
 } // end of namespace roboptim
-
-#endif //! ROBOPTIM_CORE_IPOPT_HH
+#endif //! ROBOPTIM_CORE_IPOPT_TD_HH

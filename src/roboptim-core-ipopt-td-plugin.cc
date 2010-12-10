@@ -26,7 +26,7 @@
 
 #include <roboptim/core/util.hh>
 
-#include "roboptim/core/plugin/ipopt.hh"
+#include "roboptim/core/plugin/ipopt-td.hh"
 
 
 namespace roboptim
@@ -41,8 +41,8 @@ namespace roboptim
     void
     jacobianFromGradients
     (DerivableFunction::matrix_t& jac,
-     const IpoptSolver::problem_t::constraints_t& c,
-     const DerivableFunction::vector_t& x);
+     const IpoptSolverTd::problem_t::constraints_t& c,
+     const TwiceDerivableFunction::vector_t& x);
 
     /// \internal
     /// Set "linear" tag to linear functions.
@@ -63,14 +63,14 @@ namespace roboptim
     void
     jacobianFromGradients
     (DerivableFunction::matrix_t& jac,
-     const IpoptSolver::problem_t::constraints_t& c,
-     const DerivableFunction::vector_t& x)
+     const IpoptSolverTd::problem_t::constraints_t& c,
+     const TwiceDerivableFunction::vector_t& x)
     {
       using namespace boost;
       for (unsigned i = 0; i < jac.size1 (); ++i)
 	{
-	  shared_ptr<DerivableFunction> g =
-	    get<shared_ptr<DerivableFunction> > (c[i]);
+	  shared_ptr<TwiceDerivableFunction> g =
+	    get<shared_ptr<TwiceDerivableFunction> > (c[i]);
 	  DerivableFunction::jacobian_t grad = g->jacobian (x);
 
 	  for (unsigned j = 0; j < jac.size2 (); ++j)
@@ -82,9 +82,9 @@ namespace roboptim
 
     /// \internal
     /// Ipopt non linear problem definition.
-    struct MyTNLP : public TNLP
+    struct TnlpTd : public TNLP
     {
-      MyTNLP (IpoptSolver& solver)
+      TnlpTd (IpoptSolverTd& solver)
         throw ()
         : solver_ (solver)
       {}
@@ -110,7 +110,7 @@ namespace roboptim
         assert (solver_.problem ().function ().inputSize () - n == 0);
         assert (solver_.problem ().constraints ().size () - m == 0);
 
-        typedef IpoptSolver::problem_t::intervals_t::const_iterator citer_t;
+        typedef IpoptSolverTd::problem_t::intervals_t::const_iterator citer_t;
         for (citer_t it = solver_.problem ().argumentBounds ().begin ();
              it != solver_.problem ().argumentBounds ().end (); ++it)
           *(x_l++) = (*it).first, *(x_u++) = (*it).second;
@@ -158,8 +158,8 @@ namespace roboptim
 
         for (Index i = 0; i < m; ++i)
 	  {
-	    shared_ptr<DerivableFunction> f =
-	      get<shared_ptr<DerivableFunction> >
+	    shared_ptr<TwiceDerivableFunction> f =
+	      get<shared_ptr<TwiceDerivableFunction> >
 	      (solver_.problem ().constraints ()[i]);
 	    const_types[i] = cfsqp_tag (*f);
 	  }
@@ -222,7 +222,7 @@ namespace roboptim
       {
         assert (solver_.problem ().function ().inputSize () - n == 0);
 
-        IpoptSolver::vector_t x_ (n);
+        IpoptSolverTd::vector_t x_ (n);
         array_to_vector (x_, x);
         obj_value = solver_.problem ().function () (x_)[0];
         return true;
@@ -234,7 +234,7 @@ namespace roboptim
       {
         assert (solver_.problem ().function ().inputSize () - n == 0);
 
-        IpoptSolver::vector_t x_ (n);
+        IpoptSolverTd::vector_t x_ (n);
         array_to_vector (x_, x);
 
         Function::vector_t grad =
@@ -252,18 +252,18 @@ namespace roboptim
         assert (solver_.problem ().function ().inputSize () - n == 0);
         assert (solver_.problem ().constraints ().size () - m == 0);
 
-        IpoptSolver::vector_t x_ (n);
+        IpoptSolverTd::vector_t x_ (n);
         array_to_vector (x_, x);
 
-        typedef IpoptSolver::problem_t::constraints_t::const_iterator citer_t;
+        typedef IpoptSolverTd::problem_t::constraints_t::const_iterator citer_t;
 
-        IpoptSolver::vector_t g_ (m);
+        IpoptSolverTd::vector_t g_ (m);
         int i = 0;
         for (citer_t it = solver_.problem ().constraints ().begin ();
              it != solver_.problem ().constraints ().end (); ++it, ++i)
 	  {
-	    shared_ptr<DerivableFunction> g =
-	      get<shared_ptr<DerivableFunction> > (*it);
+	    shared_ptr<TwiceDerivableFunction> g =
+	      get<shared_ptr<TwiceDerivableFunction> > (*it);
 	    g_[i] = (*g) (x_)[0];
 	  }
         vector_to_array(g, g_);
@@ -293,7 +293,7 @@ namespace roboptim
           }
         else
           {
-            IpoptSolver::vector_t x_ (n);
+            IpoptSolverTd::vector_t x_ (n);
             array_to_vector (x_, x);
             Function::matrix_t jac
 	      (solver_.problem ().constraints ().size (),
@@ -307,6 +307,74 @@ namespace roboptim
 
         return true;
       }
+
+      /// Compute Ipopt hessian from several hessians.
+      void compute_hessian (TwiceDerivableFunction::hessian_t& h,
+                            const IpoptSolverTd::vector_t& x,
+                            Number obj_factor,
+                            const Number* lambda)
+        throw ()
+      {
+        typedef IpoptSolverTd::problem_t::constraints_t::const_iterator citer_t;
+
+        TwiceDerivableFunction::hessian_t fct_h =
+          solver_.problem ().function ().hessian (x, 0);
+        h = obj_factor * fct_h;
+
+        int i = 0;
+        for (citer_t it = solver_.problem ().constraints ().begin ();
+             it != solver_.problem ().constraints ().end (); ++it)
+	  {
+	    shared_ptr<TwiceDerivableFunction> g =
+	      get<shared_ptr<TwiceDerivableFunction> > (*it);
+	    h += lambda[i++] * g->hessian (x, 0);
+	  }
+      }
+
+      virtual bool
+      eval_h (Index n, const Number* x, bool,
+              Number obj_factor, Index m, const Number* lambda,
+              bool, Index nele_hess, Index* iRow,
+              Index* jCol, Number* values)
+        throw ()
+      {
+        assert (solver_.problem ().function ().inputSize () - n == 0);
+        assert (solver_.problem ().constraints ().size () - m == 0);
+
+        //FIXME: check if a hessian is provided.
+
+        if (!values)
+          {
+            //FIXME: always dense for now.
+            int idx = 0;
+            for (int i = 0; i < n; ++i)
+              for (int j = 0; j < n; ++j)
+                {
+                  iRow[idx] = i, jCol[idx] = j;
+                  ++idx;
+                }
+            assert (idx == nele_hess);
+          }
+        else
+          {
+            IpoptSolverTd::vector_t x_ (n);
+            array_to_vector (x_, x);
+
+            TwiceDerivableFunction::hessian_t h
+	      (solver_.problem ().function ().inputSize (),
+	       solver_.problem ().function ().inputSize ());
+            compute_hessian (h, x_, obj_factor, lambda);
+
+            int idx = 0;
+            for (int i = 0; i < n; ++i)
+              for (int j = 0; j < n; ++j)
+                values[idx++] = h (i, j);
+            assert (idx == nele_hess);
+          }
+
+        return true;
+      }
+
 
 #define SWITCH_ERROR(NAME, ERROR)		\
       case NAME:				\
@@ -384,7 +452,7 @@ namespace roboptim
 	    MAP_IPOPT_ERRORS(SWITCH_ERROR);
 	    MAP_IPOPT_FATALS(SWITCH_FATAL);
 	  }
-	assert (solver_.result_.which () != IpoptSolver::SOLVER_NO_SOLUTION);
+	assert (solver_.result_.which () != IpoptSolverTd::SOLVER_NO_SOLUTION);
       }
 
 #undef FILL_RESULT
@@ -425,7 +493,7 @@ namespace roboptim
         return false;
       }
 
-      IpoptSolver& solver_;
+      IpoptSolverTd& solver_;
     };
   } // end of namespace detail
 
@@ -434,13 +502,12 @@ namespace roboptim
 
   // On Microsoft Windows, working with pre-built Ipopt
   // binaries requires the use of the IpoptApplicationFactory.
-  IpoptSolver::IpoptSolver (const problem_t& pb) throw ()
+  IpoptSolverTd::IpoptSolverTd (const problem_t& pb) throw ()
     : parent_t (pb),
-      nlp_ (new MyTNLP (*this)),
+      nlp_ (new TnlpTd (*this)),
       app_ (IpoptApplicationFactory ())
   {
     app_->Jnlst()->DeleteAllJournals();
-
     // Initialize parameters.
     initializeParameters ();
   }
@@ -452,7 +519,7 @@ namespace roboptim
   } while (0)
 
   void
-  IpoptSolver::initializeParameters () throw ()
+  IpoptSolverTd::initializeParameters () throw ()
   {
     parameters_.clear ();
 
@@ -511,7 +578,7 @@ namespace roboptim
       void
       operator () (const int& val) const
       {
-	app->Options ()->SetIntegerValue (key, val);
+	app->Options ()->SetNumericValue (key, val);
       }
 
       void
@@ -527,7 +594,7 @@ namespace roboptim
   } // end of anonymous namespace.
 
   void
-  IpoptSolver::updateParameters () throw ()
+  IpoptSolverTd::updateParameters () throw ()
   {
     const std::string prefix = "ipopt.";
     typedef const std::pair<const std::string, Parameter> const_iterator_t;
@@ -547,7 +614,7 @@ namespace roboptim
        (app_, "max_iter"), parameters_["max-iterations"].value);
   }
 
-  IpoptSolver::~IpoptSolver () throw ()
+  IpoptSolverTd::~IpoptSolverTd () throw ()
   {
   }
 
@@ -594,8 +661,8 @@ namespace roboptim
   MACRO (Internal_Error, "Internal error");				\
   MACRO (Maximum_CpuTime_Exceeded, "Maximum CPU time exceeded")
 
-#define MAP_IPOPT_FATALS(MACRO)						\
-  MACRO(User_Requested_Stop);						\
+#define MAP_IPOPT_FATALS(MACRO)			\
+  MACRO(User_Requested_Stop);			\
   MACRO(NonIpopt_Exception_Thrown)
 
 #define MAP_IPOPT_OKS(MACRO)						\
@@ -607,7 +674,7 @@ namespace roboptim
 	 MAP_IPOPT_FATALS(SWITCH_FATAL))
 
   void
-  IpoptSolver::solve () throw ()
+  IpoptSolverTd::solve () throw ()
   {
     // Read parameters and forward them to Ipopt.
     updateParameters ();
@@ -631,7 +698,7 @@ namespace roboptim
 
 
   Ipopt::SmartPtr<Ipopt::IpoptApplication>
-  IpoptSolver::getIpoptApplication () throw ()
+  IpoptSolverTd::getIpoptApplication () throw ()
   {
     return app_;
   }
@@ -641,20 +708,20 @@ namespace roboptim
 extern "C"
 {
   using namespace roboptim;
-  typedef IpoptSolver::parent_t solver_t;
+  typedef IpoptSolverTd::parent_t solver_t;
 
   ROBOPTIM_DLLEXPORT unsigned getSizeOfProblem ();
-  ROBOPTIM_DLLEXPORT solver_t* create (const IpoptSolver::problem_t& pb);
+  ROBOPTIM_DLLEXPORT solver_t* create (const IpoptSolverTd::problem_t& pb);
   ROBOPTIM_DLLEXPORT void destroy (solver_t* p);
 
   ROBOPTIM_DLLEXPORT unsigned getSizeOfProblem ()
   {
-    return sizeof (IpoptSolver::problem_t);
+    return sizeof (IpoptSolverTd::problem_t);
   }
 
-  ROBOPTIM_DLLEXPORT solver_t* create (const IpoptSolver::problem_t& pb)
+  ROBOPTIM_DLLEXPORT solver_t* create (const IpoptSolverTd::problem_t& pb)
   {
-    return new IpoptSolver (pb);
+    return new IpoptSolverTd (pb);
   }
 
   ROBOPTIM_DLLEXPORT void destroy (solver_t* p)

@@ -38,7 +38,7 @@ int run_test ()
     roboptim::TwiceDerivableFunction> (pb);
 
   // Initialize solver
-  SolverFactory<solver_t> factory ("ipopt", pb);
+  SolverFactory<solver_t> factory ("ipopt-td", pb);
   solver_t& solver = factory ();
 
   // Compute the minimum and retrieve the result.

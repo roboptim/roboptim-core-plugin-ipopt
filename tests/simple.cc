@@ -21,7 +21,7 @@
 
 #include <coin/IpIpoptApplication.hpp>
 
-#include <roboptim/core/plugin/ipopt.hh>
+#include <roboptim/core/plugin/ipopt-td.hh>
 
 #include "shared-tests/common.hh"
 #include "shared-tests/hs071.hh"
@@ -30,21 +30,21 @@ int run_test ()
 {
   F f;
 
-  IpoptSolver::problem_t pb (f);
-  initialize_problem<IpoptSolver::problem_t,
+  IpoptSolverTd::problem_t pb (f);
+  initialize_problem<IpoptSolverTd::problem_t,
     roboptim::TwiceDerivableFunction> (pb);
 
   // Initialize solver
-  IpoptSolver solver (pb);
+  IpoptSolverTd solver (pb);
 
   // Compute the minimum and retrieve the result.
-  IpoptSolver::result_t res = solver.minimum ();
+  IpoptSolverTd::result_t res = solver.minimum ();
 
   // Display solver information.
   std::cout << solver << std::endl;
 
   // Check if the minimization has succeed.
-  if (res.which () != IpoptSolver::SOLVER_VALUE)
+  if (res.which () != IpoptSolverTd::SOLVER_VALUE)
     {
       std::cout << "A solution should have been found. Failing..."
                 << std::endl
