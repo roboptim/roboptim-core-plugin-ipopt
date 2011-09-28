@@ -1,5 +1,5 @@
 /* Name of package */
-#define PACKAGE "roboptim-core-ipopt-plugin"
+#define PACKAGE "roboptim-core-plugin-ipopt"
 
 /* Define to the address where bug reports for this package should be sent. */
 #define PACKAGE_BUGREPORT "roboptim-user@lists.sourceforge.net"
@@ -11,7 +11,7 @@
 #define PACKAGE_STRING "RobOptim core IPOPT plug-in 0.2"
 
 /* Define to the one symbol short name of this package. */
-#define PACKAGE_TARNAME "roboptim-core-ipopt-plugin"
+#define PACKAGE_TARNAME "roboptim-core-plugin-ipopt"
 
 /* Define to the version of this package. */
 #define PACKAGE_VERSION "0.2"

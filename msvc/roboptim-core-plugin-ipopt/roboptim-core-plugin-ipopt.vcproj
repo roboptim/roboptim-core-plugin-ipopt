@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="roboptim-core-ipopt-plugin"
+	Name="roboptim-core-plugin-ipopt"
 	ProjectGUID="{2371865E-1D2F-4E27-AD95-7100418D803E}"
 	RootNamespace="roboptimcoreipoptplugin"
 	>
@@ -19,7 +19,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\roboptim-core.vsprops;.\roboptim-core-ipopt-plugin.vsprops"
+			InheritedPropertySheets=".\roboptim-core.vsprops;.\roboptim-core-plugin-ipopt.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -96,7 +96,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
-			InheritedPropertySheets=".\roboptim-core-ipopt-plugin.vsprops;.\roboptim-core.vsprops"
+			InheritedPropertySheets=".\roboptim-core-plugin-ipopt.vsprops;.\roboptim-core.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -177,7 +177,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\roboptim-core-ipopt-plugin.cc"
+				RelativePath="..\..\src\roboptim-core-plugin-ipopt.cc"
 				>
 			</File>
 			<Filter

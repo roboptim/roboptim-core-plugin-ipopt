@@ -2,7 +2,7 @@
 <VisualStudioPropertySheet
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="roboptim-core-ipopt-plugin"
+	Name="roboptim-core-plugin-ipopt"
 	>
 	<Tool
 		Name="VCCLCompilerTool"
