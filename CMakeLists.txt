@@ -31,6 +31,9 @@ SET(HEADERS
   ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt.hh
   )
 
+#Deactivate -Werror: coin/Ipopt does not support it
+SET(CXX_DISABLE_WERROR TRUE)
+
 SETUP_PROJECT()
 
 # Search for dependencies.
@@ -39,23 +42,35 @@ SEARCH_FOR_BOOST()
 # Libtool dynamic loading
 # This project does not use Libtool directly but still uses ltdl for
 # plug-in loading.
+SET(LIB_LTDL LIB_LTDL-NOTFOUND)
+FIND_LIBRARY(LIB_LTDL libltdl.so)
+IF (NOT LIB_LTDL)
+  MESSAGE(FATAL_ERROR
+    "Failed to find Libtool ltdl library, check that Libtool ltdl is installed.")
+ENDIF()
 INCLUDE(CheckIncludeFileCXX)
 CHECK_INCLUDE_FILE_CXX(ltdl.h LTDL_H_FOUND)
 IF (NOT LTDL_H_FOUND)
   MESSAGE(FATAL_ERROR
     "Failed to find ltdl.h, check that Libtool ltdl is installed.")
 ENDIF()
-#FIXME: check that libltdl.so is available.
 
 # Search for Ipopt.
-UNSET(IPOPT_H_FOUND)
-CHECK_INCLUDE_FILE_CXX(coin/IpSmartPtr.hpp IPOPT_H_FOUND)
-IF (NOT IPOPT_H_FOUND)
+SET(IPOPT_INSTALL_PREFIX "" CACHE PATH "Ipopt installation prefix")
+SET(LIB_IPOPT LIB_IPOPT-NOTFOUND)
+FIND_LIBRARY(LIB_IPOPT libipopt.so PATH ${IPOPT_INSTALL_PREFIX}/lib)
+IF (NOT LIB_IPOPT)
   MESSAGE(FATAL_ERROR
-    "Failed to find coin/IpIpoptApplication.hpp"
-    ", check that Ipopt is installed.")
+    "Failed to find Ipopt library, check that Ipopt is installed and set the IPOPT_INSTALL_PREFIX CMake variable.")
 ENDIF()
-#FIXME: check that ipopt.so is available.
+SET(IPOPT_H IPOPT-NOTFOUND)
+FIND_PATH (IPOPT_H IpSmartPtr.hpp "${IPOPT_INSTALL_PREFIX}/include/coin")
+IF (NOT IPOPT_H)
+  MESSAGE(FATAL_ERROR
+    "Failed to find coin/IpSmartPtr.hpp, check that Ipopt is installed.")
+ENDIF()
+INCLUDE_DIRECTORIES("${IPOPT_INSTALL_PREFIX}/include")
+LINK_DIRECTORIES("${IPOPT_INSTALL_PREFIX}/lib")
 
 ADD_REQUIRED_DEPENDENCY("roboptim-core >= 0.5")
 
