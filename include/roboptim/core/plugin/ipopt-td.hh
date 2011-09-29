@@ -27,7 +27,6 @@
 # include <roboptim/core/solver.hh>
 # include <roboptim/core/twice-derivable-function.hh>
 # include <roboptim/core/plugin/ipopt-common.hh>
-# include <roboptim/core/plugin/ipopt-parameters-updater.hh>
 
 /// \brief Ipopt classes.
 namespace Ipopt

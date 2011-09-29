@@ -27,10 +27,15 @@
 #include <roboptim/core/util.hh>
 
 #include "roboptim/core/plugin/ipopt-td.hh"
-
+#include "roboptim/core/plugin/ipopt-parameters-updater.hh"
+#include "ipopt-common.hxx"
 
 namespace roboptim
 {
+  template class IpoptSolverCommon<
+    Solver<TwiceDifferentiableFunction,
+	   boost::mpl::vector<TwiceDifferentiableFunction> > >;
+  
   using namespace Ipopt;
 
   namespace detail
