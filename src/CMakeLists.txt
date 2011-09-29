@@ -17,23 +17,23 @@
 SET(PLUGINDIR lib/roboptim-core)
 
 # Ipopt plug-in (with only gradient computation).
-ADD_LIBRARY(roboptim-core-ipopt-plugin MODULE
-  roboptim-core-ipopt-plugin.cc doc.hh ${HEADERS}
+ADD_LIBRARY(roboptim-core-plugin-ipopt MODULE
+  ipopt.cc doc.hh ${HEADERS}
   )
-TARGET_LINK_LIBRARIES(roboptim-core-ipopt-plugin ipopt)
-SET_TARGET_PROPERTIES(roboptim-core-ipopt-plugin PROPERTIES
+TARGET_LINK_LIBRARIES(roboptim-core-plugin-ipopt ipopt)
+SET_TARGET_PROPERTIES(roboptim-core-plugin-ipopt PROPERTIES
   PREFIX ""
   SOVERSION 1.1.0)
-INSTALL(TARGETS roboptim-core-ipopt-plugin DESTINATION ${PLUGINDIR})
-PKG_CONFIG_USE_DEPENDENCY(roboptim-core-ipopt-plugin roboptim-core)
+INSTALL(TARGETS roboptim-core-plugin-ipopt DESTINATION ${PLUGINDIR})
+PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-ipopt roboptim-core)
 
 # Ipopt twice differentiable (td) plug-in (require hessian computation).
-ADD_LIBRARY(roboptim-core-ipopt-td-plugin MODULE
-  roboptim-core-ipopt-td-plugin.cc doc.hh ${HEADERS}
+ADD_LIBRARY(roboptim-core-plugin-ipopt-td MODULE
+  ipopt-td.cc doc.hh ${HEADERS}
   )
-TARGET_LINK_LIBRARIES(roboptim-core-ipopt-td-plugin ipopt)
-SET_TARGET_PROPERTIES(roboptim-core-ipopt-td-plugin PROPERTIES
+TARGET_LINK_LIBRARIES(roboptim-core-plugin-ipopt-td ipopt)
+SET_TARGET_PROPERTIES(roboptim-core-plugin-ipopt-td PROPERTIES
   PREFIX ""
   SOVERSION 1.1.0)
-INSTALL(TARGETS roboptim-core-ipopt-td-plugin DESTINATION ${PLUGINDIR})
-PKG_CONFIG_USE_DEPENDENCY(roboptim-core-ipopt-td-plugin roboptim-core)
+INSTALL(TARGETS roboptim-core-plugin-ipopt-td DESTINATION ${PLUGINDIR})
+PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-ipopt-td roboptim-core)

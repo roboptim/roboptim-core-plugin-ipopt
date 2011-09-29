@@ -69,7 +69,7 @@ IF (NOT IPOPT_H)
   MESSAGE(FATAL_ERROR
     "Failed to find coin/IpSmartPtr.hpp, check that Ipopt is installed.")
 ENDIF()
-INCLUDE_DIRECTORIES("${IPOPT_INSTALL_PREFIX}/include")
+INCLUDE_DIRECTORIES("${IPOPT_INSTALL_PREFIX}/include" "${CMAKE_SOURCE_DIR}/src")
 LINK_DIRECTORIES("${IPOPT_INSTALL_PREFIX}/lib")
 
 ADD_REQUIRED_DEPENDENCY("roboptim-core >= 0.5")
