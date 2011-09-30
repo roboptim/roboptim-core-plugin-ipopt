@@ -509,7 +509,9 @@ namespace roboptim
   // binaries requires the use of the IpoptApplicationFactory.
   IpoptSolverTd::IpoptSolverTd (const problem_t& pb) throw ()
     : parent_t (pb, Ipopt::SmartPtr<Ipopt::TNLP> (new TnlpTd (*this)))
-  {}
+  {
+    parameters ()["ipopt.hessian_approximation"].value = "exact";
+  }
 } // end of namespace roboptim
 
 extern "C"
