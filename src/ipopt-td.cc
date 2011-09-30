@@ -102,7 +102,7 @@ namespace roboptim
         n = solver_.problem ().function ().inputSize ();
         m = solver_.problem ().constraints ().size ();
         nnz_jac_g = n * m; //FIXME: use a dense matrix for now.
-        nnz_h_lag = n * n; //FIXME: use a dense matrix for now.
+        nnz_h_lag = n * (n + 1) / 2; //FIXME: use a dense matrix for now.
         index_style = TNLP::C_STYLE;
         return true;
       }
@@ -353,7 +353,7 @@ namespace roboptim
             //FIXME: always dense for now.
             int idx = 0;
             for (int i = 0; i < n; ++i)
-              for (int j = 0; j < n; ++j)
+              for (int j = 0; j < i + 1; ++j)
                 {
                   iRow[idx] = i, jCol[idx] = j;
                   ++idx;
@@ -372,7 +372,7 @@ namespace roboptim
 
             int idx = 0;
             for (int i = 0; i < n; ++i)
-              for (int j = 0; j < n; ++j)
+              for (int j = 0; j < i + 1; ++j)
                 values[idx++] = h (i, j);
             assert (idx == nele_hess);
           }

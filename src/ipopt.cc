@@ -102,7 +102,7 @@ namespace roboptim
         n = solver_.problem ().function ().inputSize ();
         m = solver_.problem ().constraints ().size ();
         nnz_jac_g = n * m; //FIXME: use a dense matrix for now.
-        nnz_h_lag = n * n; //FIXME: use a dense matrix for now.
+        nnz_h_lag = n * (n + 1) / 2; //FIXME: use a dense matrix for now.
         index_style = TNLP::C_STYLE;
         return true;
       }
