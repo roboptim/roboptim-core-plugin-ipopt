@@ -22,7 +22,6 @@
 #include <coin/IpIpoptApplication.hpp>
 
 #include <roboptim/core/plugin/ipopt-td.hh>
-#include "ipopt-common.hxx"
 
 #include "shared-tests/common.hh"
 #include "shared-tests/hs071.hh"
