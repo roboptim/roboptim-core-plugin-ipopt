@@ -56,23 +56,24 @@ IF (NOT LTDL_H_FOUND)
 ENDIF()
 
 # Search for Ipopt.
-SET(IPOPT_INSTALL_PREFIX "" CACHE PATH "Ipopt installation prefix")
-SET(LIB_IPOPT LIB_IPOPT-NOTFOUND)
-FIND_LIBRARY(LIB_IPOPT libipopt.so PATH ${IPOPT_INSTALL_PREFIX}/lib)
-IF (NOT LIB_IPOPT)
-  MESSAGE(FATAL_ERROR
-    "Failed to find Ipopt library, check that Ipopt is installed and set the IPOPT_INSTALL_PREFIX CMake variable.")
-ENDIF()
-SET(IPOPT_H IPOPT-NOTFOUND)
-FIND_PATH (IPOPT_H IpSmartPtr.hpp "${IPOPT_INSTALL_PREFIX}/include/coin")
-IF (NOT IPOPT_H)
-  MESSAGE(FATAL_ERROR
-    "Failed to find coin/IpSmartPtr.hpp, check that Ipopt is installed.")
-ENDIF()
-INCLUDE_DIRECTORIES("${IPOPT_INSTALL_PREFIX}/include" "${CMAKE_SOURCE_DIR}/src")
-LINK_DIRECTORIES("${IPOPT_INSTALL_PREFIX}/lib")
-
 ADD_REQUIRED_DEPENDENCY("roboptim-core >= 0.5")
+ADD_REQUIRED_DEPENDENCY("ipopt")
+
+# patch for ipopt: in the .pc file, the header path may be IpoptPath/include/coin
+#  for clarity, we want to have IpoptPath/include/ instead
+# assuming that the path is such as include/coin (and not include/coin/)
+#  we check the last element is not "coin"
+GET_FILENAME_COMPONENT(lastFolder ${IPOPT_INCLUDE_DIRS} NAME)
+
+IF (${lastFolder} STREQUAL "coin")
+	GET_FILENAME_COMPONENT(IPOPT_INCLUDE_DIRS_PATCHED ${IPOPT_INCLUDE_DIRS} PATH)
+
+	#add the path to ipopt to the current include path
+	INCLUDE_DIRECTORIES(${IPOPT_INCLUDE_DIRS_PATCHED})
+
+	#add this path to the .pc file
+	PKG_CONFIG_APPEND_CFLAGS(-I${IPOPT_INCLUDE_DIRS_PATCHED})
+ENDIF(${lastFolder} STREQUAL "coin")
 
 HEADER_INSTALL("${HEADERS}")
 
