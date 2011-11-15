@@ -43,7 +43,7 @@ SEARCH_FOR_BOOST()
 # This project does not use Libtool directly but still uses ltdl for
 # plug-in loading.
 SET(LIB_LTDL LIB_LTDL-NOTFOUND)
-FIND_LIBRARY(LIB_LTDL libltdl.so)
+FIND_LIBRARY(LIB_LTDL libltdl${CMAKE_SHARED_LIBRARY_SUFFIX})
 IF (NOT LIB_LTDL)
   MESSAGE(FATAL_ERROR
     "Failed to find Libtool ltdl library, check that Libtool ltdl is installed.")
