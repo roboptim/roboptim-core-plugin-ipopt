@@ -25,6 +25,7 @@ SET_TARGET_PROPERTIES(roboptim-core-plugin-ipopt PROPERTIES
   PREFIX ""
   SOVERSION 1.1.0)
 INSTALL(TARGETS roboptim-core-plugin-ipopt DESTINATION ${PLUGINDIR})
+PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-ipopt ipopt)
 PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-ipopt roboptim-core)
 
 # Ipopt twice differentiable (td) plug-in (require hessian computation).
