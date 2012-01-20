@@ -61,19 +61,15 @@ ADD_REQUIRED_DEPENDENCY("ipopt")
 
 # patch for ipopt: in the .pc file, the header path may be IpoptPath/include/coin
 #  for clarity, we want to have IpoptPath/include/ instead
-# assuming that the path is such as include/coin (and not include/coin/)
-#  we check the last element is not "coin"
-GET_FILENAME_COMPONENT(lastFolder ${IPOPT_INCLUDE_DIRS} NAME)
+# This patch assumes that the initial header path has the following form :
+#  "install-folder/include/coin"
+SET(IPOPT_INCLUDE_DIRS_PATCHED ${IPOPT_PREFIX}/include)
 
-IF (${lastFolder} STREQUAL "coin")
-	GET_FILENAME_COMPONENT(IPOPT_INCLUDE_DIRS_PATCHED ${IPOPT_INCLUDE_DIRS} PATH)
+#add the path to ipopt to the current include path
+INCLUDE_DIRECTORIES(${IPOPT_INCLUDE_DIRS_PATCHED})
 
-	#add the path to ipopt to the current include path
-	INCLUDE_DIRECTORIES(${IPOPT_INCLUDE_DIRS_PATCHED})
-
-	#add this path to the .pc file
-	PKG_CONFIG_APPEND_CFLAGS(-I${IPOPT_INCLUDE_DIRS_PATCHED})
-ENDIF(${lastFolder} STREQUAL "coin")
+#add this path to the .pc file
+PKG_CONFIG_APPEND_CFLAGS(-I${IPOPT_INCLUDE_DIRS_PATCHED})
 
 HEADER_INSTALL("${HEADERS}")
 
