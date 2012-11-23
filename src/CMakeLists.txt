@@ -20,7 +20,6 @@ SET(PLUGINDIR lib/roboptim-core)
 ADD_LIBRARY(roboptim-core-plugin-ipopt MODULE
   ipopt.cc doc.hh ${HEADERS}
   )
-TARGET_LINK_LIBRARIES(roboptim-core-plugin-ipopt ipopt)
 SET_TARGET_PROPERTIES(roboptim-core-plugin-ipopt PROPERTIES
   PREFIX ""
   SOVERSION 1.1.0)
@@ -32,9 +31,9 @@ PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-ipopt roboptim-core)
 ADD_LIBRARY(roboptim-core-plugin-ipopt-td MODULE
   ipopt-td.cc doc.hh ${HEADERS}
   )
-TARGET_LINK_LIBRARIES(roboptim-core-plugin-ipopt-td ipopt)
 SET_TARGET_PROPERTIES(roboptim-core-plugin-ipopt-td PROPERTIES
   PREFIX ""
   SOVERSION 1.1.0)
 INSTALL(TARGETS roboptim-core-plugin-ipopt-td DESTINATION ${PLUGINDIR})
+PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-ipopt-td ipopt)
 PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-ipopt-td roboptim-core)
