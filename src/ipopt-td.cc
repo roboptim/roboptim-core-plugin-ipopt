@@ -32,7 +32,7 @@
 
 namespace roboptim
 {
-  template class ROBOPTIM_DLLAPI IpoptSolverCommon<
+  template class IpoptSolverCommon<
     Solver<TwiceDifferentiableFunction,
 	   boost::mpl::vector<TwiceDifferentiableFunction> > >;
   
