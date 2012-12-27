@@ -72,15 +72,20 @@ namespace roboptim
      const TwiceDerivableFunction::vector_t& x)
     {
       using namespace boost;
-      for (unsigned i = 0; i < jac.size1 (); ++i)
-	{
-	  shared_ptr<TwiceDerivableFunction> g =
-	    get<shared_ptr<TwiceDerivableFunction> > (c[i]);
-	  DerivableFunction::jacobian_t grad = g->jacobian (x);
 
-	  for (unsigned j = 0; j < jac.size2 (); ++j)
-	    jac (i, j) = grad(0, j);
-	}
+      // ci is the index for constraints
+      // ji is the index for jacobian line
+      for (unsigned ci=0,ji=0; ci < c.size() ; ++ci)
+      {
+        shared_ptr<TwiceDerivableFunction> g =
+          get<shared_ptr<TwiceDerivableFunction> > (c[ci]);
+        DerivableFunction::jacobian_t grad = g->jacobian (x);
+
+        assert(grad.size2() == jac.size2());
+        for (unsigned k = 0; k < grad.size1(); ++k,++ji)
+          for (unsigned jj = 0; jj < grad.size2 (); ++jj)
+            jac (ji, jj) = grad(k, jj);
+      }
     }
 
 
@@ -100,7 +105,7 @@ namespace roboptim
         throw ()
       {
         n = solver_.problem ().function ().inputSize ();
-        m = solver_.problem ().constraints ().size ();
+        m = solver_.problem ().bounds ().size ();
         nnz_jac_g = n * m; //FIXME: use a dense matrix for now.
         nnz_h_lag = n * (n + 1) / 2; //FIXME: use a dense matrix for now.
         index_style = TNLP::C_STYLE;
@@ -113,7 +118,7 @@ namespace roboptim
         throw ()
       {
         assert (solver_.problem ().function ().inputSize () - n == 0);
-        assert (solver_.problem ().constraints ().size () - m == 0);
+        assert (solver_.problem ().bounds ().size () - m == 0);
 
         typedef IpoptSolverTd::problem_t::intervals_t::const_iterator citer_t;
         for (citer_t it = solver_.problem ().argumentBounds ().begin ();
@@ -158,16 +163,19 @@ namespace roboptim
       virtual bool
       get_function_linearity (Index m, LinearityType* const_types) throw ()
       {
-	using namespace boost;
-        assert (solver_.problem ().constraints ().size () - m == 0);
+        using namespace boost;
+        assert (solver_.problem ().bounds ().size () - m == 0);
 
+        Function::size_type mi=0; // index of the current constraint value
         for (Index i = 0; i < m; ++i)
-	  {
-	    shared_ptr<TwiceDerivableFunction> f =
-	      get<shared_ptr<TwiceDerivableFunction> >
-	      (solver_.problem ().constraints ()[i]);
-	    const_types[i] = cfsqp_tag (*f);
-	  }
+        {
+          shared_ptr<TwiceDerivableFunction> f =
+            get<shared_ptr<TwiceDerivableFunction> >
+            (solver_.problem ().constraints ()[i]);
+          for(Function::size_type j=0; j<f->outputSize(); ++j, ++mi)
+            const_types[i] = cfsqp_tag (*f);
+        }
+
         return true;
       }
 
@@ -179,7 +187,7 @@ namespace roboptim
         throw ()
       {
         assert (solver_.problem ().function ().inputSize () - n == 0);
-        assert (solver_.problem ().constraints ().size () - m == 0);
+        assert (solver_.problem ().bounds ().size () - m == 0);
 
         //FIXME: handle all modes.
         assert(init_lambda == false);
@@ -255,7 +263,7 @@ namespace roboptim
       {
 	using namespace boost;
         assert (solver_.problem ().function ().inputSize () - n == 0);
-        assert (solver_.problem ().constraints ().size () - m == 0);
+        assert (solver_.problem ().bounds ().size () - m == 0);
 
         IpoptSolverTd::vector_t x_ (n);
         array_to_vector (x_, x);
@@ -265,12 +273,13 @@ namespace roboptim
         IpoptSolverTd::vector_t g_ (m);
         int i = 0;
         for (citer_t it = solver_.problem ().constraints ().begin ();
-             it != solver_.problem ().constraints ().end (); ++it, ++i)
-	  {
-	    shared_ptr<TwiceDerivableFunction> g =
-	      get<shared_ptr<TwiceDerivableFunction> > (*it);
-	    g_[i] = (*g) (x_)[0];
-	  }
+             it != solver_.problem ().constraints ().end (); ++it)
+        {
+          shared_ptr<TwiceDerivableFunction> g =
+            get<shared_ptr<TwiceDerivableFunction> > (*it);
+          for (unsigned k=0; k<g->outputSize(); ++k, ++i)
+            g_[i] = (*g) (x_)[k];
+        }
         vector_to_array(g, g_);
         return true;
       }
@@ -283,7 +292,7 @@ namespace roboptim
       {
 	using namespace boost;
         assert (solver_.problem ().function ().inputSize () - n == 0);
-        assert (solver_.problem ().constraints ().size () - m == 0);
+        assert (solver_.problem ().bounds ().size () - m == 0);
 
         if (!values)
           {
@@ -301,13 +310,13 @@ namespace roboptim
             IpoptSolverTd::vector_t x_ (n);
             array_to_vector (x_, x);
             Function::matrix_t jac
-	      (solver_.problem ().constraints ().size (),
+        (solver_.problem ().bounds ().size (),
 	       solver_.problem ().function ().inputSize ());
             jacobianFromGradients (jac, solver_.problem ().constraints (), x_);
             int idx = 0;
             for (int i = 0; i < m; ++i)
-	      for (int j = 0; j < n; ++j)
-		values[idx++] = jac (i, j);
+              for (int j = 0; j < n; ++j)
+                values[idx++] = jac (i, j);
           }
 
         return true;
@@ -329,11 +338,12 @@ namespace roboptim
         int i = 0;
         for (citer_t it = solver_.problem ().constraints ().begin ();
              it != solver_.problem ().constraints ().end (); ++it)
-	  {
-	    shared_ptr<TwiceDerivableFunction> g =
-	      get<shared_ptr<TwiceDerivableFunction> > (*it);
-	    h += lambda[i++] * g->hessian (x, 0);
-	  }
+        {
+          shared_ptr<TwiceDerivableFunction> g =
+            get<shared_ptr<TwiceDerivableFunction> > (*it);
+          for(unsigned ci=0; ci<g->outputSize(); ++ci)
+            h += lambda[i++] * g->hessian (x, ci);
+        }
       }
 
       virtual bool
@@ -344,7 +354,7 @@ namespace roboptim
         throw ()
       {
         assert (solver_.problem ().function ().inputSize () - n == 0);
-        assert (solver_.problem ().constraints ().size () - m == 0);
+        assert (solver_.problem ().bounds ().size () - m == 0);
 
         //FIXME: check if a hessian is provided.
 
@@ -433,7 +443,7 @@ namespace roboptim
         throw ()
       {
         assert (solver_.problem ().function ().inputSize () - n == 0);
-        assert (solver_.problem ().constraints ().size () - m == 0);
+        assert (solver_.problem ().bounds ().size () - m == 0);
 
         switch (status)
           {
