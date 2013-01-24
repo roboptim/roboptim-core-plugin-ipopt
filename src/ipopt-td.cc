@@ -72,13 +72,13 @@ namespace roboptim
      const TwiceDerivableFunction::vector_t& x)
     {
       using namespace boost;
-      for (unsigned i = 0; i < jac.size1 (); ++i)
+      for (unsigned i = 0; i < jac.rows (); ++i)
 	{
 	  shared_ptr<TwiceDerivableFunction> g =
 	    get<shared_ptr<TwiceDerivableFunction> > (c[i]);
 	  DerivableFunction::jacobian_t grad = g->jacobian (x);
 
-	  for (unsigned j = 0; j < jac.size2 (); ++j)
+	  for (unsigned j = 0; j < jac.cols (); ++j)
 	    jac (i, j) = grad(0, j);
 	}
     }
