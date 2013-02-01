@@ -120,9 +120,13 @@ namespace roboptim
              it != solver_.problem ().argumentBounds ().end (); ++it)
           *(x_l++) = (*it).first, *(x_u++) = (*it).second;
 
-        for (citer_t it = solver_.problem ().bounds ().begin ();
-             it != solver_.problem ().bounds ().end (); ++it)
-          *(g_l++) = (*it).first, *(g_u++) = (*it).second;
+        typedef IpoptSolver::problem_t::intervalsVect_t::const_iterator
+	  citerVect_t;
+	
+        for (citerVect_t it = solver_.problem ().boundsVector ().begin ();
+             it != solver_.problem ().boundsVector ().end (); ++it)
+	  for (citer_t it2 = it->begin (); it2 != it->end (); ++it2)
+	    *(g_l++) = it2->first, *(g_u++) = it2->second;
         return true;
       }
 
@@ -140,7 +144,9 @@ namespace roboptim
                 n * sizeof (double));
 
         for (Index i = 0; i < m; ++i)
-          g_scaling[i] = solver_.problem ().scales ()[i];
+	  for (Index j = 0;
+	       j < solver_.problem ().scalesVector ()[i].size (); ++j)
+          g_scaling[i] = solver_.problem ().scalesVector ()[i][j];
         return true;
       }
 
@@ -471,5 +477,5 @@ extern "C"
 
 
 // Local Variables:
-// compile-command: "cd ../_build && make -k"
+// compile-command: "make -k -C ../_build"
 // End:
