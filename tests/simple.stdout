@@ -1,17 +1,17 @@
 Solver:
   Problem:
-    a * d * (a + b + c) + d (twice derivable function)
+    a * d * (a + b + c) + d (twice differentiable function)
     Argument's bounds: (1, 5), (1, 5), (1, 5), (1, 5)
     Argument's scales: 1, 1, 1, 1
     Number of constraints: 2
     Constraint 0
-        a * b * c * d (twice derivable function)
+        a * b * c * d (twice differentiable function)
         Bounds: (25, inf)
         Scales: 1
         Initial value: [1](25)
         
     Constraint 1
-        a * a + b * b + c * c + d * d (twice derivable function)
+        a * a + b * b + c * c + d * d (twice differentiable function)
         Bounds: (40, 40)
         Scales: 1
         Initial value: [1](52) (constraint not satisfied)
@@ -21,6 +21,8 @@ Solver:
     Infinity value (for all functions): inf
   Parameters:
     ipopt.file_print_level (verbosity level for output file): 5
+    ipopt.hessian_approximation (): exact
+    ipopt.linear_solver (linear_solver): mumps
     ipopt.mu_strategy (update strategy for barrier parameter): adaptive
     ipopt.option_file_name (file name of options file (to overwrite default)): 
     ipopt.output_file (file name of desired output file (leave unset for no file output)): 

@@ -29,8 +29,11 @@ using namespace roboptim;
 typedef Solver<TwiceDerivableFunction,
 	       boost::mpl::vector<TwiceDerivableFunction> > solver_t;
 
-int run_test ()
+BOOST_AUTO_TEST_CASE (simple)
 {
+  boost::shared_ptr<boost::test_tools::output_test_stream>
+    output = retrievePattern ("plugin");
+
   F f;
 
   solver_t::problem_t pb (f);
@@ -45,7 +48,7 @@ int run_test ()
   solver_t::result_t res = solver.minimum ();
 
   // Display solver information.
-  std::cout << solver << std::endl;
+  (*output) << solver << std::endl;
 
   // Check if the minimization has succeed.
   if (res.which () != solver_t::SOLVER_VALUE)
@@ -54,17 +57,16 @@ int run_test ()
                 << std::endl
                 << boost::get<SolverError> (res).what ()
                 << std::endl;
-      return 1;
+      BOOST_CHECK_EQUAL (res.which (), solver_t::SOLVER_VALUE);
     }
 
   // Get the result.
   Result& result = boost::get<Result> (res);
 
   // Display the result.
-  std::cout << "A solution has been found: " << std::endl;
-  std::cout << result << std::endl;
-  return 0;
+  (*output) << "A solution has been found: " << std::endl;
+  (*output) << result << std::endl;
+
+  std::cout << output->str () << std::endl;
+  BOOST_CHECK (output->match_pattern ());
 }
-
-
-GENERATE_TEST ()

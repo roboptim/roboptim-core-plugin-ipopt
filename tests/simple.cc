@@ -16,7 +16,9 @@
 // along with roboptim.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
-#include <boost/numeric/ublas/io.hpp>
+
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/variant/get.hpp>
 
 #include <coin/IpIpoptApplication.hpp>
@@ -26,8 +28,12 @@
 #include "shared-tests/common.hh"
 #include "shared-tests/hs071.hh"
 
-int run_test ()
+
+BOOST_AUTO_TEST_CASE (simple)
 {
+  boost::shared_ptr<boost::test_tools::output_test_stream>
+    output = retrievePattern ("simple");
+
   F f;
 
   IpoptSolverTd::problem_t pb (f);
@@ -45,7 +51,7 @@ int run_test ()
   IpoptSolverTd::result_t res = solver.minimum ();
 
   // Display solver information.
-  std::cout << solver << std::endl;
+  (*output) << solver << std::endl;
 
   // Check if the minimization has succeed.
   if (res.which () != IpoptSolverTd::SOLVER_VALUE)
@@ -54,17 +60,16 @@ int run_test ()
                 << std::endl
                 << boost::get<SolverError> (res).what ()
                 << std::endl;
-      return 1;
+      BOOST_CHECK_EQUAL (res.which (), IpoptSolverTd::SOLVER_VALUE);
     }
 
   // Get the result.
   Result& result = boost::get<Result> (res);
 
   // Display the result.
-  std::cout << "A solution has been found: " << std::endl;
-  std::cout << result << std::endl;
-  return 0;
+  (*output) << "A solution has been found: " << std::endl;
+  (*output) << result << std::endl;
+
+  std::cout << output->str () << std::endl;
+  BOOST_CHECK (output->match_pattern ());
 }
-
-
-GENERATE_TEST ()
