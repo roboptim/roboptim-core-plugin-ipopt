@@ -188,7 +188,8 @@ namespace roboptim
         if (!solver_.problem ().startingPoint ())
           return true;
 
-        vector_to_array (x, *solver_.problem ().startingPoint ());
+	Eigen::Map<Function::result_t> x_ (x, n);
+	x_ = *solver_.problem ().startingPoint ();
         return true;
       }
 
@@ -211,9 +212,7 @@ namespace roboptim
         throw ()
       {
         assert (solver_.problem ().function ().inputSize () - n == 0);
-
-        IpoptSolver::vector_t x_ (n);
-        array_to_vector (x_, x);
+	Eigen::Map<const Function::argument_t> x_ (x, n);
         obj_value = solver_.problem ().function () (x_)[0];
         return true;
       }
@@ -224,8 +223,7 @@ namespace roboptim
       {
         assert (solver_.problem ().function ().inputSize () - n == 0);
 
-        IpoptSolver::vector_t x_ (n);
-        array_to_vector (x_, x);
+	Eigen::Map<const Function::vector_t> x_ (x, n);
 
         Function::vector_t grad =
           solver_.problem ().function ().gradient (x_, 0);
@@ -242,8 +240,7 @@ namespace roboptim
         assert (solver_.problem ().function ().inputSize () - n == 0);
         assert (solver_.problem ().constraints ().size () - m == 0);
 
-        IpoptSolver::vector_t x_ (n);
-        array_to_vector (x_, x);
+	Eigen::Map<const Function::vector_t> x_ (x, n);
 
         typedef IpoptSolver::problem_t::constraints_t::const_iterator citer_t;
 
@@ -283,8 +280,7 @@ namespace roboptim
           }
         else
           {
-            IpoptSolver::vector_t x_ (n);
-            array_to_vector (x_, x);
+	    Eigen::Map<const Function::vector_t> x_ (x, n);
             Function::matrix_t jac
 	      (solver_.problem ().constraints ().size (),
 	       solver_.problem ().function ().inputSize ());
