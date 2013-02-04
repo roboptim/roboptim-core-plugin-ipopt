@@ -47,35 +47,38 @@ namespace roboptim
      const DerivableFunction::vector_t& x);
 
     /// \internal
-    /// Concatenate jacobians.
-    void
-    jacobianFromGradients
-    (DerivableFunction::matrix_t& jac,
-     const IpoptSolver::problem_t::constraints_t& c,
-     const DerivableFunction::vector_t& x)
-    {
-      using namespace boost;
-      for (unsigned i = 0; i < jac.rows (); ++i)
-	{
-	  shared_ptr<DerivableFunction> g =
-	    get<shared_ptr<DerivableFunction> > (c[i]);
-	  DerivableFunction::jacobian_t grad = g->jacobian (x);
-
-	  for (unsigned j = 0; j < jac.cols (); ++j)
-	    jac (i, j) = grad(0, j);
-	}
-    }
-
-
-
-    /// \internal
     /// Ipopt non linear problem definition.
     struct Tnlp : public TNLP
     {
       Tnlp (IpoptSolver& solver)
         throw ()
-        : solver_ (solver)
+        : solver_ (solver),
+	  cost_ (1),
+	  costGradient_ (solver.problem ().function ().inputSize ()),
+	  constraints_ (constraintsOutputSize (),
+			solver.problem ().function ().inputSize ()),
+	  jacobian_ (constraintsOutputSize (),
+		     solver.problem ().function ().inputSize ())
       {}
+
+      unsigned
+      constraintsOutputSize ()
+      {
+	unsigned result = 0;
+	typedef IpoptSolver::problem_t::constraints_t::const_iterator
+	  citer_t;
+	for (citer_t it = solver_.problem ().constraints ().begin ();
+	     it != solver_.problem ().constraints ().end (); ++it)
+	  {
+	    shared_ptr<DifferentiableFunction> g;
+	    if (it->which () == LINEAR)
+	      g = get<shared_ptr<LinearFunction> > (*it);
+	    else
+	      g = get<shared_ptr<DifferentiableFunction> > (*it);
+	    result += g->outputSize ();
+	  }
+	return result;
+      }
 
       virtual bool
       get_nlp_info (Index& n, Index& m, Index& nnz_jac_g,
@@ -83,7 +86,7 @@ namespace roboptim
         throw ()
       {
         n = solver_.problem ().function ().inputSize ();
-        m = solver_.problem ().constraints ().size ();
+        m = constraintsOutputSize ();
         nnz_jac_g = n * m; //FIXME: use a dense matrix for now.
         nnz_h_lag = n * (n + 1) / 2; //FIXME: use a dense matrix for now.
         index_style = TNLP::C_STYLE;
@@ -96,7 +99,7 @@ namespace roboptim
         throw ()
       {
         assert (solver_.problem ().function ().inputSize () - n == 0);
-        assert (solver_.problem ().constraints ().size () - m == 0);
+        assert (constraintsOutputSize () - m == 0);
 
         typedef IpoptSolver::problem_t::intervals_t::const_iterator citer_t;
         for (citer_t it = solver_.problem ().argumentBounds ().begin ();
@@ -105,7 +108,7 @@ namespace roboptim
 
         typedef IpoptSolver::problem_t::intervalsVect_t::const_iterator
 	  citerVect_t;
-	
+
         for (citerVect_t it = solver_.problem ().boundsVector ().begin ();
              it != solver_.problem ().boundsVector ().end (); ++it)
 	  for (citer_t it2 = it->begin (); it2 != it->end (); ++it2)
@@ -148,11 +151,27 @@ namespace roboptim
       virtual bool
       get_function_linearity (Index m, LinearityType* const_types) throw ()
       {
-        assert (solver_.problem ().constraints ().size () - m == 0);
-        for (Index i = 0; i < m; ++i)
-	  const_types[i] =
-	    (solver_.problem ().constraints ()[i].which () == LINEAR)
-	    ? TNLP::LINEAR : TNLP::NON_LINEAR;
+        assert (constraintsOutputSize () - m == 0);
+
+	typedef IpoptSolver::problem_t::constraints_t::const_iterator
+	  citer_t;
+
+	unsigned idx = 0;
+	for (citer_t it = solver_.problem ().constraints ().begin ();
+	     it != solver_.problem ().constraints ().end (); ++it)
+
+	  {
+	    LinearityType type =
+	      (it->which () == LINEAR) ? TNLP::LINEAR : TNLP::NON_LINEAR;
+	    shared_ptr<DifferentiableFunction> g;
+	    if (type == LINEAR)
+	      g = get<shared_ptr<LinearFunction> > (*it);
+	    else
+	      g = get<shared_ptr<DifferentiableFunction> > (*it);
+
+	    for (unsigned j = 0; j < g->outputSize (); ++j)
+	      const_types[idx++] = type;
+	  }
         return true;
       }
 
@@ -164,7 +183,7 @@ namespace roboptim
         throw ()
       {
         assert (solver_.problem ().function ().inputSize () - n == 0);
-        assert (solver_.problem ().constraints ().size () - m == 0);
+        assert (constraintsOutputSize () - m == 0);
 
         //FIXME: handle all modes.
         assert(init_lambda == false);
@@ -208,31 +227,39 @@ namespace roboptim
       }
 
       virtual bool
-      eval_f (Index n, const Number* x, bool, Number& obj_value)
-        throw ()
-      {
-        assert (solver_.problem ().function ().inputSize () - n == 0);
-	Eigen::Map<const Function::argument_t> x_ (x, n);
-        obj_value = solver_.problem ().function () (x_)[0];
-        return true;
-      }
-
-      virtual bool
-      eval_grad_f (Index n, const Number* x, bool, Number* grad_f)
+      eval_f (Index n, const Number* x, bool new_x, Number& obj_value)
         throw ()
       {
         assert (solver_.problem ().function ().inputSize () - n == 0);
 
-	Eigen::Map<const Function::vector_t> x_ (x, n);
+	if (new_x)
+	  {
+	    Eigen::Map<const Function::argument_t> x_ (x, n);
+	    solver_.problem ().function () (cost_, x_);
+	  }
+	obj_value = cost_[0];
+	return true;
+      }
 
-        Function::vector_t grad =
-          solver_.problem ().function ().gradient (x_, 0);
-        vector_to_array(grad_f, grad);
+      virtual bool
+      eval_grad_f (Index n, const Number* x, bool new_x, Number* grad_f)
+        throw ()
+      {
+        assert (solver_.problem ().function ().inputSize () - n == 0);
+
+	if (new_x)
+	  {
+	    Eigen::Map<const Function::vector_t> x_ (x, n);
+	    solver_.problem ().function ().gradient (costGradient_, x_, 0);
+	  }
+
+	Eigen::Map<Function::vector_t> grad_f_ (grad_f, n);
+	grad_f_ =  costGradient_;
         return true;
       }
 
       virtual bool
-      eval_g (Index n, const Number* x, bool,
+      eval_g (Index n, const Number* x, bool new_x,
               Index m, Number* g)
         throw ()
       {
@@ -240,25 +267,36 @@ namespace roboptim
         assert (solver_.problem ().function ().inputSize () - n == 0);
         assert (solver_.problem ().constraints ().size () - m == 0);
 
-	Eigen::Map<const Function::vector_t> x_ (x, n);
-
-        typedef IpoptSolver::problem_t::constraints_t::const_iterator citer_t;
-
-        IpoptSolver::vector_t g_ (m);
-        int i = 0;
-        for (citer_t it = solver_.problem ().constraints ().begin ();
-             it != solver_.problem ().constraints ().end (); ++it, ++i)
+	if (new_x)
 	  {
-	    shared_ptr<DerivableFunction> g =
-	      get<shared_ptr<DerivableFunction> > (*it);
-	    g_[i] = (*g) (x_)[0];
+	    Eigen::Map<const Function::vector_t> x_ (x, n);
+
+	    typedef IpoptSolver::problem_t::constraints_t::const_iterator
+	      citer_t;
+
+	    int idx = 0;
+	    for (citer_t it = solver_.problem ().constraints ().begin ();
+		 it != solver_.problem ().constraints ().end (); ++it)
+	      {
+		shared_ptr<DifferentiableFunction> g;
+		if (it->which () == LINEAR)
+		  g = get<shared_ptr<LinearFunction> > (*it);
+		else
+		  g = get<shared_ptr<DifferentiableFunction> > (*it);
+
+		constraints_.block
+		  (idx, 0, g->outputSize (), n) = (*g) (x_);
+		idx += g->outputSize ();
+	      }
 	  }
-        vector_to_array(g, g_);
-        return true;
+
+	Eigen::Map<Function::matrix_t> g_ (g, m, n);
+	g_ =  constraints_;
+	return true;
       }
 
       virtual bool
-      eval_jac_g(Index n, const Number* x, bool,
+      eval_jac_g(Index n, const Number* x, bool new_x,
                  Index m, Index, Index* iRow,
                  Index *jCol, Number* values)
         throw ()
@@ -279,17 +317,32 @@ namespace roboptim
                 }
           }
         else
-          {
-	    Eigen::Map<const Function::vector_t> x_ (x, n);
-            Function::matrix_t jac
-	      (solver_.problem ().constraints ().size (),
-	       solver_.problem ().function ().inputSize ());
-            jacobianFromGradients (jac, solver_.problem ().constraints (), x_);
-            int idx = 0;
-            for (int i = 0; i < m; ++i)
-	      for (int j = 0; j < n; ++j)
-		values[idx++] = jac (i, j);
-          }
+	  {
+	    if (new_x)
+	      {
+		Eigen::Map<const Function::vector_t> x_ (x, n);
+
+		typedef IpoptSolver::problem_t::constraints_t::const_iterator
+		  citer_t;
+
+		int idx = 0;
+		for (citer_t it = solver_.problem ().constraints ().begin ();
+		     it != solver_.problem ().constraints ().end (); ++it)
+		  {
+		    shared_ptr<DifferentiableFunction> g;
+		    if (it->which () == LINEAR)
+		      g = get<shared_ptr<LinearFunction> > (*it);
+		    else
+		      g = get<shared_ptr<DifferentiableFunction> > (*it);
+
+		    jacobian_.block
+		      (idx, 0, g->outputSize (), n) = g->jacobian (x_);
+		    idx += g->outputSize ();
+		  }
+	      }
+	    Eigen::Map<Function::matrix_t> values_ (values, m, n);
+	    values_ =  jacobian_;
+	  }
 
         return true;
       }
@@ -346,7 +399,7 @@ namespace roboptim
         throw ()
       {
         assert (solver_.problem ().function ().inputSize () - n == 0);
-        assert (solver_.problem ().constraints ().size () - m == 0);
+        assert (constraintsOutputSize () - m == 0);
 
         switch (status)
           {
@@ -411,7 +464,21 @@ namespace roboptim
         return false;
       }
 
+      /// \brief Reference to RobOptim structure which instantiated
+      /// this one.
       IpoptSolver& solver_;
+
+      /// \brief Cost function buffer.
+      Eigen::Matrix<double, Eigen::Dynamic, 1> cost_;
+
+      /// \brief Cost gradient buffer.
+      Function::vector_t costGradient_;
+
+      /// \brief Constraints buffer.
+      Function::matrix_t constraints_;
+
+      /// \brief Constraints jacobian buffer.
+      Function::matrix_t jacobian_;
     };
   } // end of namespace detail
 
