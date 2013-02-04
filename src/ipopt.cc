@@ -121,10 +121,12 @@ namespace roboptim
                               Number* g_scaling)
         throw ()
       {
-        use_x_scaling = true, use_g_scaling = true;
+	assert (solver_.problem ().argumentScales ().size () == n);
 
-        memcpy (x_scaling, &solver_.problem ().argumentScales ()[0],
-                n * sizeof (double));
+        use_x_scaling = true, use_g_scaling = true;
+	std::copy (solver_.problem ().argumentScales ().begin (),
+		   solver_.problem ().argumentScales ().end (),
+		   x_scaling);
 
         for (Index i = 0; i < m; ++i)
 	  for (Index j = 0;
