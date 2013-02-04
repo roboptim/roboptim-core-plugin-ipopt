@@ -55,14 +55,15 @@ namespace roboptim
   class ROBOPTIM_DLLEXPORT IpoptSolver
     : public IpoptSolverCommon<
     Solver<DerivableFunction,
-	   boost::mpl::vector<DerivableFunction> > >
+	   boost::mpl::vector<LinearFunction, DifferentiableFunction> > >
   {
   public:
     friend class detail::Tnlp;
 
     /// \brief RobOptim solver type.
-    typedef Solver<DerivableFunction,
-      boost::mpl::vector<DerivableFunction> > solver_t;
+    typedef Solver<
+      DifferentiableFunction,
+      boost::mpl::vector<LinearFunction, DifferentiableFunction> > solver_t;
 
     /// \brief Parent type.
     typedef IpoptSolverCommon<solver_t> parent_t;

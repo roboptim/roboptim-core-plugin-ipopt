@@ -34,34 +34,17 @@ namespace roboptim
 {
   template class ROBOPTIM_DLLAPI IpoptSolverCommon<
     Solver<DifferentiableFunction,
-	   boost::mpl::vector<DifferentiableFunction> > >;
+	   boost::mpl::vector<LinearFunction, DifferentiableFunction> > >;
 
   using namespace Ipopt;
 
   namespace detail
   {
-    TNLP::LinearityType cfsqp_tag (const LinearFunction& f);
-    TNLP::LinearityType cfsqp_tag (const Function& f);
-
     void
     jacobianFromGradients
     (DerivableFunction::matrix_t& jac,
      const IpoptSolver::problem_t::constraints_t& c,
      const DerivableFunction::vector_t& x);
-
-    /// \internal
-    /// Set "linear" tag to linear functions.
-    TNLP::LinearityType cfsqp_tag (const LinearFunction&)
-    {
-      return TNLP::LINEAR;
-    }
-
-    /// \internal
-    /// Set "non_linear" tag to non linear functions.
-    TNLP::LinearityType cfsqp_tag (const Function&)
-    {
-      return TNLP::NON_LINEAR;
-    }
 
     /// \internal
     /// Concatenate jacobians.
@@ -154,26 +137,20 @@ namespace roboptim
       get_variables_linearity (Index n, LinearityType* var_types) throw ()
       {
         assert (solver_.problem ().function ().inputSize () - n == 0);
-
         //FIXME: detect from problem.
         for (Index i = 0; i < n; ++i)
-          var_types[i] = cfsqp_tag (solver_.problem ().function ());
+          var_types[i] = TNLP::NON_LINEAR;
         return true;
       }
 
       virtual bool
       get_function_linearity (Index m, LinearityType* const_types) throw ()
       {
-	using namespace boost;
         assert (solver_.problem ().constraints ().size () - m == 0);
-
         for (Index i = 0; i < m; ++i)
-	  {
-	    shared_ptr<DerivableFunction> f =
-	      get<shared_ptr<DerivableFunction> >
-	      (solver_.problem ().constraints ()[i]);
-	    const_types[i] = cfsqp_tag (*f);
-	  }
+	  const_types[i] =
+	    (solver_.problem ().constraints ()[i].which () == LINEAR)
+	    ? TNLP::LINEAR : TNLP::NON_LINEAR;
         return true;
       }
 

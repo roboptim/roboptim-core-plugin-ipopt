@@ -34,52 +34,40 @@ namespace roboptim
 {
   template class IpoptSolverCommon<
     Solver<TwiceDifferentiableFunction,
-	   boost::mpl::vector<TwiceDifferentiableFunction> > >;
+	   boost::mpl::vector<LinearFunction, TwiceDifferentiableFunction> > >;
   
   using namespace Ipopt;
 
   namespace detail
   {
-    TNLP::LinearityType cfsqp_tag (const LinearFunction& f);
-    TNLP::LinearityType cfsqp_tag (const Function& f);
-
     void
     jacobianFromGradients
-    (DerivableFunction::matrix_t& jac,
+    (DifferentiableFunction::matrix_t& jac,
      const IpoptSolverTd::problem_t::constraints_t& c,
-     const TwiceDerivableFunction::vector_t& x);
-
-    /// \internal
-    /// Set "linear" tag to linear functions.
-    TNLP::LinearityType cfsqp_tag (const LinearFunction&)
-    {
-      return TNLP::LINEAR;
-    }
-
-    /// \internal
-    /// Set "non_linear" tag to non linear functions.
-    TNLP::LinearityType cfsqp_tag (const Function&)
-    {
-      return TNLP::NON_LINEAR;
-    }
+     const TwiceDifferentiableFunction::vector_t& x);
 
     /// \internal
     /// Concatenate jacobians.
     void
     jacobianFromGradients
-    (DerivableFunction::matrix_t& jac,
+    (DifferentiableFunction::matrix_t& jac,
      const IpoptSolverTd::problem_t::constraints_t& c,
-     const TwiceDerivableFunction::vector_t& x)
+     const TwiceDifferentiableFunction::vector_t& x)
     {
       using namespace boost;
+      DifferentiableFunction::jacobian_t grad;
       for (unsigned i = 0; i < jac.rows (); ++i)
 	{
-	  shared_ptr<TwiceDerivableFunction> g =
-	    get<shared_ptr<TwiceDerivableFunction> > (c[i]);
-	  DerivableFunction::jacobian_t grad = g->jacobian (x);
+	  shared_ptr<TwiceDifferentiableFunction> g;
+	  if (c[i].which () == IpoptSolverTd::LINEAR)
+	    g = get<shared_ptr<LinearFunction> > (c[i]);
+	  else
+	    g = get<shared_ptr<TwiceDifferentiableFunction> > (c[i]);
+	  grad.resize (g->outputSize (), g->inputSize ());
+	  g->jacobian (grad, x);
 
 	  for (unsigned j = 0; j < jac.cols (); ++j)
-	    jac (i, j) = grad(0, j);
+	    jac (i, j) = grad (0, j);
 	}
     }
 
@@ -154,26 +142,21 @@ namespace roboptim
       get_variables_linearity (Index n, LinearityType* var_types) throw ()
       {
         assert (solver_.problem ().function ().inputSize () - n == 0);
-
         //FIXME: detect from problem.
         for (Index i = 0; i < n; ++i)
-          var_types[i] = cfsqp_tag (solver_.problem ().function ());
+          var_types[i] = TNLP::NON_LINEAR;
         return true;
       }
 
       virtual bool
       get_function_linearity (Index m, LinearityType* const_types) throw ()
       {
-	using namespace boost;
         assert (solver_.problem ().constraints ().size () - m == 0);
 
         for (Index i = 0; i < m; ++i)
-	  {
-	    shared_ptr<TwiceDerivableFunction> f =
-	      get<shared_ptr<TwiceDerivableFunction> >
-	      (solver_.problem ().constraints ()[i]);
-	    const_types[i] = cfsqp_tag (*f);
-	  }
+	  const_types[i] =
+	    (solver_.problem ().constraints ()[i].which () == LINEAR)
+	    ? TNLP::LINEAR : TNLP::NON_LINEAR;
         return true;
       }
 
@@ -273,8 +256,11 @@ namespace roboptim
         for (citer_t it = solver_.problem ().constraints ().begin ();
              it != solver_.problem ().constraints ().end (); ++it, ++i)
 	  {
-	    shared_ptr<TwiceDerivableFunction> g =
-	      get<shared_ptr<TwiceDerivableFunction> > (*it);
+	    shared_ptr<TwiceDifferentiableFunction> g;
+	    if (it->which () == LINEAR)
+	      g = get<shared_ptr<LinearFunction> > (*it);
+	    else
+	      g = get<shared_ptr<TwiceDifferentiableFunction> > (*it);
 	    g_[i] = (*g) (x_)[0];
 	  }
         vector_to_array(g, g_);
@@ -320,7 +306,7 @@ namespace roboptim
       }
 
       /// Compute Ipopt hessian from several hessians.
-      void compute_hessian (TwiceDerivableFunction::hessian_t& h,
+      void compute_hessian (TwiceDifferentiableFunction::hessian_t& h,
                             const IpoptSolverTd::vector_t& x,
                             Number obj_factor,
                             const Number* lambda)
@@ -328,7 +314,7 @@ namespace roboptim
       {
         typedef IpoptSolverTd::problem_t::constraints_t::const_iterator citer_t;
 
-        TwiceDerivableFunction::hessian_t fct_h =
+        TwiceDifferentiableFunction::hessian_t fct_h =
           solver_.problem ().function ().hessian (x, 0);
         h = obj_factor * fct_h;
 
@@ -336,8 +322,11 @@ namespace roboptim
         for (citer_t it = solver_.problem ().constraints ().begin ();
              it != solver_.problem ().constraints ().end (); ++it)
 	  {
-	    shared_ptr<TwiceDerivableFunction> g =
-	      get<shared_ptr<TwiceDerivableFunction> > (*it);
+	    shared_ptr<TwiceDifferentiableFunction> g;
+	    if (it->which () == LINEAR)
+	      g = get<shared_ptr<LinearFunction> > (*it);
+	    else
+	      g = get<shared_ptr<TwiceDifferentiableFunction> > (*it);
 	    h += lambda[i++] * g->hessian (x, 0);
 	  }
       }
@@ -371,7 +360,7 @@ namespace roboptim
             IpoptSolverTd::vector_t x_ (n);
             array_to_vector (x_, x);
 
-            TwiceDerivableFunction::hessian_t h
+            TwiceDifferentiableFunction::hessian_t h
 	      (solver_.problem ().function ().inputSize (),
 	       solver_.problem ().function ().inputSize ());
             compute_hessian (h, x_, obj_factor, lambda);

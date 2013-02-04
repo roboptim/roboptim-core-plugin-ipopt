@@ -23,8 +23,9 @@
 # include <boost/mpl/vector.hpp>
 
 # include <roboptim/core/solver.hh>
-# include <roboptim/core/derivable-function.hh>
-# include <roboptim/core/twice-derivable-function.hh>
+# include <roboptim/core/linear-function.hh>
+# include <roboptim/core/differentiable-function.hh>
+# include <roboptim/core/twice-differentiable-function.hh>
 
 /// \brief Ipopt classes.
 namespace Ipopt
@@ -50,6 +51,22 @@ namespace roboptim
   class IpoptSolverCommon : public T
   {
   public:
+    /// \brief Categorize constraints.
+    ///
+    /// Used with the which method of the Boost.Variant, it
+    /// allows to check for a constraint's real type.
+    ///
+    /// \warning Make sure to keep enum values in the
+    /// same order than the MPL vector used to specify CLIST.
+    enum ConstraintType
+      {
+	/// \brief Constraint is a linear function.
+	LINEAR = 0,
+	/// \brief Constraint is a differentiable or a twice
+	/// differentiable function depending on the solve.
+	NONLINEAR = 1
+      };
+
     /// \brief Parent type.
     typedef T parent_t;
 
@@ -90,13 +107,13 @@ namespace roboptim
     Ipopt::SmartPtr<Ipopt::IpoptApplication> app_;
   };
 
-extern template class IpoptSolverCommon<
-  Solver<DifferentiableFunction,
-	 boost::mpl::vector<DifferentiableFunction> > >;
-
-extern template class IpoptSolverCommon<
-  Solver<TwiceDifferentiableFunction,
-	 boost::mpl::vector<TwiceDifferentiableFunction> > >;
+  extern template class IpoptSolverCommon<
+    Solver<DifferentiableFunction,
+	   boost::mpl::vector<LinearFunction, DifferentiableFunction> > >;
+  
+  extern template class IpoptSolverCommon<
+    Solver<TwiceDifferentiableFunction,
+	   boost::mpl::vector<LinearFunction, TwiceDifferentiableFunction> > >;
 
   /// @}
 } // end of namespace roboptim

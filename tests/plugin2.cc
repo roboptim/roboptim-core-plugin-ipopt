@@ -29,7 +29,7 @@ using namespace roboptim;
 typedef Solver<TwiceDerivableFunction,
 	       boost::mpl::vector<TwiceDerivableFunction> > solver_t;
 
-BOOST_AUTO_TEST_CASE (simple)
+BOOST_AUTO_TEST_CASE (plugin2)
 {
   boost::shared_ptr<boost::test_tools::output_test_stream>
     output = retrievePattern ("plugin2");
