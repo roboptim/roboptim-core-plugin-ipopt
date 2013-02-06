@@ -79,7 +79,12 @@ namespace roboptim
 			pb.function ().inputSize ()),
 	  jacobian_ (computeConstraintsOutputSize (pb),
 		     pb.function ().inputSize ())
-      {}
+      {
+	cost_.setZero ();
+	costGradient_.setZero ();
+	constraints_.setZero ();
+	jacobian_.setZero ();
+      }
 
       unsigned
       constraintsOutputSize ()
