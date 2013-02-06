@@ -46,38 +46,45 @@ namespace roboptim
      const IpoptSolver::problem_t::constraints_t& c,
      const DerivableFunction::vector_t& x);
 
+    static unsigned
+    computeConstraintsOutputSize (const IpoptSolver::problem_t& pb)
+    {
+      unsigned result = 0;
+      typedef IpoptSolver::problem_t::constraints_t::const_iterator
+	citer_t;
+      for (citer_t it = pb.constraints ().begin ();
+	   it != pb.constraints ().end (); ++it)
+	{
+	  shared_ptr<DifferentiableFunction> g;
+	  if (it->which () == IpoptSolver::LINEAR)
+	    g = get<shared_ptr<LinearFunction> > (*it);
+	  else
+	    g = get<shared_ptr<DifferentiableFunction> > (*it);
+	  result += g->outputSize ();
+	}
+      return result;
+    }
+
+
     /// \internal
     /// Ipopt non linear problem definition.
     struct Tnlp : public TNLP
     {
-      Tnlp (IpoptSolver& solver)
+      Tnlp (const IpoptSolver::problem_t& pb, IpoptSolver& solver)
         throw ()
         : solver_ (solver),
 	  cost_ (1),
-	  costGradient_ (solver.problem ().function ().inputSize ()),
-	  constraints_ (constraintsOutputSize (),
-			solver.problem ().function ().inputSize ()),
-	  jacobian_ (constraintsOutputSize (),
-		     solver.problem ().function ().inputSize ())
+	  costGradient_ (pb.function ().inputSize ()),
+	  constraints_ (computeConstraintsOutputSize (pb),
+			pb.function ().inputSize ()),
+	  jacobian_ (computeConstraintsOutputSize (pb),
+		     pb.function ().inputSize ())
       {}
 
       unsigned
       constraintsOutputSize ()
       {
-	unsigned result = 0;
-	typedef IpoptSolver::problem_t::constraints_t::const_iterator
-	  citer_t;
-	for (citer_t it = solver_.problem ().constraints ().begin ();
-	     it != solver_.problem ().constraints ().end (); ++it)
-	  {
-	    shared_ptr<DifferentiableFunction> g;
-	    if (it->which () == LINEAR)
-	      g = get<shared_ptr<LinearFunction> > (*it);
-	    else
-	      g = get<shared_ptr<DifferentiableFunction> > (*it);
-	    result += g->outputSize ();
-	  }
-	return result;
+	return computeConstraintsOutputSize (solver_.problem ());
       }
 
       virtual bool
@@ -269,6 +276,10 @@ namespace roboptim
 
 	if (new_x)
 	  {
+#ifndef ROBOPTIM_DO_NOT_CHECK_ALLOCATION
+      Eigen::internal::set_is_malloc_allowed (true);
+#endif //! ROBOPTIM_DO_NOT_CHECK_ALLOCATION
+
 	    Eigen::Map<const Function::vector_t> x_ (x, n);
 
 	    typedef IpoptSolver::problem_t::constraints_t::const_iterator
@@ -285,7 +296,7 @@ namespace roboptim
 		  g = get<shared_ptr<DifferentiableFunction> > (*it);
 
 		constraints_.block
-		  (idx, 0, g->outputSize (), n) = (*g) (x_);
+		  (idx, 0, g->outputSize (), 1) = (*g) (x_);
 		idx += g->outputSize ();
 	      }
 	  }
@@ -485,7 +496,7 @@ namespace roboptim
   using namespace detail;
 
   IpoptSolver::IpoptSolver (const problem_t& pb) throw ()
-    : parent_t (pb, Ipopt::SmartPtr<Ipopt::TNLP> (new Tnlp (*this)))
+    : parent_t (pb, Ipopt::SmartPtr<Ipopt::TNLP> (new Tnlp (pb, *this)))
   {
     parameters ()["ipopt.hessian_approximation"].value = "limited-memory";
   }
