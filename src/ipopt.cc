@@ -306,7 +306,7 @@ namespace roboptim
 	      }
 	  }
 
-	Eigen::Map<Function::matrix_t> g_ (g, m, n);
+	Eigen::Map<Function::matrix_t> g_ (g, m, 1);
 	g_ =  constraints_;
 	return true;
       }
