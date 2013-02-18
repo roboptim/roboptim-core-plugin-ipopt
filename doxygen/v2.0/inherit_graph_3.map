@@ -1,0 +1,9 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$a00005.html" title="Solver" alt="" coords="5,127,64,155"/>
+<area shape="rect" id="node3" href="$a00002.html" title="roboptim::IpoptSolverCommon\l\&lt; Solver\&lt; DifferentiableFunction,\l boost::mpl::vector\&lt; LinearFunction,\l DifferentiableFunction \&gt; \&gt; \&gt;" alt="" coords="132,5,356,81"/>
+<area shape="rect" id="node7" href="$a00002.html" title="roboptim::IpoptSolverCommon\l\&lt; Solver\&lt; DifferentiableSparseFunction,\l boost::mpl::vector\&lt; LinearSparseFunction,\l DifferentiableSparseFunction \&gt; \&gt; \&gt;" alt="" coords="112,103,376,179"/>
+<area shape="rect" id="node11" href="$a00002.html" title="roboptim::IpoptSolverCommon\l\&lt; Solver\&lt; TwiceDifferentiableFunction,\l boost::mpl::vector\&lt; LinearFunction,\l TwiceDifferentiableFunction \&gt; \&gt; \&gt;" alt="" coords="123,202,365,278"/>
+<area shape="rect" id="node5" href="$a00001.html" title="Ipopt based solver." alt="" coords="445,29,587,57"/>
+<area shape="rect" id="node9" href="$a00003.html" title="Ipopt based solver." alt="" coords="425,127,607,155"/>
+<area shape="rect" id="node13" href="$a00004.html" title="Ipopt based solver." alt="" coords="437,226,595,254"/>
+</map>

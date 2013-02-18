@@ -1,0 +1,8 @@
+<map id="Solver" name="Solver">
+<area shape="rect" id="node3" href="$a00002.html" title="IpoptSolverCommon\&lt;\l Solver\&lt; DifferentiableFunction,\l boost::mpl::vector\&lt; LinearFunction,\l DifferentiableFunction \&gt; \&gt; \&gt;" alt="" coords="120,5,344,81"/>
+<area shape="rect" id="node7" href="$a00002.html" title="IpoptSolverCommon\&lt;\l Solver\&lt; DifferentiableSparse\lFunction, boost::mpl::vector\l\&lt; LinearSparseFunction, Differentiable\lSparseFunction \&gt; \&gt; \&gt;" alt="" coords="113,103,351,195"/>
+<area shape="rect" id="node11" href="$a00002.html" title="IpoptSolverCommon\&lt;\l Solver\&lt; TwiceDifferentiable\lFunction, boost::mpl::vector\l\&lt; LinearFunction, TwiceDifferentiable\lFunction \&gt; \&gt; \&gt;" alt="" coords="116,218,348,310"/>
+<area shape="rect" id="node5" href="$a00001.html" title="Ipopt based solver." alt="" coords="421,29,563,57"/>
+<area shape="rect" id="node9" href="$a00003.html" title="Ipopt based solver." alt="" coords="401,135,583,163"/>
+<area shape="rect" id="node13" href="$a00004.html" title="Ipopt based solver." alt="" coords="413,250,571,278"/>
+</map>
