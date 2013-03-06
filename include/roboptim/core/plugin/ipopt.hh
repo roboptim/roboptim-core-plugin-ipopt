@@ -23,6 +23,7 @@
 # include <boost/mpl/vector.hpp>
 
 # include <coin/IpSmartPtr.hpp>
+# include <coin/IpReturnCodes.hpp> // for AlgorithmMode
 
 # include <roboptim/core/solver.hh>
 # include <roboptim/core/derivable-function.hh>
@@ -32,6 +33,8 @@
 namespace Ipopt
 {
   class IpoptApplication;
+  class IpoptData;
+  class IpoptCalculatedQuantities;
 } // end of namespace Ipopt
 
 

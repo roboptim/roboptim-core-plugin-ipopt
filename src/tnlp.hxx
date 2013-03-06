@@ -568,17 +568,22 @@ namespace roboptim
 
     template <typename T>
     bool
-    Tnlp<T>::intermediate_callback (AlgorithmMode,
-				    Index, Number,
-				    Number, Number,
-				    Number, Number,
-				    Number,
-				    Number, Number,
-				    Index,
-				    const IpoptData*,
-				    IpoptCalculatedQuantities*)
-	     throw ()
+    Tnlp<T>::intermediate_callback (AlgorithmMode mode,
+				    Index iter, Number obj_value,
+				    Number inf_pr, Number inf_du,
+				    Number mu, Number d_norm,
+				    Number regularization_size,
+				    Number alpha_du, Number alpha_pr,
+				    Index ls_trials,
+				    const IpoptData* ip_data,
+				    IpoptCalculatedQuantities* ip_cq)
+      throw ()
     {
+      if (solver_.userIntermediateCallback ())
+	return (*solver_.userIntermediateCallback ())
+	  (mode, iter, obj_value, inf_pr, inf_du, mu, d_norm,
+	   regularization_size, alpha_du, alpha_pr, ls_trials,
+	   ip_data, ip_cq);
       return true;
     }
 

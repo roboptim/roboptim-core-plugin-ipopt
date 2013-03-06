@@ -21,6 +21,7 @@
 # include <roboptim/core/portability.hh>
 
 # include <boost/mpl/vector.hpp>
+# include <boost/optional.hpp>
 
 # include <roboptim/core/solver.hh>
 # include <roboptim/core/linear-function.hh>
@@ -43,6 +44,41 @@ namespace roboptim
 
   template <typename T>
   class IpoptSolverCommon;
+
+  /// \brief Functor called at the end of each iteration.
+  ///
+  /// By inheriting this type and implementing the operator ()
+  /// method, then setting it as the userIntermediateCallback
+  /// of your solver, one can define a custom behavior to be
+  /// executed at the end of each iteration.
+  ///
+  /// See http://en.wikipedia.org/wiki/Function_object#In_C_and_C.2B.2B
+  /// for more information about functors.
+  ///
+  /// Functor parameters match original Ipopt parameters, see Ipopt
+  /// documentation to read explanation regarding their mathematical
+  /// meaning.
+  struct UserIntermediateCallback
+  {
+    /// \brief Virtual desctructor.
+    virtual ~UserIntermediateCallback () {}
+
+    /// \brief Callback to be called.
+    /// You *have* to implement this function yourself.
+    ///
+    /// \return true means continue optimizating (or finish if it is the
+    ///         last iteration), false interrupt the optimization now.
+    virtual bool operator () (Ipopt::AlgorithmMode mode,
+			      int iter, double obj_value,
+			      double inf_pr, double inf_du,
+			      double mu, double d_norm,
+			      double regularization_size,
+			      double alpha_du, double alpha_pr,
+			      int ls_trials,
+			      const Ipopt::IpoptData* ip_data,
+			      Ipopt::IpoptCalculatedQuantities* ip_cq) = 0;
+  };
+
 
   /// \brief Ipopt common solver.
   ///
@@ -89,8 +125,22 @@ namespace roboptim
     /// IpoptApplication class.
     virtual Ipopt::SmartPtr<Ipopt::IpoptApplication> getIpoptApplication ()
       throw ();
-  private:
 
+    /// \brief Retrieve user intermeditate callback.
+    const boost::optional<UserIntermediateCallback>&
+    userIntermediateCallback () const
+    {
+      return uic_;
+    }
+
+    /// \brief Retrieve user intermeditate callback.
+    boost::optional<UserIntermediateCallback>&
+    userIntermediateCallback ()
+    {
+      return uic_;
+    }
+
+  private:
     /// \brief Initialize parameters.
     ///
     /// Add solver parameters. Called during construction.
@@ -105,6 +155,10 @@ namespace roboptim
     Ipopt::SmartPtr<Ipopt::TNLP> nlp_;
     /// \brief Smart pointer to the Ipopt application instance.
     Ipopt::SmartPtr<Ipopt::IpoptApplication> app_;
+
+    /// \brief Optional intermediate callback (called at each end
+    /// of iteration).
+    boost::optional<UserIntermediateCallback> uic_;
   };
 
   /// @}

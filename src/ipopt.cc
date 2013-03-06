@@ -42,10 +42,10 @@ namespace roboptim
   IpoptSolver::IpoptSolver (const problem_t& pb) throw ()
     : parent_t (pb, Ipopt::SmartPtr<Ipopt::TNLP>
 		(new detail::Tnlp<IpoptSolver> (pb, *this)))
+
   {
     parameters ()["ipopt.hessian_approximation"].value = "limited-memory";
   }
-
 } // end of namespace roboptim
 
 extern "C"

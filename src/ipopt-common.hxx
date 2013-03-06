@@ -36,7 +36,8 @@ namespace roboptim
 		     Ipopt::SmartPtr<Ipopt::TNLP> tnlp) throw ()
     : parent_t (pb),
       nlp_ (tnlp),
-      app_ (IpoptApplicationFactory ())
+      app_ (IpoptApplicationFactory ()),
+      uic_ ()
   {
     app_->Jnlst()->DeleteAllJournals();
     

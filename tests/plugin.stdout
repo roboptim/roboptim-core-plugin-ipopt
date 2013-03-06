@@ -35,7 +35,7 @@ Solver:
 A solution has been found: 
 Result: 
   Size (input, output): 4, 1
-  X: [4](1,4.743,3.82115,1.37941)
-  Value: [1](14.5723)
+  X: [4](1,5,3.44949,1.44949)
+  Value: [1](12.1597)
   Constraints values: [2](25,40)
-  Lambda: [2](-0.552294,0.161469)
+  Lambda: [2](-0.441667,0.0208333)
