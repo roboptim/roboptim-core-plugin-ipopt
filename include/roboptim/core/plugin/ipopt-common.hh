@@ -107,14 +107,6 @@ namespace roboptim
     Ipopt::SmartPtr<Ipopt::IpoptApplication> app_;
   };
 
-  extern template class IpoptSolverCommon<
-    Solver<DifferentiableFunction,
-	   boost::mpl::vector<LinearFunction, DifferentiableFunction> > >;
-  
-  extern template class IpoptSolverCommon<
-    Solver<TwiceDifferentiableFunction,
-	   boost::mpl::vector<LinearFunction, TwiceDifferentiableFunction> > >;
-
   /// @}
 } // end of namespace roboptim
 

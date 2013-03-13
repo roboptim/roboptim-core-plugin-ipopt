@@ -31,9 +31,6 @@ SET(HEADERS
   ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt.hh
   )
 
-#Deactivate -Werror: coin/Ipopt does not support it
-SET(CXX_DISABLE_WERROR TRUE)
-
 SETUP_PROJECT()
 
 # Search for dependencies.

@@ -35,7 +35,7 @@ namespace roboptim
   template class IpoptSolverCommon<
     Solver<TwiceDifferentiableFunction,
 	   boost::mpl::vector<LinearFunction, TwiceDifferentiableFunction> > >;
-  
+
   using namespace Ipopt;
 
   namespace detail
@@ -75,8 +75,9 @@ namespace roboptim
 
     /// \internal
     /// Ipopt non linear problem definition.
-    struct TnlpTd : public TNLP
+    class TnlpTd : public TNLP
     {
+    public:
       TnlpTd (IpoptSolverTd& solver)
         throw ()
         : solver_ (solver)
@@ -87,8 +88,8 @@ namespace roboptim
                     Index& nnz_h_lag, TNLP::IndexStyleEnum& index_style)
         throw ()
       {
-        n = solver_.problem ().function ().inputSize ();
-        m = solver_.problem ().constraints ().size ();
+        n = static_cast<Index> (solver_.problem ().function ().inputSize ());
+        m = static_cast<Index> (solver_.problem ().constraints ().size ());
         nnz_jac_g = n * m; //FIXME: use a dense matrix for now.
         nnz_h_lag = n * (n + 1) / 2; //FIXME: use a dense matrix for now.
         index_style = TNLP::C_STYLE;
@@ -100,8 +101,10 @@ namespace roboptim
                        Index m, Number* g_l, Number* g_u)
         throw ()
       {
-        assert (solver_.problem ().function ().inputSize () - n == 0);
-        assert (solver_.problem ().constraints ().size () - m == 0);
+	Function::size_type n_ = static_cast<Function::size_type> (n);
+	std::size_t m_ = static_cast<std::size_t> (m);
+        assert (solver_.problem ().function ().inputSize () == n_);
+        assert (solver_.problem ().constraints ().size () == m_);
 
         typedef IpoptSolverTd::problem_t::intervals_t::const_iterator citer_t;
         for (citer_t it = solver_.problem ().argumentBounds ().begin ();
@@ -126,15 +129,18 @@ namespace roboptim
                               Number* g_scaling)
         throw ()
       {
-	assert (solver_.problem ().argumentScales ().size () == n);
+	std::size_t n_ = static_cast<std::size_t> (n);
+	std::size_t m_ = static_cast<std::size_t> (m);
+
+	assert (solver_.problem ().argumentScales ().size () == n_);
 
         use_x_scaling = true, use_g_scaling = true;
 	std::copy (solver_.problem ().argumentScales ().begin (),
 		   solver_.problem ().argumentScales ().end (),
 		   x_scaling);
 
-        for (Index i = 0; i < m; ++i)
-	  for (Index j = 0;
+        for (std::size_t i = 0; i < m_; ++i)
+	  for (std::size_t j = 0;
 	       j < solver_.problem ().scalesVector ()[i].size (); ++j)
           g_scaling[i] = solver_.problem ().scalesVector ()[i][j];
         return true;
@@ -153,9 +159,11 @@ namespace roboptim
       virtual bool
       get_function_linearity (Index m, LinearityType* const_types) throw ()
       {
-        assert (solver_.problem ().constraints ().size () - m == 0);
+	std::size_t m_ = static_cast<std::size_t> (m);
 
-        for (Index i = 0; i < m; ++i)
+        assert (solver_.problem ().constraints ().size () == m_);
+
+        for (std::size_t i = 0; i < m_; ++i)
 	  const_types[i] =
 	    (solver_.problem ().constraints ()[i].which () == LINEAR)
 	    ? TNLP::LINEAR : TNLP::NON_LINEAR;
@@ -169,8 +177,11 @@ namespace roboptim
                           Number*)
         throw ()
       {
-        assert (solver_.problem ().function ().inputSize () - n == 0);
-        assert (solver_.problem ().constraints ().size () - m == 0);
+	Function::size_type n_ = static_cast<Function::size_type> (n);
+	std::size_t m_ = static_cast<std::size_t> (m);
+
+        assert (solver_.problem ().function ().inputSize () == n_);
+        assert (solver_.problem ().constraints ().size () == m_);
 
         //FIXME: handle all modes.
         assert(init_lambda == false);
@@ -245,8 +256,12 @@ namespace roboptim
         throw ()
       {
 	using namespace boost;
-        assert (solver_.problem ().function ().inputSize () - n == 0);
-        assert (solver_.problem ().constraints ().size () - m == 0);
+
+	Function::size_type n_ = static_cast<Function::size_type> (n);
+	std::size_t m_ = static_cast<std::size_t> (m);
+
+        assert (solver_.problem ().function ().inputSize () == n_);
+        assert (solver_.problem ().constraints ().size () == m_);
 
         IpoptSolverTd::vector_t x_ (n);
         array_to_vector (x_, x);
@@ -276,8 +291,12 @@ namespace roboptim
         throw ()
       {
 	using namespace boost;
-        assert (solver_.problem ().function ().inputSize () - n == 0);
-        assert (solver_.problem ().constraints ().size () - m == 0);
+
+	Function::size_type n_ = static_cast<Function::size_type> (n);
+	std::size_t m_ = static_cast<std::size_t> (m);
+
+        assert (solver_.problem ().function ().inputSize () == n_);
+        assert (solver_.problem ().constraints ().size () == m_);
 
         if (!values)
           {
@@ -340,8 +359,11 @@ namespace roboptim
               Index* jCol, Number* values)
         throw ()
       {
-        assert (solver_.problem ().function ().inputSize () - n == 0);
-        assert (solver_.problem ().constraints ().size () - m == 0);
+	Function::size_type n_ = static_cast<Function::size_type> (n);
+	std::size_t m_ = static_cast<std::size_t> (m);
+
+        assert (solver_.problem ().function ().inputSize () == n_);
+        assert (solver_.problem ().constraints ().size () == m_);
 
         //FIXME: check if a hessian is provided.
 
@@ -429,8 +451,11 @@ namespace roboptim
                         IpoptCalculatedQuantities*)
         throw ()
       {
-        assert (solver_.problem ().function ().inputSize () - n == 0);
-        assert (solver_.problem ().constraints ().size () - m == 0);
+	Function::size_type n_ = static_cast<Function::size_type> (n);
+	std::size_t m_ = static_cast<std::size_t> (m);
+
+        assert (solver_.problem ().function ().inputSize () == n_);
+        assert (solver_.problem ().constraints ().size () == m_);
 
         switch (status)
           {
@@ -453,6 +478,9 @@ namespace roboptim
 
 	    MAP_IPOPT_ERRORS(SWITCH_ERROR);
 	    MAP_IPOPT_FATALS(SWITCH_FATAL);
+
+	  case UNASSIGNED:
+	    assert (0 && "should never happen");
 	  }
 	assert (solver_.result_.which () != IpoptSolverTd::SOLVER_NO_SOLUTION);
       }

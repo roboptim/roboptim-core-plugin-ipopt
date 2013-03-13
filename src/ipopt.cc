@@ -32,7 +32,7 @@
 
 namespace roboptim
 {
-  template class ROBOPTIM_DLLAPI IpoptSolverCommon<
+  template class IpoptSolverCommon<
     Solver<DifferentiableFunction,
 	   boost::mpl::vector<LinearFunction, DifferentiableFunction> > >;
 
@@ -46,10 +46,10 @@ namespace roboptim
      const IpoptSolver::problem_t::constraints_t& c,
      const DerivableFunction::vector_t& x);
 
-    static unsigned
+    static Function::size_type
     computeConstraintsOutputSize (const IpoptSolver::problem_t& pb)
     {
-      unsigned result = 0;
+      Function::size_type result = 0;
       typedef IpoptSolver::problem_t::constraints_t::const_iterator
 	citer_t;
       for (citer_t it = pb.constraints ().begin ();
@@ -68,8 +68,9 @@ namespace roboptim
 
     /// \internal
     /// Ipopt non linear problem definition.
-    struct Tnlp : public TNLP
+    class Tnlp : public TNLP
     {
+    public:
       Tnlp (const IpoptSolver::problem_t& pb, IpoptSolver& solver)
         throw ()
         : solver_ (solver),
@@ -86,7 +87,7 @@ namespace roboptim
 	jacobian_.setZero ();
       }
 
-      unsigned
+      Function::size_type
       constraintsOutputSize ()
       {
 	return computeConstraintsOutputSize (solver_.problem ());
@@ -97,8 +98,8 @@ namespace roboptim
                     Index& nnz_h_lag, TNLP::IndexStyleEnum& index_style)
         throw ()
       {
-        n = solver_.problem ().function ().inputSize ();
-        m = constraintsOutputSize ();
+        n = static_cast<Index> (solver_.problem ().function ().inputSize ());
+        m = static_cast<Index> (constraintsOutputSize ());
         nnz_jac_g = n * m; //FIXME: use a dense matrix for now.
         nnz_h_lag = n * (n + 1) / 2; //FIXME: use a dense matrix for now.
         index_style = TNLP::C_STYLE;
@@ -136,18 +137,22 @@ namespace roboptim
                               Number* g_scaling)
         throw ()
       {
-	assert (solver_.problem ().argumentScales ().size () == n);
+	std::size_t n_ = static_cast<std::size_t> (n);
+	std::size_t m_ = static_cast<std::size_t> (m);
+
+	assert (solver_.problem ().argumentScales ().size () == n_);
 
         use_x_scaling = true, use_g_scaling = true;
 	std::copy (solver_.problem ().argumentScales ().begin (),
 		   solver_.problem ().argumentScales ().end (),
 		   x_scaling);
 
-        for (Index i = 0; i < m; ++i)
-	  for (Index j = 0;
-	       j < solver_.problem ().scalesVector ()[i].size (); ++j)
-          g_scaling[i] = solver_.problem ().scalesVector ()[i][j];
-        return true;
+
+	for (std::size_t i = 0; i < m_; ++i)
+	       for (std::size_t j = 0;
+		    j < solver_.problem ().scalesVector ()[i].size (); ++j)
+		      g_scaling[i] = solver_.problem ().scalesVector ()[i][j];
+		    return true;
       }
 
       virtual bool
@@ -276,8 +281,11 @@ namespace roboptim
         throw ()
       {
 	using namespace boost;
-        assert (solver_.problem ().function ().inputSize () - n == 0);
-        assert (solver_.problem ().constraints ().size () - m == 0);
+	Function::size_type n_ = static_cast<Function::size_type> (n);
+	std::size_t m_ = static_cast<std::size_t> (m);
+
+        assert (solver_.problem ().function ().inputSize () == n_);
+        assert (solver_.problem ().constraints ().size () == m_);
 
 	if (new_x)
 	  {
@@ -290,7 +298,7 @@ namespace roboptim
 	    typedef IpoptSolver::problem_t::constraints_t::const_iterator
 	      citer_t;
 
-	    int idx = 0;
+	    Function::size_type idx = 0;
 	    for (citer_t it = solver_.problem ().constraints ().begin ();
 		 it != solver_.problem ().constraints ().end (); ++it)
 	      {
@@ -318,8 +326,10 @@ namespace roboptim
         throw ()
       {
 	using namespace boost;
-        assert (solver_.problem ().function ().inputSize () - n == 0);
-        assert (solver_.problem ().constraints ().size () - m == 0);
+	Function::size_type n_ = static_cast<Function::size_type> (n);
+	std::size_t m_ = static_cast<std::size_t> (m);
+        assert (solver_.problem ().function ().inputSize () == n_);
+        assert (solver_.problem ().constraints ().size () == m_);
 
         if (!values)
           {
@@ -341,7 +351,7 @@ namespace roboptim
 		typedef IpoptSolver::problem_t::constraints_t::const_iterator
 		  citer_t;
 
-		int idx = 0;
+		Function::size_type idx = 0;
 		for (citer_t it = solver_.problem ().constraints ().begin ();
 		     it != solver_.problem ().constraints ().end (); ++it)
 		  {
@@ -438,6 +448,9 @@ namespace roboptim
 
 	    MAP_IPOPT_ERRORS(SWITCH_ERROR);
 	    MAP_IPOPT_FATALS(SWITCH_FATAL);
+
+	  case UNASSIGNED:
+	    assert (0 && "should never happen");
 	  }
 	assert (solver_.result_.which () != IpoptSolver::SOLVER_NO_SOLUTION);
       }
