@@ -18,7 +18,7 @@ SET(PLUGINDIR lib/roboptim-core)
 
 # Ipopt plug-in (with only gradient computation).
 ADD_LIBRARY(roboptim-core-plugin-ipopt MODULE
-  ipopt.cc doc.hh ${HEADERS}
+  ipopt.cc tnlp.hh tnlp.hxx doc.hh ${HEADERS}
   )
 SET_TARGET_PROPERTIES(roboptim-core-plugin-ipopt PROPERTIES
   PREFIX ""
@@ -29,7 +29,7 @@ PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-ipopt roboptim-core)
 
 # Ipopt twice differentiable (td) plug-in (require hessian computation).
 ADD_LIBRARY(roboptim-core-plugin-ipopt-td MODULE
-  ipopt-td.cc doc.hh ${HEADERS}
+  ipopt-td.cc tnlp.hh tnlp.hxx doc.hh ${HEADERS}
   )
 SET_TARGET_PROPERTIES(roboptim-core-plugin-ipopt-td PROPERTIES
   PREFIX ""

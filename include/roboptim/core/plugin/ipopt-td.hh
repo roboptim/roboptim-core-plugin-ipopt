@@ -40,7 +40,8 @@ namespace roboptim
   namespace detail
   {
     /// \internal
-    class TnlpTd;
+    template <typename T>
+    class Tnlp;
   }
 
   /// \addtogroup roboptim_problem
@@ -58,8 +59,6 @@ namespace roboptim
 	    boost::mpl::vector<LinearFunction, TwiceDifferentiableFunction> > >
   {
   public:
-    friend class detail::TnlpTd;
-
     /// \brief RobOptim solver type.
     typedef Solver<TwiceDifferentiableFunction,
       boost::mpl::vector<LinearFunction,
@@ -74,6 +73,9 @@ namespace roboptim
     explicit IpoptSolverTd (const problem_t& problem) throw ();
 
     virtual ~IpoptSolverTd () throw () {}
+
+    template <typename T>
+      friend class ::roboptim::detail::Tnlp;
   };
 
   /// @}
