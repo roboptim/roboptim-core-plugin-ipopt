@@ -279,10 +279,9 @@ namespace roboptim
     {
       using namespace boost;
       Function::size_type n_ = static_cast<Function::size_type> (n);
-      std::size_t m_ = static_cast<std::size_t> (m);
 
       assert (solver_.problem ().function ().inputSize () == n_);
-      assert (solver_.problem ().constraints ().size () == m_);
+      assert (constraintsOutputSize () == m);
 
       if (new_x || !constraints_)
 	{
@@ -328,9 +327,8 @@ namespace roboptim
     {
       using namespace boost;
       Function::size_type n_ = static_cast<Function::size_type> (n);
-      std::size_t m_ = static_cast<std::size_t> (m);
       assert (solver_.problem ().function ().inputSize () == n_);
-      assert (solver_.problem ().constraints ().size () == m_);
+      assert (constraintsOutputSize () == m);
 
       if (!values)
 	{
@@ -424,10 +422,9 @@ namespace roboptim
       throw ()
     {
       Function::size_type n_ = static_cast<Function::size_type> (n);
-      std::size_t m_ = static_cast<std::size_t> (m);
 
       assert (solver_.problem ().function ().inputSize () == n_);
-      assert (solver_.problem ().constraints ().size () == m_);
+      assert (constraintsOutputSize () == m);
 
       //FIXME: check if a hessian is provided.
 
