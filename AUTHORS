@@ -1,5 +1,8 @@
 This package was written by and with the assistance of
 
+* Benjamin Chrétien             chretien@lirmm.fr
+- Bug fix.
+
 * Florent Lamiraux              florent@laas.fr
 - Interface design.
 
@@ -14,3 +17,6 @@ This package was written by and with the assistance of
 
 * Karim Bouyarmane		karim.bouyarmane@gmail.com
 - Bug fix, gradient only solver.
+
+* Joris Vaillant                joris.vaillant@gmail.com
+- Implement user intermediate callback, bug fix.
