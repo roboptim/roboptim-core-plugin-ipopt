@@ -13,6 +13,46 @@ namespace roboptim
 
   namespace detail
   {
+    /// \internal
+#ifdef ROBOPTIM_CORE_IPOPT_PLUGIN_CHECK_GRADIENT
+    template <typename T>
+    void IpoptCheckGradient (const DerivableFunction& function,
+			     unsigned functionId,
+			     Eigen::Map<const Function::vector_t>& x,
+			     int constraintId,
+			     T& solver) throw ()
+    {
+      using boost::format;
+      try
+	{
+	  checkGradientAndThrow (function, functionId, x, 1.);
+	}
+      catch (BadGradient& bg)
+	{
+	  solver.invalidateGradient ();
+	  std::cerr
+	    << ((functionId < 0)
+		? "Invalid cost function gradient:"
+		: (format ("Invalid constraint function gradient (id = %1%):")
+		   % constraintId).str ())
+	    << std::endl
+	    << function.getName ()
+	    << std::endl
+	    << bg
+	    << std::endl;
+	}
+    }
+#else
+    template <typename T>
+    void IpoptCheckGradient (const DerivableFunction&,
+			     unsigned,
+			     Eigen::Map<const Function::vector_t>&,
+			     int,
+			     T&) throw ()
+    {}
+#endif //!ROBOPTIM_CORE_IPOPT_PLUGIN_CHECK_GRADIENT
+
+
     void
     jacobianFromGradients
     (DerivableFunction::matrix_t& jac,
@@ -264,6 +304,9 @@ namespace roboptim
 
 	  Eigen::Map<const Function::vector_t> x_ (x, n);
 	  solver_.problem ().function ().gradient (*costGradient_, x_, 0);
+
+	  IpoptCheckGradient
+	    (solver_.problem ().function (), 0, x_, -1, solver_);
 	}
 
       Eigen::Map<Function::vector_t> grad_f_ (grad_f, n);
@@ -361,6 +404,7 @@ namespace roboptim
 		citer_t;
 
 	      Function::size_type idx = 0;
+	      int constraintId = 0;
 	      for (citer_t it = solver_.problem ().constraints ().begin ();
 		   it != solver_.problem ().constraints ().end (); ++it)
 		{
@@ -373,6 +417,10 @@ namespace roboptim
 		  jacobian_->block
 		    (idx, 0, g->outputSize (), n) = g->jacobian (x_);
 		  idx += g->outputSize ();
+
+		  IpoptCheckGradient
+		    (*g, 0, x_,
+		     constraintId++, solver_);
 		}
 	    }
 	  Eigen::Map<Function::matrix_t> values_ (values, m, n);

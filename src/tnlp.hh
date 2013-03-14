@@ -25,6 +25,11 @@
 
 # include <roboptim/core/plugin/ipopt.hh>
 
+#ifdef ROBOPTIM_CORE_IPOPT_PLUGIN_CHECK_GRADIENT
+# include <boost/format.hpp>
+# include <roboptim/core/finite-difference-gradient.hh>
+#endif //!ROBOPTIM_CORE_IPOPT_PLUGIN_CHECK_GRADIENT
+
 namespace roboptim
 {
   namespace detail
