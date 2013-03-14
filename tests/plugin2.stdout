@@ -45,7 +45,7 @@ a * a + b * b + c * c + d * d (twice differentiable function)
 A solution has been found: 
 Result: 
   Size (input, output): 4, 1
-  X: [4](1,5,5,1)
-  Value: [1](12)
-  Constraints values: [1](25)
-  Lambda: [1](-0.400142)
+  X: [4](1,5,3.44949,1.44949)
+  Value: [1](14.4575)
+  Constraints values: [2](25,40)
+  Lambda: [2](-0.441667,0.0208333)
