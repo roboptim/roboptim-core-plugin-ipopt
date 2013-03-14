@@ -56,10 +56,11 @@ BOOST_AUTO_TEST_CASE (simple)
   // Check if the minimization has succeed.
   if (res.which () != IpoptSolverTd::SOLVER_VALUE)
     {
-      std::cout << "A solution should have been found. Failing..."
+      (*output) << "A solution should have been found. Failing..."
                 << std::endl
                 << boost::get<SolverError> (res).what ()
                 << std::endl;
+      std::cout << output->str () << std::endl;
       BOOST_CHECK_EQUAL (res.which (), IpoptSolverTd::SOLVER_VALUE);
     }
 
