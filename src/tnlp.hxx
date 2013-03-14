@@ -6,6 +6,7 @@
 # include <boost/mpl/vector.hpp>
 
 # include <roboptim/core/plugin/ipopt-td.hh>
+# include <roboptim/core/debug.hh>
 
 namespace roboptim
 {
@@ -131,8 +132,9 @@ namespace roboptim
 
     template <typename T>
     bool
-    Tnlp<T>::get_bounds_info (Index n, Number* x_l, Number* x_u,
-			   Index m, Number* g_l, Number* g_u)
+    Tnlp<T>::get_bounds_info (Index ROBOPTIM_DEBUG_ONLY(n), Number* x_l,
+			Number* x_u, Index ROBOPTIM_DEBUG_ONLY(m), Number* g_l,
+			Number* g_u)
       throw ()
     {
       assert (solver_.problem ().function ().inputSize () - n == 0);
@@ -156,13 +158,14 @@ namespace roboptim
     template <typename T>
     bool
     Tnlp<T>::get_scaling_parameters (Number&,
-				  bool& use_x_scaling, Index n,
+				  bool& use_x_scaling,
+				  Index ROBOPTIM_DEBUG_ONLY(n),
 				  Number* x_scaling,
 				  bool& use_g_scaling, Index m,
 				  Number* g_scaling)
       throw ()
     {
-      std::size_t n_ = static_cast<std::size_t> (n);
+      ROBOPTIM_DEBUG_ONLY(std::size_t n_ = static_cast<std::size_t> (n));
       std::size_t m_ = static_cast<std::size_t> (m);
 
       assert (solver_.problem ().argumentScales ().size () == n_);
@@ -193,7 +196,8 @@ namespace roboptim
 
     template <typename T>
     bool
-    Tnlp<T>::get_function_linearity (Index m, LinearityType* const_types) throw ()
+    Tnlp<T>::get_function_linearity (Index ROBOPTIM_DEBUG_ONLY(m),
+                  LinearityType* const_types) throw ()
     {
       assert (constraintsOutputSize () - m == 0);
 
@@ -221,10 +225,9 @@ namespace roboptim
 
     template <typename T>
     bool
-    Tnlp<T>::get_starting_point (Index n, bool init_x, Number* x,
-			      bool init_z, Number* z_L, Number* z_U,
-			      Index m, bool init_lambda,
-			      Number*)
+    Tnlp<T>::get_starting_point (Index n, bool init_x, Number* x, bool init_z,
+		  Number* z_L, Number* z_U, Index ROBOPTIM_DEBUG_ONLY(m),
+		  bool ROBOPTIM_DEBUG_ONLY(init_lambda), Number*)
 	     throw ()
     {
       assert (solver_.problem ().function ().inputSize () - n == 0);
@@ -464,8 +467,8 @@ namespace roboptim
     bool
     Tnlp<IpoptSolverTd>::eval_h
       (Index n, const Number* x, bool,
-       Number obj_factor, Index m, const Number* lambda,
-       bool, Index nele_hess, Index* iRow,
+       Number obj_factor, Index ROBOPTIM_DEBUG_ONLY(m), const Number* lambda,
+       bool, Index ROBOPTIM_DEBUG_ONLY(nele_hess), Index* iRow,
        Index* jCol, Number* values)
       throw ()
     {
