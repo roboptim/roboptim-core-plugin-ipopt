@@ -60,23 +60,29 @@ namespace roboptim
   /// meaning.
   struct UserIntermediateCallback
   {
-    /// \brief Virtual desctructor.
+    /// \brief Default constructor.
+    UserIntermediateCallback () {}
+
+    /// \brief Virtual destructor.
     virtual ~UserIntermediateCallback () {}
 
     /// \brief Callback to be called.
-    /// You *have* to implement this function yourself.
+    /// You can implement this function yourself. Default version returns true.
     ///
     /// \return true means continue optimizating (or finish if it is the
     ///         last iteration), false interrupt the optimization now.
-    virtual bool operator () (Ipopt::AlgorithmMode mode,
-			      int iter, double obj_value,
-			      double inf_pr, double inf_du,
-			      double mu, double d_norm,
-			      double regularization_size,
-			      double alpha_du, double alpha_pr,
-			      int ls_trials,
-			      const Ipopt::IpoptData* ip_data,
-			      Ipopt::IpoptCalculatedQuantities* ip_cq) = 0;
+    virtual bool operator () (Ipopt::AlgorithmMode,
+                  int, double,
+                  double, double,
+                  double, double,
+                  double,
+                  double, double,
+                  int,
+                  const Ipopt::IpoptData*,
+                  Ipopt::IpoptCalculatedQuantities*)
+    {
+      return true;
+    }
   };
 
 
@@ -127,14 +133,14 @@ namespace roboptim
       throw ();
 
     /// \brief Retrieve user intermeditate callback.
-    const boost::optional<UserIntermediateCallback>&
+    const boost::shared_ptr<UserIntermediateCallback>&
     userIntermediateCallback () const
     {
       return uic_;
     }
 
     /// \brief Retrieve user intermeditate callback.
-    boost::optional<UserIntermediateCallback>&
+    boost::shared_ptr<UserIntermediateCallback>&
     userIntermediateCallback ()
     {
       return uic_;
@@ -156,9 +162,9 @@ namespace roboptim
     /// \brief Smart pointer to the Ipopt application instance.
     Ipopt::SmartPtr<Ipopt::IpoptApplication> app_;
 
-    /// \brief Optional intermediate callback (called at each end
+    /// \brief Intermediate callback (called at each end
     /// of iteration).
-    boost::optional<UserIntermediateCallback> uic_;
+    boost::shared_ptr<UserIntermediateCallback> uic_;
   };
 
   /// @}

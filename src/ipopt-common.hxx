@@ -37,7 +37,7 @@ namespace roboptim
     : parent_t (pb),
       nlp_ (tnlp),
       app_ (IpoptApplicationFactory ()),
-      uic_ ()
+      uic_ (new UserIntermediateCallback)
   {
     app_->Jnlst()->DeleteAllJournals();
     
