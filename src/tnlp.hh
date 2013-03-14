@@ -171,7 +171,7 @@ namespace roboptim
       boost::optional<Function::vector_t> costGradient_;
 
       /// \brief Constraints buffer.
-      boost::optional<Function::matrix_t> constraints_;
+      boost::optional<Function::vector_t> constraints_;
 
       /// \brief Constraints jacobian buffer.
       boost::optional<Function::matrix_t> jacobian_;

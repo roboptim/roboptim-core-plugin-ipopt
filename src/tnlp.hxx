@@ -287,8 +287,7 @@ namespace roboptim
       if (new_x || !constraints_)
 	{
 	  if (!constraints_)
-	    constraints_ = Function::matrix_t
-	      (constraintsOutputSize (), 1);
+	    constraints_ = Function::vector_t (constraintsOutputSize ());
 
 #ifndef ROBOPTIM_DO_NOT_CHECK_ALLOCATION
 	  Eigen::internal::set_is_malloc_allowed (true);
@@ -309,8 +308,7 @@ namespace roboptim
 	      else
 		g = get<shared_ptr<nonLinearFunction_t> > (*it);
 
-	      constraints_->block
-		(idx, 0, g->outputSize (), 1) = (*g) (x_);
+	      constraints_->segment (idx, g->outputSize ()) = (*g) (x_);
 	      idx += g->outputSize ();
 	    }
 	}
