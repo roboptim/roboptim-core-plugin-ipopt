@@ -627,12 +627,10 @@ namespace roboptim
 				    IpoptCalculatedQuantities* ip_cq)
       throw ()
     {
-      if (solver_.userIntermediateCallback ())
-	return (*solver_.userIntermediateCallback ())
-	  (mode, iter, obj_value, inf_pr, inf_du, mu, d_norm,
-	   regularization_size, alpha_du, alpha_pr, ls_trials,
-	   ip_data, ip_cq);
-      return true;
+      return (*solver_.userIntermediateCallback ())
+            (mode, iter, obj_value, inf_pr, inf_du, mu, d_norm,
+            regularization_size, alpha_du, alpha_pr, ls_trials,
+            ip_data, ip_cq);
     }
 
     template <typename T>
