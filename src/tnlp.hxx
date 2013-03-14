@@ -338,8 +338,12 @@ namespace roboptim
 	{
 	  //FIXME: always dense for now.
 	  int idx = 0;
-	  for (int i = 0; i < m; ++i)
-	    for (int j = 0; j < n; ++j)
+	  // Eigen matrix are by default in colunmn major
+	  // so a table 0 1 2 3 is see as a matrix: 0 2 by Eigen
+	  //                                        1 3
+	  // so we must fill (iRow,jCol) as 0:(0,0), 1:(1,0), 2:(0,1), 3:(1,1)
+	  for (int j = 0; j < n; ++j)
+	    for (int i = 0; i < m; ++i)
 	      {
 		iRow[idx] = i, jCol[idx] = j;
 		++idx;
