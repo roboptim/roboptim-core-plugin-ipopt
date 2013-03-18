@@ -33,6 +33,8 @@ namespace Ipopt
 {
   class IpoptApplication;
   class TNLP;
+  class IpoptData;
+  class IpoptCalculatedQuantities;
   template <typename T> class SmartPtr;
 } // end of namespace Ipopt
 
