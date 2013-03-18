@@ -523,10 +523,21 @@ namespace roboptim
       return false;
     }
 
+#define FILL_RESULT()					\
+      array_to_vector (res.x, x);			\
+      res.constraints.resize (m);			\
+      array_to_vector (res.constraints, g);		\
+      res.lambda.resize (m);				\
+      array_to_vector (res.lambda, lambda);		\
+      res.value (0) = obj_value
 
-#define SWITCH_ERROR(NAME, ERROR)		\
-      case NAME:				\
-      solver_.result_ = SolverError (ERROR);	\
+#define SWITCH_ERROR(NAME, ERROR)			\
+      case NAME:					\
+      {						\
+      Result res (n, 1);				\
+      FILL_RESULT ();					\
+      solver_.result_ = SolverError (ERROR, res);	\
+      }						\
       break
 
 #define SWITCH_FATAL(NAME)			\
@@ -556,14 +567,6 @@ namespace roboptim
 
 #define MAP_IPOPT_FATALS(MACRO)						\
       MACRO(USER_REQUESTED_STOP)
-
-#define FILL_RESULT()					\
-      array_to_vector (res.x, x);			\
-      res.constraints.resize (m);			\
-      array_to_vector (res.constraints, g);		\
-      res.lambda.resize (m);				\
-      array_to_vector (res.lambda, lambda);		\
-      res.value (0) = obj_value
 
 
     template <typename T>
