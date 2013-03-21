@@ -50,9 +50,9 @@ namespace roboptim
   ~IpoptSolverCommon () throw ()
   {}
   
+  // /!\ this->result_ is filled by tnlp.hxx, do not overwrite!
 #define SWITCH_ERROR(NAME, ERROR)		\
   case NAME:					\
-  this->result_ = SolverError (ERROR);		\
   break
 
 #define SWITCH_FATAL(NAME)			\
