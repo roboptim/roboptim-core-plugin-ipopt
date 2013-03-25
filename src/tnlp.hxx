@@ -6,6 +6,7 @@
 # include <boost/mpl/vector.hpp>
 
 # include <roboptim/core/plugin/ipopt-td.hh>
+# include <roboptim/core/plugin/ipopt-sparse.hh>
 # include <roboptim/core/debug.hh>
 
 namespace roboptim
@@ -16,8 +17,8 @@ namespace roboptim
   {
     /// \internal
 #ifdef ROBOPTIM_CORE_IPOPT_PLUGIN_CHECK_GRADIENT
-    template <typename T>
-    void IpoptCheckGradient (const DerivableFunction& function,
+    template <typename T, typename F>
+    void IpoptCheckGradient (const F& function,
 			     unsigned functionId,
 			     Eigen::Map<const Function::vector_t>& x,
 			     int constraintId,
@@ -44,8 +45,8 @@ namespace roboptim
 	}
     }
 #else
-    template <typename T>
-    void IpoptCheckGradient (const DerivableFunction&,
+    template <typename T, typename F>
+    void IpoptCheckGradient (const F&,
 			     unsigned,
 			     Eigen::Map<const Function::vector_t>&,
 			     int,
@@ -62,30 +63,31 @@ namespace roboptim
 
     template  <typename T>
     Function::size_type
-    computeConstraintsOutputSize (const T& pb)
+    computeConstraintsOutputSize (const T& solver)
     {
       BOOST_MPL_ASSERT_RELATION
-	( (boost::mpl::size<typename T::constraintsList_t>::value), ==, 2);
+	( (boost::mpl::size<typename T::problem_t::constraintsList_t>::value),
+	  ==, 2);
 
       // Non-linear function type is supposed to be the second
       // constraint type and the linear function type is the
       // first.
       typedef typename
-	boost::mpl::at<typename T::constraintsList_t,
+	boost::mpl::at<typename T::problem_t::constraintsList_t,
 		       boost::mpl::int_<1> >::type
 	nonLinearFunction_t;
 
       typedef typename
-	boost::mpl::at<typename T::constraintsList_t,
+	boost::mpl::at<typename T::problem_t::constraintsList_t,
 		       boost::mpl::int_<0> >::type
 	linearFunction_t;
 
       Function::size_type result = 0;
-      typedef typename T::constraints_t::const_iterator citer_t;
-      for (citer_t it = pb.constraints ().begin ();
-	   it != pb.constraints ().end (); ++it)
+      typedef typename T::problem_t::constraints_t::const_iterator citer_t;
+      for (citer_t it = solver.problem ().constraints ().begin ();
+	   it != solver.problem ().constraints ().end (); ++it)
 	{
-	  shared_ptr<DifferentiableFunction> g;
+	  shared_ptr<typename T::commonConstraintFunction_t> g;
 	  if (it->which () == IpoptSolver::LINEAR)
 	    g = get<shared_ptr<linearFunction_t> > (*it);
 	  else
@@ -113,7 +115,22 @@ namespace roboptim
     Function::size_type
     Tnlp<T>::constraintsOutputSize ()
     {
-      return computeConstraintsOutputSize (solver_.problem ());
+      return computeConstraintsOutputSize (solver_);
+    }
+
+    template <>
+    inline bool
+    Tnlp<IpoptSolverSparse>::get_nlp_info (Index& n, Index& m, Index& nnz_jac_g,
+					   Index& nnz_h_lag,
+					   TNLP::IndexStyleEnum& index_style)
+      throw ()
+    {
+      n = static_cast<Index> (solver_.problem ().function ().inputSize ());
+      m = static_cast<Index> (constraintsOutputSize ());
+      nnz_jac_g = 4242;
+      nnz_h_lag = 0; // unused
+      index_style = TNLP::C_STYLE;
+      return true;
     }
 
     template <typename T>
@@ -124,8 +141,8 @@ namespace roboptim
     {
       n = static_cast<Index> (solver_.problem ().function ().inputSize ());
       m = static_cast<Index> (constraintsOutputSize ());
-      nnz_jac_g = n * m; //FIXME: use a dense matrix for now.
-      nnz_h_lag = n * (n + 1) / 2; //FIXME: use a dense matrix for now.
+      nnz_jac_g = n * m;
+      nnz_h_lag = n * (n + 1) / 2;
       index_style = TNLP::C_STYLE;
       return true;
     }
@@ -211,13 +228,13 @@ namespace roboptim
 	{
 	  LinearityType type =
 	    (it->which () == LINEAR) ? TNLP::LINEAR : TNLP::NON_LINEAR;
-	  shared_ptr<DifferentiableFunction> g;
+	  shared_ptr<typename solver_t::commonConstraintFunction_t> g;
 	  if (type == LINEAR)
 	    g = get<shared_ptr<linearFunction_t> > (*it);
 	  else
 	    g = get<shared_ptr<nonLinearFunction_t> > (*it);
 
-	  for (unsigned j = 0; j < g->outputSize (); ++j)
+	  for (Function::size_type j = 0; j < g->outputSize (); ++j)
 	    const_types[idx++] = type;
 	}
       return true;
@@ -347,7 +364,7 @@ namespace roboptim
 	  for (citer_t it = solver_.problem ().constraints ().begin ();
 	       it != solver_.problem ().constraints ().end (); ++it)
 	    {
-	      shared_ptr<DifferentiableFunction> g;
+	      shared_ptr<typename solver_t::commonConstraintFunction_t> g;
 	      if (it->which () == LINEAR)
 		g = get<shared_ptr<linearFunction_t> > (*it);
 	      else
@@ -364,11 +381,11 @@ namespace roboptim
     }
 
 
-    template <typename T>
-    bool
-    Tnlp<T>::eval_jac_g(Index n, const Number* x, bool new_x,
-			Index m, Index, Index* iRow,
-			Index *jCol, Number* values)
+    template <>
+    inline bool
+    Tnlp<IpoptSolverSparse>::eval_jac_g(Index n, const Number* x, bool new_x,
+					Index m, Index, Index* iRow,
+					Index *jCol, Number* values)
 	     throw ()
     {
       using namespace boost;
@@ -411,7 +428,75 @@ namespace roboptim
 	      for (citer_t it = solver_.problem ().constraints ().begin ();
 		   it != solver_.problem ().constraints ().end (); ++it)
 		{
-		  shared_ptr<DifferentiableFunction> g;
+		  shared_ptr<typename solver_t::commonConstraintFunction_t> g;
+		  if (it->which () == LINEAR)
+		    g = get<shared_ptr<linearFunction_t> > (*it);
+		  else
+		    g = get<shared_ptr<nonLinearFunction_t> > (*it);
+
+		  jacobian_->block
+		    (idx, 0, g->outputSize (), n) = g->jacobian (x_);
+		  idx += g->outputSize ();
+
+		  IpoptCheckGradient
+		    (*g, 0, x_,
+		     constraintId++, solver_);
+		}
+	    }
+	  Eigen::Map<Function::matrix_t> values_ (values, m, n);
+	  values_ =  *jacobian_;
+	}
+
+      return true;
+    }
+
+    template <typename T>
+    bool
+    Tnlp<T>::eval_jac_g(Index n, const Number* x, bool new_x,
+			Index m, Index, Index* iRow,
+			Index *jCol, Number* values)
+	     throw ()
+    {
+      using namespace boost;
+      Function::size_type n_ = static_cast<Function::size_type> (n);
+      assert (solver_.problem ().function ().inputSize () == n_);
+      assert (constraintsOutputSize () == m);
+
+      if (!values)
+	{
+	  int idx = 0;
+	  // Eigen matrix are by default in colunmn major
+	  // so a table 0 1 2 3 is see as a matrix: 0 2 by Eigen
+	  //                                        1 3
+	  // so we must fill (iRow,jCol) as 0:(0,0), 1:(1,0), 2:(0,1), 3:(1,1)
+	  for (int j = 0; j < n; ++j)
+	    for (int i = 0; i < m; ++i)
+	      {
+		iRow[idx] = i, jCol[idx] = j;
+		++idx;
+	      }
+	}
+      else
+	{
+	  if (new_x || !jacobian_)
+	    {
+	      if (!jacobian_)
+		jacobian_ = Function::matrix_t
+		  (constraintsOutputSize (),
+		   solver_.problem ().function ().inputSize ());
+
+	      Eigen::Map<const Function::vector_t> x_ (x, n);
+
+	      typedef typename
+		solver_t::problem_t::constraints_t::const_iterator
+		citer_t;
+
+	      Function::size_type idx = 0;
+	      int constraintId = 0;
+	      for (citer_t it = solver_.problem ().constraints ().begin ();
+		   it != solver_.problem ().constraints ().end (); ++it)
+		{
+		  shared_ptr<typename solver_t::commonConstraintFunction_t> g;
 		  if (it->which () == LINEAR)
 		    g = get<shared_ptr<linearFunction_t> > (*it);
 		  else

@@ -16,24 +16,21 @@
 # Define the directory where plug-ins will be installed.
 SET(PLUGINDIR lib/roboptim-core)
 
-# Ipopt plug-in (with only gradient computation).
-ADD_LIBRARY(roboptim-core-plugin-ipopt MODULE
-  ipopt.cc tnlp.hh tnlp.hxx doc.hh ${HEADERS}
-  )
-SET_TARGET_PROPERTIES(roboptim-core-plugin-ipopt PROPERTIES
-  PREFIX ""
-  SOVERSION 1.1.0)
-INSTALL(TARGETS roboptim-core-plugin-ipopt DESTINATION ${PLUGINDIR})
-PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-ipopt ipopt)
-PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-ipopt roboptim-core)
+MACRO(IPOPT_PLUGIN NAME)
+  ADD_LIBRARY(roboptim-core-plugin-${NAME} MODULE
+    ${NAME}.cc tnlp.hh tnlp.hxx doc.hh ${HEADERS}
+    )
+  SET_TARGET_PROPERTIES(roboptim-core-plugin-${NAME} PROPERTIES
+    PREFIX ""
+    SOVERSION 1.1.0)
+  INSTALL(TARGETS roboptim-core-plugin-${NAME} DESTINATION ${PLUGINDIR})
+  PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-${NAME} ipopt)
+  PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-${NAME} roboptim-core)
+ENDMACRO()
 
+# Ipopt plug-in (with only gradient computation).
+IPOPT_PLUGIN(ipopt)
+# Ipopt plug-in (with only gradient computation and sparse matrices).
+IPOPT_PLUGIN(ipopt-sparse)
 # Ipopt twice differentiable (td) plug-in (require hessian computation).
-ADD_LIBRARY(roboptim-core-plugin-ipopt-td MODULE
-  ipopt-td.cc tnlp.hh tnlp.hxx doc.hh ${HEADERS}
-  )
-SET_TARGET_PROPERTIES(roboptim-core-plugin-ipopt-td PROPERTIES
-  PREFIX ""
-  SOVERSION 1.1.0)
-INSTALL(TARGETS roboptim-core-plugin-ipopt-td DESTINATION ${PLUGINDIR})
-PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-ipopt-td ipopt)
-PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-ipopt-td roboptim-core)
+IPOPT_PLUGIN(ipopt-td)

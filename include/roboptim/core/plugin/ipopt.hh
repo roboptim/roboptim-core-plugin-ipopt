@@ -58,7 +58,7 @@ namespace roboptim
   /// to provide hessians in your function's problems.
   class ROBOPTIM_DLLEXPORT IpoptSolver
     : public IpoptSolverCommon<
-    Solver<DerivableFunction,
+    Solver<DifferentiableFunction,
 	   boost::mpl::vector<LinearFunction, DifferentiableFunction> > >
   {
   public:
@@ -69,6 +69,11 @@ namespace roboptim
 
     /// \brief Parent type.
     typedef IpoptSolverCommon<solver_t> parent_t;
+
+    /// \brief Common function type.
+    ///
+    /// Fuction type which can contain any kind of constraint.
+    typedef DifferentiableFunction commonConstraintFunction_t;
 
     /// \brief Instantiate the solver from a problem.
     ///

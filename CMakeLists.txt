@@ -29,6 +29,7 @@ SET(HEADERS
   ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt-parameters-updater.hh
   ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt-td.hh
   ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt.hh
+  ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt-sparse.hh
   )
 
 SETUP_PROJECT()
