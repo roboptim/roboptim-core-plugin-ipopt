@@ -127,7 +127,28 @@ namespace roboptim
     {
       n = static_cast<Index> (solver_.problem ().function ().inputSize ());
       m = static_cast<Index> (constraintsOutputSize ());
-      nnz_jac_g = 4242;
+
+      // compute number of non zeros elements in jacobian constraint.
+      nnz_jac_g = 0;
+      typedef typename solver_t::problem_t::constraints_t::const_iterator
+	citer_t;
+      for (citer_t it = solver_.problem ().constraints ().begin ();
+	   it != solver_.problem ().constraints ().end (); ++it)
+	{
+	  // FIXME: should make sure we are in the bounds.
+	  Function::vector_t x (n);
+	  x.setZero ();
+
+	  shared_ptr<typename solver_t::commonConstraintFunction_t> g;
+	  if (it->which () == LINEAR)
+	    g = get<shared_ptr<linearFunction_t> > (*it);
+	  else
+	    g = get<shared_ptr<nonLinearFunction_t> > (*it);
+
+	  nnz_jac_g += g->jacobian (x).nonZeros ();
+	}
+
+
       nnz_h_lag = 0; // unused
       index_style = TNLP::C_STYLE;
       return true;
@@ -393,18 +414,43 @@ namespace roboptim
       assert (solver_.problem ().function ().inputSize () == n_);
       assert (constraintsOutputSize () == m);
 
+      if (!jacobian_)
+	jacobian_ = function_t::matrix_t
+	  (constraintsOutputSize (),
+	   solver_.problem ().function ().inputSize ());
+
       if (!values)
 	{
-	  //FIXME: always dense for now.
+	  // First evaluate the constraints in zero to build the
+	  // constraints jacobian.
 	  int idx = 0;
-	  // Eigen matrix are by default in colunmn major
-	  // so a table 0 1 2 3 is see as a matrix: 0 2 by Eigen
-	  //                                        1 3
-	  // so we must fill (iRow,jCol) as 0:(0,0), 1:(1,0), 2:(0,1), 3:(1,1)
-	  for (int j = 0; j < n; ++j)
-	    for (int i = 0; i < m; ++i)
+	  typedef typename solver_t::problem_t::constraints_t::const_iterator
+	    citer_t;
+	  for (citer_t it = solver_.problem ().constraints ().begin ();
+	       it != solver_.problem ().constraints ().end (); ++it)
+	    {
+	      // FIXME: should make sure we are in the bounds.
+	      Function::vector_t x (n);
+	      x.setZero ();
+
+	      shared_ptr<typename solver_t::commonConstraintFunction_t> g;
+	      if (it->which () == LINEAR)
+		g = get<shared_ptr<linearFunction_t> > (*it);
+	      else
+		g = get<shared_ptr<nonLinearFunction_t> > (*it);
+
+	      jacobian_->middleRows
+		(idx, g->outputSize ()) = g->jacobian (x);
+	      idx += g->outputSize ();
+	    }
+
+	  // Then look for non-zero values.
+	  idx = 0;
+	  for (int k = 0; k < jacobian_->outerSize (); ++k)
+	    for (function_t::jacobian_t::InnerIterator it (*jacobian_, k);
+		 it; ++it)
 	      {
-		iRow[idx] = i, jCol[idx] = j;
+		iRow[idx] = it.row (), jCol[idx] = it.col ();
 		++idx;
 	      }
 	}
@@ -412,18 +458,13 @@ namespace roboptim
 	{
 	  if (new_x || !jacobian_)
 	    {
-	      if (!jacobian_)
-		jacobian_ = Function::matrix_t
-		  (constraintsOutputSize (),
-		   solver_.problem ().function ().inputSize ());
-
 	      Eigen::Map<const Function::vector_t> x_ (x, n);
 
 	      typedef typename
 		solver_t::problem_t::constraints_t::const_iterator
 		citer_t;
 
-	      Function::size_type idx = 0;
+	      int idx = 0;
 	      int constraintId = 0;
 	      for (citer_t it = solver_.problem ().constraints ().begin ();
 		   it != solver_.problem ().constraints ().end (); ++it)
@@ -434,8 +475,8 @@ namespace roboptim
 		  else
 		    g = get<shared_ptr<nonLinearFunction_t> > (*it);
 
-		  jacobian_->block
-		    (idx, 0, g->outputSize (), n) = g->jacobian (x_);
+		  jacobian_->middleRows
+		    (idx, g->outputSize ()) = g->jacobian (x_);
 		  idx += g->outputSize ();
 
 		  IpoptCheckGradient
