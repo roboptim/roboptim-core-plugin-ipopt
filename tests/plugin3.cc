@@ -59,6 +59,55 @@ BOOST_AUTO_TEST_CASE (plugin3)
                 << boost::get<SolverError> (res).what ()
                 << std::endl;
       BOOST_CHECK_EQUAL (res.which (), solver_t::SOLVER_VALUE);
+      return;
+    }
+
+  // Get the result.
+  Result& result = boost::get<Result> (res);
+
+  // Display the result.
+  (*output) << "A solution has been found: " << std::endl;
+  (*output) << result << std::endl;
+
+  std::cout << output->str () << std::endl;
+  BOOST_CHECK (output->match_pattern ());
+}
+
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(plugin3_sparse, 1)
+BOOST_AUTO_TEST_CASE (plugin3_sparse)
+{
+  typedef Solver<DifferentiableSparseFunction,
+		 boost::mpl::vector<DifferentiableSparseFunction> > solver_t;
+
+  boost::shared_ptr<boost::test_tools::output_test_stream>
+    output = retrievePattern ("plugin3-sparse");
+
+  F<EigenMatrixSparse> f;
+
+  solver_t::problem_t pb (f);
+  initialize_problem<solver_t::problem_t,
+		     roboptim::DifferentiableSparseFunction,
+		     EigenMatrixSparse> (pb);
+
+  // Initialize solver
+  SolverFactory<solver_t> factory ("ipopt-sparse", pb);
+  solver_t& solver = factory ();
+
+  // Compute the minimum and retrieve the result.
+  solver_t::result_t res = solver.minimum ();
+
+  // Display solver information.
+  (*output) << solver << std::endl;
+
+  // Check if the minimization has succeed.
+  if (res.which () != solver_t::SOLVER_VALUE)
+    {
+      std::cout << "A solution should have been found. Failing..."
+                << std::endl
+                << boost::get<SolverError> (res).what ()
+                << std::endl;
+      BOOST_CHECK_EQUAL (res.which (), solver_t::SOLVER_VALUE);
+      return;
     }
 
   // Get the result.
