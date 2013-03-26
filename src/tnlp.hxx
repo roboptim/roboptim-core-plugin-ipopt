@@ -136,7 +136,7 @@ namespace roboptim
 	   it != solver_.problem ().constraints ().end (); ++it)
 	{
 	  // FIXME: should make sure we are in the bounds.
-	  Function::vector_t x (n);
+	  typename function_t::vector_t x (n);
 	  x.setZero ();
 
 	  shared_ptr<typename solver_t::commonConstraintFunction_t> g;
@@ -322,8 +322,8 @@ namespace roboptim
 
       if (new_x || !cost_)
 	{
-	  cost_ = Function::vector_t (1);
-	  Eigen::Map<const Function::argument_t> x_ (x, n);
+	  cost_ = typename function_t::vector_t (1);
+	  Eigen::Map<const typename function_t::argument_t> x_ (x, n);
 	  solver_.problem ().function () (*cost_, x_);
 	}
       obj_value = (*cost_)[0];
@@ -340,17 +340,17 @@ namespace roboptim
       if (new_x || !costGradient_)
 	{
 	  if (!costGradient_)
-	    costGradient_ = Function::vector_t
+	    costGradient_ = typename function_t::gradient_t
 	      (solver_.problem ().function ().inputSize ());
 
-	  Eigen::Map<const Function::vector_t> x_ (x, n);
+	  Eigen::Map<const typename function_t::argument_t> x_ (x, n);
 	  solver_.problem ().function ().gradient (*costGradient_, x_, 0);
 
 	  IpoptCheckGradient
 	    (solver_.problem ().function (), 0, x_, -1, solver_);
 	}
 
-      Eigen::Map<Function::vector_t> grad_f_ (grad_f, n);
+      Eigen::Map<typename function_t::vector_t> grad_f_ (grad_f, n);
       grad_f_ =  *costGradient_;
       return true;
     }
@@ -362,7 +362,8 @@ namespace roboptim
 	     throw ()
     {
       using namespace boost;
-      Function::size_type n_ = static_cast<Function::size_type> (n);
+      typename function_t::size_type n_ =
+	static_cast<typename function_t::size_type> (n);
 
       assert (solver_.problem ().function ().inputSize () == n_);
       assert (constraintsOutputSize () == m);
@@ -370,18 +371,19 @@ namespace roboptim
       if (new_x || !constraints_)
 	{
 	  if (!constraints_)
-	    constraints_ = Function::vector_t (constraintsOutputSize ());
+	    constraints_ =
+	      typename function_t::result_t (constraintsOutputSize ());
 
 #ifndef ROBOPTIM_DO_NOT_CHECK_ALLOCATION
 	  Eigen::internal::set_is_malloc_allowed (true);
 #endif //! ROBOPTIM_DO_NOT_CHECK_ALLOCATION
 
-	  Eigen::Map<const Function::vector_t> x_ (x, n);
+	  Eigen::Map<const typename function_t::argument_t> x_ (x, n);
 
 	  typedef typename solver_t::problem_t::constraints_t::const_iterator
 	    citer_t;
 
-	  Function::size_type idx = 0;
+	  typename function_t::size_type idx = 0;
 	  for (citer_t it = solver_.problem ().constraints ().begin ();
 	       it != solver_.problem ().constraints ().end (); ++it)
 	    {
@@ -396,7 +398,7 @@ namespace roboptim
 	    }
 	}
 
-      Eigen::Map<Function::matrix_t> g_ (g, m, 1);
+      Eigen::Map<typename function_t::result_t> g_ (g, m, 1);
       g_ =  *constraints_;
       return true;
     }
@@ -410,7 +412,7 @@ namespace roboptim
 	     throw ()
     {
       using namespace boost;
-      Function::size_type n_ = static_cast<Function::size_type> (n);
+      function_t::size_type n_ = static_cast<function_t::size_type> (n);
       assert (solver_.problem ().function ().inputSize () == n_);
       assert (constraintsOutputSize () == m);
 
@@ -430,7 +432,7 @@ namespace roboptim
 	       it != solver_.problem ().constraints ().end (); ++it)
 	    {
 	      // FIXME: should make sure we are in the bounds.
-	      Function::vector_t x (n);
+	      function_t::vector_t x (n);
 	      x.setZero ();
 
 	      shared_ptr<typename solver_t::commonConstraintFunction_t> g;
@@ -458,7 +460,7 @@ namespace roboptim
 	{
 	  if (new_x || !jacobian_)
 	    {
-	      Eigen::Map<const Function::vector_t> x_ (x, n);
+	      Eigen::Map<const function_t::vector_t> x_ (x, n);
 
 	      typedef typename
 		solver_t::problem_t::constraints_t::const_iterator
@@ -484,8 +486,9 @@ namespace roboptim
 		     constraintId++, solver_);
 		}
 	    }
-	  Eigen::Map<Function::matrix_t> values_ (values, m, n);
-	  values_ =  *jacobian_;
+	  // Eigen::Map<typename function_t::matrix_t> values_
+	  //   (values, m, n);
+	  // values_ =  *jacobian_; FIXME FIXME FIXME
 	}
 
       return true;
@@ -499,7 +502,8 @@ namespace roboptim
 	     throw ()
     {
       using namespace boost;
-      Function::size_type n_ = static_cast<Function::size_type> (n);
+      typename function_t::size_type n_ =
+	static_cast<typename function_t::size_type> (n);
       assert (solver_.problem ().function ().inputSize () == n_);
       assert (constraintsOutputSize () == m);
 
@@ -522,17 +526,17 @@ namespace roboptim
 	  if (new_x || !jacobian_)
 	    {
 	      if (!jacobian_)
-		jacobian_ = Function::matrix_t
+		jacobian_ = typename function_t::matrix_t
 		  (constraintsOutputSize (),
 		   solver_.problem ().function ().inputSize ());
 
-	      Eigen::Map<const Function::vector_t> x_ (x, n);
+	      Eigen::Map<const typename function_t::vector_t> x_ (x, n);
 
 	      typedef typename
 		solver_t::problem_t::constraints_t::const_iterator
 		citer_t;
 
-	      Function::size_type idx = 0;
+	      typename function_t::size_type idx = 0;
 	      int constraintId = 0;
 	      for (citer_t it = solver_.problem ().constraints ().begin ();
 		   it != solver_.problem ().constraints ().end (); ++it)
@@ -552,7 +556,8 @@ namespace roboptim
 		     constraintId++, solver_);
 		}
 	    }
-	  Eigen::Map<Function::matrix_t> values_ (values, m, n);
+	  Eigen::Map<typename function_t::matrix_t> values_
+	    (values, m, n);
 	  values_ =  *jacobian_;
 	}
 
@@ -598,7 +603,8 @@ namespace roboptim
        Index* jCol, Number* values)
       throw ()
     {
-      Function::size_type n_ = static_cast<Function::size_type> (n);
+      typename function_t::size_type n_ =
+	static_cast<typename function_t::size_type> (n);
 
       assert (solver_.problem ().function ().inputSize () == n_);
       assert (constraintsOutputSize () == m);

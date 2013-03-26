@@ -26,19 +26,20 @@
 #include "shared-tests/hs071.hh"
 
 using namespace roboptim;
-typedef Solver<TwiceDerivableFunction,
-	       boost::mpl::vector<TwiceDerivableFunction> > solver_t;
+typedef Solver<TwiceDifferentiableFunction,
+	       boost::mpl::vector<TwiceDifferentiableFunction> > solver_t;
 
 BOOST_AUTO_TEST_CASE (plugin)
 {
   boost::shared_ptr<boost::test_tools::output_test_stream>
     output = retrievePattern ("plugin");
 
-  F f;
+  F<EigenMatrixDense> f;
 
   solver_t::problem_t pb (f);
   initialize_problem<solver_t::problem_t,
-    roboptim::TwiceDerivableFunction> (pb);
+		     roboptim::TwiceDifferentiableFunction,
+		     EigenMatrixDense> (pb);
 
   // Initialize solver
   SolverFactory<solver_t> factory ("ipopt-td", pb);

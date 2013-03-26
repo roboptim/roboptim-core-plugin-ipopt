@@ -34,11 +34,12 @@ BOOST_AUTO_TEST_CASE (plugin3)
   boost::shared_ptr<boost::test_tools::output_test_stream>
     output = retrievePattern ("plugin3");
 
-  F f;
+  F<EigenMatrixDense> f;
 
   solver_t::problem_t pb (f);
   initialize_problem<solver_t::problem_t,
-    roboptim::TwiceDerivableFunction> (pb);
+		     roboptim::TwiceDifferentiableFunction,
+		     EigenMatrixDense> (pb);
 
   // Initialize solver
   SolverFactory<solver_t> factory ("ipopt", pb);

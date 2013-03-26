@@ -173,13 +173,13 @@ namespace roboptim
       typedef typename solver_t::problem_t::function_t function_t;
 
       /// \brief Cost function buffer.
-      boost::optional<typename function_t::vector_t> cost_;
+      boost::optional<typename function_t::result_t> cost_;
 
       /// \brief Cost gradient buffer.
-      boost::optional<typename function_t::vector_t> costGradient_;
+      boost::optional<typename function_t::gradient_t> costGradient_;
 
       /// \brief Constraints buffer.
-      boost::optional<typename function_t::vector_t> constraints_;
+      boost::optional<typename function_t::result_t> constraints_;
 
       /// \brief Constraints jacobian buffer.
       boost::optional<typename function_t::matrix_t> jacobian_;
