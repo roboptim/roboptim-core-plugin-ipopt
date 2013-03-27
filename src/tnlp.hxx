@@ -318,6 +318,7 @@ namespace roboptim
     Tnlp<T>::eval_f (Index n, const Number* x, bool new_x, Number& obj_value)
       throw ()
     {
+      new_x = true;
       assert (solver_.problem ().function ().inputSize () - n == 0);
 
       if (new_x || !cost_)
@@ -335,6 +336,7 @@ namespace roboptim
     Tnlp<T>::eval_grad_f (Index n, const Number* x, bool new_x, Number* grad_f)
         throw ()
     {
+      new_x = true;
       assert (solver_.problem ().function ().inputSize () - n == 0);
 
       if (new_x || !costGradient_)
@@ -361,6 +363,7 @@ namespace roboptim
 		     Index m, Number* g)
 	     throw ()
     {
+      new_x = true;
       using namespace boost;
       typename function_t::size_type n_ =
 	static_cast<typename function_t::size_type> (n);
@@ -411,6 +414,7 @@ namespace roboptim
 					Index *jCol, Number* values)
 	     throw ()
     {
+      new_x = true;
       using namespace boost;
       function_t::size_type n_ = static_cast<function_t::size_type> (n);
       assert (solver_.problem ().function ().inputSize () == n_);
@@ -501,6 +505,7 @@ namespace roboptim
 			Index *jCol, Number* values)
 	     throw ()
     {
+      new_x = true;
       using namespace boost;
       typename function_t::size_type n_ =
 	static_cast<typename function_t::size_type> (n);
