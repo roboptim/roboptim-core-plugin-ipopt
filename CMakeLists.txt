@@ -32,6 +32,8 @@ SET(HEADERS
   ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt-sparse.hh
   )
 
+SET(PKG_CONFIG_ADDITIONAL_VARIABLES plugindir ${PKG_CONFIG_ADDITIONAL_VARIABLES})
+
 SETUP_PROJECT()
 
 # Search for dependencies.
