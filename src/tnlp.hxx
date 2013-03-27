@@ -418,7 +418,7 @@ namespace roboptim
 
       if (!jacobian_)
 	jacobian_ = function_t::matrix_t
-	  (constraintsOutputSize (),
+	  (static_cast<function_t::matrix_t::Index> (constraintsOutputSize ()),
 	   solver_.problem ().function ().inputSize ());
 
       if (!values)
