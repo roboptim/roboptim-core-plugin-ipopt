@@ -14,7 +14,14 @@
 # along with roboptim-core.  If not, see <http://www.gnu.org/licenses/>.
 
 # Include shared test suite.
-SET(SOLVER_NAME "ipopt")
 SET(PLUGIN_PATH "${CMAKE_BINARY_DIR}/src")
 
-ADD_SUBDIRECTORY(shared-tests)
+SET(SOLVER_NAME "ipopt")
+SET(FUNCTION_TYPE ::roboptim::EigenMatrixDense)
+SET(PROGRAM_SUFFIX "")
+INCLUDE(shared-tests/CMakeLists.txt)
+
+SET(SOLVER_NAME "ipopt-sparse")
+SET(FUNCTION_TYPE ::roboptim::EigenMatrixSparse)
+SET(PROGRAM_SUFFIX "-sparse")
+INCLUDE(shared-tests/CMakeLists.txt)
