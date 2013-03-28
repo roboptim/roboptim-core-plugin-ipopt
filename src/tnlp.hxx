@@ -410,8 +410,10 @@ namespace roboptim
     template <>
     inline bool
     Tnlp<IpoptSolverSparse>::eval_jac_g(Index n, const Number* x, bool new_x,
-					Index m, Index, Index* iRow,
-					Index *jCol, Number* values)
+					Index m,
+					Index nele_jac,
+					Index* iRow, Index *jCol,
+					Number* values)
 	     throw ()
     {
       new_x = true;
@@ -427,6 +429,9 @@ namespace roboptim
 
       if (!values)
 	{
+	  memset (iRow, 0, nele_jac * sizeof (double));
+	  memset (jCol, 0, nele_jac * sizeof (double));
+
 	  // First evaluate the constraints in zero to build the
 	  // constraints jacobian.
 	  int idx = 0;
@@ -456,12 +461,14 @@ namespace roboptim
 	    for (function_t::jacobian_t::InnerIterator it (*jacobian_, k);
 		 it; ++it)
 	      {
+		assert (idx < nele_jac);
 		iRow[idx] = it.row (), jCol[idx] = it.col ();
 		++idx;
 	      }
 	}
       else
 	{
+	  memset (values, 0, nele_jac * sizeof (double));
 	  if (new_x || !jacobian_)
 	    {
 	      Eigen::Map<const function_t::vector_t> x_ (x, n);
@@ -470,6 +477,7 @@ namespace roboptim
 		solver_t::problem_t::constraints_t::const_iterator
 		citer_t;
 
+	      // build internal jacobian matrix by concatenating constraints.
 	      int idx = 0;
 	      int constraintId = 0;
 	      for (citer_t it = solver_.problem ().constraints ().begin ();
@@ -490,9 +498,13 @@ namespace roboptim
 		     constraintId++, solver_);
 		}
 	    }
-	  // Eigen::Map<typename function_t::matrix_t> values_
-	  //   (values, m, n);
-	  // values_ =  *jacobian_; FIXME FIXME FIXME
+
+	  // Copy jacobian values from interal sparse matrix.
+	  int idx = 0;
+	  for (int k = 0; k < jacobian_->outerSize (); ++k)
+	    for (function_t::jacobian_t::InnerIterator it (*jacobian_, k);
+		 it; ++it)
+	      values[++idx] = it.value ();
 	}
 
       return true;
