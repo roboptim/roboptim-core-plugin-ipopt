@@ -315,42 +315,35 @@ namespace roboptim
 
     template <typename T>
     bool
-    Tnlp<T>::eval_f (Index n, const Number* x, bool new_x, Number& obj_value)
+    Tnlp<T>::eval_f (Index n, const Number* x, bool, Number& obj_value)
       throw ()
     {
-      new_x = true;
       assert (solver_.problem ().function ().inputSize () - n == 0);
 
-      if (new_x || !cost_)
-	{
-	  cost_ = typename function_t::vector_t (1);
-	  Eigen::Map<const typename function_t::argument_t> x_ (x, n);
-	  solver_.problem ().function () (*cost_, x_);
-	}
+      cost_ = typename function_t::vector_t (1);
+      Eigen::Map<const typename function_t::argument_t> x_ (x, n);
+      solver_.problem ().function () (*cost_, x_);
+
       obj_value = (*cost_)[0];
       return true;
     }
 
     template <typename T>
     bool
-    Tnlp<T>::eval_grad_f (Index n, const Number* x, bool new_x, Number* grad_f)
+    Tnlp<T>::eval_grad_f (Index n, const Number* x, bool, Number* grad_f)
         throw ()
     {
-      new_x = true;
       assert (solver_.problem ().function ().inputSize () - n == 0);
 
-      if (new_x || !costGradient_)
-	{
-	  if (!costGradient_)
-	    costGradient_ = typename function_t::gradient_t
-	      (solver_.problem ().function ().inputSize ());
+      if (!costGradient_)
+	costGradient_ = typename function_t::gradient_t
+	  (solver_.problem ().function ().inputSize ());
 
-	  Eigen::Map<const typename function_t::argument_t> x_ (x, n);
-	  solver_.problem ().function ().gradient (*costGradient_, x_, 0);
+      Eigen::Map<const typename function_t::argument_t> x_ (x, n);
+      solver_.problem ().function ().gradient (*costGradient_, x_, 0);
 
-	  IpoptCheckGradient
-	    (solver_.problem ().function (), 0, x_, -1, solver_);
-	}
+      IpoptCheckGradient
+        (solver_.problem ().function (), 0, x_, -1, solver_);
 
       Eigen::Map<typename function_t::vector_t> grad_f_ (grad_f, n);
       grad_f_ =  *costGradient_;
@@ -359,11 +352,10 @@ namespace roboptim
 
     template <typename T>
     bool
-    Tnlp<T>::eval_g (Index n, const Number* x, bool new_x,
+    Tnlp<T>::eval_g (Index n, const Number* x, bool,
 		     Index m, Number* g)
 	     throw ()
     {
-      new_x = true;
       using namespace boost;
       typename function_t::size_type n_ =
 	static_cast<typename function_t::size_type> (n);
@@ -371,35 +363,32 @@ namespace roboptim
       assert (solver_.problem ().function ().inputSize () == n_);
       assert (constraintsOutputSize () == m);
 
-      if (new_x || !constraints_)
-	{
-	  if (!constraints_)
-	    constraints_ =
-	      typename function_t::result_t (constraintsOutputSize ());
+      if (!constraints_)
+	constraints_ =
+	  typename function_t::result_t (constraintsOutputSize ());
 
 #ifndef ROBOPTIM_DO_NOT_CHECK_ALLOCATION
-	  Eigen::internal::set_is_malloc_allowed (true);
+      Eigen::internal::set_is_malloc_allowed (true);
 #endif //! ROBOPTIM_DO_NOT_CHECK_ALLOCATION
 
-	  Eigen::Map<const typename function_t::argument_t> x_ (x, n);
+      Eigen::Map<const typename function_t::argument_t> x_ (x, n);
 
-	  typedef typename solver_t::problem_t::constraints_t::const_iterator
-	    citer_t;
+      typedef typename solver_t::problem_t::constraints_t::const_iterator
+	citer_t;
 
-	  typename function_t::size_type idx = 0;
-	  for (citer_t it = solver_.problem ().constraints ().begin ();
-	       it != solver_.problem ().constraints ().end (); ++it)
-	    {
-	      shared_ptr<typename solver_t::commonConstraintFunction_t> g;
-	      if (it->which () == LINEAR)
-		g = get<shared_ptr<linearFunction_t> > (*it);
-	      else
-		g = get<shared_ptr<nonLinearFunction_t> > (*it);
+      typename function_t::size_type idx = 0;
+      for (citer_t it = solver_.problem ().constraints ().begin ();
+	   it != solver_.problem ().constraints ().end (); ++it)
+	{
+	  shared_ptr<typename solver_t::commonConstraintFunction_t> g;
+	  if (it->which () == LINEAR)
+	    g = get<shared_ptr<linearFunction_t> > (*it);
+	  else
+	    g = get<shared_ptr<nonLinearFunction_t> > (*it);
 
-	      constraints_->segment (idx, g->outputSize ()) = (*g) (x_);
-	      idx += g->outputSize ();
-	    }
-	}
+	  constraints_->segment (idx, g->outputSize ()) = (*g) (x_);
+	  idx += g->outputSize ();
+        }
 
       Eigen::Map<typename function_t::result_t> g_ (g, m, 1);
       g_ =  *constraints_;
@@ -409,14 +398,13 @@ namespace roboptim
 
     template <>
     inline bool
-    Tnlp<IpoptSolverSparse>::eval_jac_g(Index n, const Number* x, bool new_x,
+    Tnlp<IpoptSolverSparse>::eval_jac_g(Index n, const Number* x, bool,
 					Index m,
 					Index nele_jac,
 					Index* iRow, Index *jCol,
 					Number* values)
 	     throw ()
     {
-      new_x = true;
       using namespace boost;
       function_t::size_type n_ = static_cast<function_t::size_type> (n);
       assert (solver_.problem ().function ().inputSize () == n_);
@@ -461,46 +449,40 @@ namespace roboptim
 	    for (function_t::jacobian_t::InnerIterator it (*jacobian_, k);
 		 it; ++it)
 	      {
-		assert (idx < nele_jac);
 		iRow[idx] = it.row (), jCol[idx] = it.col ();
 		++idx;
 	      }
 	}
       else
 	{
-	  memset (values, 0, nele_jac * sizeof (double));
-	  if (new_x || !jacobian_)
+	  Eigen::Map<const function_t::vector_t> x_ (x, n);
+
+	  typedef typename
+	    solver_t::problem_t::constraints_t::const_iterator
+	    citer_t;
+
+	  int idx = 0;
+	  int constraintId = 0;
+	  for (citer_t it = solver_.problem ().constraints ().begin ();
+	       it != solver_.problem ().constraints ().end (); ++it)
 	    {
-	      Eigen::Map<const function_t::vector_t> x_ (x, n);
+	      shared_ptr<typename solver_t::commonConstraintFunction_t> g;
+	      if (it->which () == LINEAR)
+		g = get<shared_ptr<linearFunction_t> > (*it);
+	      else
+		g = get<shared_ptr<nonLinearFunction_t> > (*it);
 
-	      typedef typename
-		solver_t::problem_t::constraints_t::const_iterator
-		citer_t;
+	      jacobian_->middleRows
+		(idx, g->outputSize ()) = g->jacobian (x_);
+	      idx += g->outputSize ();
 
-	      // build internal jacobian matrix by concatenating constraints.
-	      int idx = 0;
-	      int constraintId = 0;
-	      for (citer_t it = solver_.problem ().constraints ().begin ();
-		   it != solver_.problem ().constraints ().end (); ++it)
-		{
-		  shared_ptr<typename solver_t::commonConstraintFunction_t> g;
-		  if (it->which () == LINEAR)
-		    g = get<shared_ptr<linearFunction_t> > (*it);
-		  else
-		    g = get<shared_ptr<nonLinearFunction_t> > (*it);
-
-		  jacobian_->middleRows
-		    (idx, g->outputSize ()) = g->jacobian (x_);
-		  idx += g->outputSize ();
-
-		  IpoptCheckGradient
-		    (*g, 0, x_,
-		     constraintId++, solver_);
-		}
+	      IpoptCheckGradient
+		(*g, 0, x_,
+		 constraintId++, solver_);
 	    }
 
 	  // Copy jacobian values from interal sparse matrix.
-	  int idx = 0;
+	  idx = 0;
 	  for (int k = 0; k < jacobian_->outerSize (); ++k)
 	    for (function_t::jacobian_t::InnerIterator it (*jacobian_, k);
 		 it; ++it)
@@ -512,12 +494,11 @@ namespace roboptim
 
     template <typename T>
     bool
-    Tnlp<T>::eval_jac_g(Index n, const Number* x, bool new_x,
+    Tnlp<T>::eval_jac_g(Index n, const Number* x, bool,
 			Index m, Index, Index* iRow,
 			Index *jCol, Number* values)
 	     throw ()
     {
-      new_x = true;
       using namespace boost;
       typename function_t::size_type n_ =
 	static_cast<typename function_t::size_type> (n);
@@ -540,38 +521,35 @@ namespace roboptim
 	}
       else
 	{
-	  if (new_x || !jacobian_)
+	  if (!jacobian_)
+	    jacobian_ = typename function_t::matrix_t
+	      (constraintsOutputSize (),
+	       solver_.problem ().function ().inputSize ());
+
+	  Eigen::Map<const typename function_t::vector_t> x_ (x, n);
+
+	  typedef typename
+	    solver_t::problem_t::constraints_t::const_iterator
+	    citer_t;
+
+	  typename function_t::size_type idx = 0;
+	  int constraintId = 0;
+	  for (citer_t it = solver_.problem ().constraints ().begin ();
+	       it != solver_.problem ().constraints ().end (); ++it)
 	    {
-	      if (!jacobian_)
-		jacobian_ = typename function_t::matrix_t
-		  (constraintsOutputSize (),
-		   solver_.problem ().function ().inputSize ());
+	      shared_ptr<typename solver_t::commonConstraintFunction_t> g;
+	      if (it->which () == LINEAR)
+		g = get<shared_ptr<linearFunction_t> > (*it);
+	      else
+		g = get<shared_ptr<nonLinearFunction_t> > (*it);
 
-	      Eigen::Map<const typename function_t::vector_t> x_ (x, n);
+	      jacobian_->block
+		(idx, 0, g->outputSize (), n) = g->jacobian (x_);
+	      idx += g->outputSize ();
 
-	      typedef typename
-		solver_t::problem_t::constraints_t::const_iterator
-		citer_t;
-
-	      typename function_t::size_type idx = 0;
-	      int constraintId = 0;
-	      for (citer_t it = solver_.problem ().constraints ().begin ();
-		   it != solver_.problem ().constraints ().end (); ++it)
-		{
-		  shared_ptr<typename solver_t::commonConstraintFunction_t> g;
-		  if (it->which () == LINEAR)
-		    g = get<shared_ptr<linearFunction_t> > (*it);
-		  else
-		    g = get<shared_ptr<nonLinearFunction_t> > (*it);
-
-		  jacobian_->block
-		    (idx, 0, g->outputSize (), n) = g->jacobian (x_);
-		  idx += g->outputSize ();
-
-		  IpoptCheckGradient
-		    (*g, 0, x_,
-		     constraintId++, solver_);
-		}
+	      IpoptCheckGradient
+		(*g, 0, x_,
+		 constraintId++, solver_);
 	    }
 	  Eigen::Map<typename function_t::matrix_t> values_
 	    (values, m, n);
