@@ -68,6 +68,10 @@ namespace roboptim
     /// \brief Virtual destructor.
     virtual ~UserIntermediateCallback () {}
 
+    //FIXME: this is wrong. We should not rely here on IPOPT types
+    //directly as it forces our user to link against the library.
+    //Ipopt types should be wrapped/replaced with custom ones.
+
     /// \brief Callback to be called.
     /// You can implement this function yourself. Default version returns true.
     ///

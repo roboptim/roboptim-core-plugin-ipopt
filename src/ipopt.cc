@@ -45,6 +45,12 @@ namespace roboptim
 
   {
     parameters ()["ipopt.hessian_approximation"].value = "limited-memory";
+
+#ifdef ROBOPTIM_CORE_PLUGIN_IPOPT_VERBOSE
+    Ipopt::SmartPtr<Ipopt::Journal> stdout_jrnl =
+      getIpoptApplication ()->Jnlst ()->AddFileJournal
+      ("console", "stdout", Ipopt::J_ITERSUMMARY);
+#endif // ROBPOTIM_CORE_PLUGIN_IPOPT_VERBOSE
   }
 } // end of namespace roboptim
 

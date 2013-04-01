@@ -18,7 +18,7 @@ SET(PLUGINDIR lib/roboptim-core)
 
 MACRO(IPOPT_PLUGIN NAME)
   ADD_LIBRARY(roboptim-core-plugin-${NAME} MODULE
-    ${NAME}.cc tnlp.hh tnlp.hxx doc.hh ${HEADERS}
+    ${NAME}.cc tnlp.cc tnlp.hh tnlp.hxx doc.hh ${HEADERS}
     )
   SET_TARGET_PROPERTIES(roboptim-core-plugin-${NAME} PROPERTIES
     PREFIX ""
