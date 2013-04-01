@@ -574,9 +574,9 @@ namespace roboptim
       if (!values)
 	{
 	  int idx = 0;
-	  // RobOptim jacobian matrices are row-major.
-	  for (int i = 0; i < m; ++i)
-	    for (int j = 0; j < n; ++j)
+	  // DENSE RobOptim jacobian matrices are column-major.
+	  for (int j = 0; j < n; ++j)
+	    for (int i = 0; i < m; ++i)
 	      {
 		iRow[idx] = i, jCol[idx] = j;
 		++idx;
