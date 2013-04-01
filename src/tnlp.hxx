@@ -434,6 +434,10 @@ namespace roboptim
 	  typedef typename solver_t::problem_t::constraints_t::const_iterator
 	    citer_t;
 	  unsigned constraintId = 0;
+
+	  typedef Eigen::Triplet<double> triplet_t;
+	  std::vector<triplet_t> coefficients;
+
 	  for (citer_t it = solver_.problem ().constraints ().begin ();
 	       it != solver_.problem ().constraints ().end ();
 	       ++it, ++constraintId)
@@ -462,11 +466,14 @@ namespace roboptim
 			 - solver_.problem ().boundsVector ()
 			 [constraintId][i].first) / 2.;
 		    // otherwise use the non-infinite bound.
-		    else if (solver_.problem ().boundsVector ()[constraintId][i].first
+		    else if (solver_.problem ().boundsVector ()
+			     [constraintId][i].first
 			     != Function::infinity ())
-		      x[i] = solver_.problem ().boundsVector ()[constraintId][i].first;
+		      x[i] = solver_.problem ().boundsVector ()
+			[constraintId][i].first;
 		    else
-		      x[i] = solver_.problem ().boundsVector ()[constraintId][i].second;
+		      x[i] = solver_.problem ().boundsVector ()
+			[constraintId][i].second;
 		}
 	      else // other use initial guess.
 		x = *(solver_.problem ().startingPoint ());
@@ -477,18 +484,17 @@ namespace roboptim
 	      else
 		g = get<shared_ptr<nonLinearFunction_t> > (*it);
 
-	      typedef Eigen::Triplet<double> triplet_t;
-	      std::vector<triplet_t> coefficients;
 	      typename function_t::jacobian_t jacobian = g->jacobian (x);
-	      for (int k = 0; k < jacobian_->outerSize (); ++k)
+	      for (int k = 0; k < jacobian.outerSize (); ++k)
 		for (typename function_t::jacobian_t::InnerIterator
 		       it (jacobian, k); it; ++it)
 		  coefficients.push_back
 		    (triplet_t (idx + it.row (), it.col (), it.value ()));
-	      jacobian_->setFromTriplets
-		(coefficients.begin (), coefficients.end ());
 	      idx += g->outputSize ();
 	    }
+
+	  jacobian_->setFromTriplets
+	    (coefficients.begin (), coefficients.end ());
 
 	  LOG4CXX_TRACE
 	    (GenericSolver::logger, "full problem jacobian...\n" << *jacobian_);
@@ -568,12 +574,9 @@ namespace roboptim
       if (!values)
 	{
 	  int idx = 0;
-	  // Eigen matrix are by default in colunmn major
-	  // so a table 0 1 2 3 is see as a matrix: 0 2 by Eigen
-	  //                                        1 3
-	  // so we must fill (iRow,jCol) as 0:(0,0), 1:(1,0), 2:(0,1), 3:(1,1)
-	  for (int j = 0; j < n; ++j)
-	    for (int i = 0; i < m; ++i)
+	  // RobOptim jacobian matrices are row-major.
+	  for (int i = 0; i < m; ++i)
+	    for (int j = 0; j < n; ++j)
 	      {
 		iRow[idx] = i, jCol[idx] = j;
 		++idx;
