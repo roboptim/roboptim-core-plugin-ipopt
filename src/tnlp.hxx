@@ -411,26 +411,65 @@ namespace roboptim
       assert (constraintsOutputSize () == m);
 
       if (!jacobian_)
-	jacobian_ = function_t::matrix_t
-	  (static_cast<function_t::matrix_t::Index> (constraintsOutputSize ()),
-	   solver_.problem ().function ().inputSize ());
+	{
+	  jacobian_ = function_t::matrix_t
+	    (static_cast<function_t::matrix_t::Index> (constraintsOutputSize ()),
+	     solver_.problem ().function ().inputSize ());
+	  jacobian_->reserve (nele_jac);
+	}
 
       if (!values)
 	{
-	  memset (iRow, 0, nele_jac * sizeof (double));
-	  memset (jCol, 0, nele_jac * sizeof (double));
+	  LOG4CXX_TRACE
+	    (GenericSolver::logger, "Looking for non-zeros elements.");
+	  LOG4CXX_TRACE (GenericSolver::logger, "nele_jac = " << nele_jac);
+
+	  // Emptying iRow/jCol arrays.
+	  memset (iRow, 0, nele_jac * sizeof (Index));
+	  memset (jCol, 0, nele_jac * sizeof (Index));
 
 	  // First evaluate the constraints in zero to build the
 	  // constraints jacobian.
 	  int idx = 0;
 	  typedef typename solver_t::problem_t::constraints_t::const_iterator
 	    citer_t;
+	  unsigned constraintId = 0;
 	  for (citer_t it = solver_.problem ().constraints ().begin ();
-	       it != solver_.problem ().constraints ().end (); ++it)
+	       it != solver_.problem ().constraints ().end ();
+	       ++it, ++constraintId)
 	    {
-	      // FIXME: should make sure we are in the bounds.
+	      LOG4CXX_TRACE
+		(GenericSolver::logger,
+		 "Compute jacobian of constraint id = " << constraintId
+		 << "to count for non-zeros elements");
+
 	      function_t::vector_t x (n);
-	      x.setZero ();
+	      // Look for a place to evaluate the jacobian of the
+	      // current constraint.
+	      // If we do not have an initial guess...
+	      if (!solver_.problem ().startingPoint ())
+		for (unsigned i = 0; i < x.size (); ++i)
+		  {
+		    // if constraint is in an interval, evaluate at middle.
+		    if (solver_.problem ().boundsVector ()[constraintId][i].first
+			!= Function::infinity ()
+			&&
+			solver_.problem ().boundsVector ()[constraintId][i].second
+			!= Function::infinity ())
+		      x[i] =
+			(solver_.problem ().boundsVector ()
+			 [constraintId][i].second
+			 - solver_.problem ().boundsVector ()
+			 [constraintId][i].first) / 2.;
+		    // otherwise use the non-infinite bound.
+		    else if (solver_.problem ().boundsVector ()[constraintId][i].first
+			     != Function::infinity ())
+		      x[i] = solver_.problem ().boundsVector ()[constraintId][i].first;
+		    else
+		      x[i] = solver_.problem ().boundsVector ()[constraintId][i].second;
+		}
+	      else // other use initial guess.
+		x = *(solver_.problem ().startingPoint ());
 
 	      shared_ptr<typename solver_t::commonConstraintFunction_t> g;
 	      if (it->which () == LINEAR)
@@ -438,18 +477,36 @@ namespace roboptim
 	      else
 		g = get<shared_ptr<nonLinearFunction_t> > (*it);
 
-	      jacobian_->middleRows
-		(idx, g->outputSize ()) = g->jacobian (x);
+	      typedef Eigen::Triplet<double> triplet_t;
+	      std::vector<triplet_t> coefficients;
+	      typename function_t::jacobian_t jacobian = g->jacobian (x);
+	      for (int k = 0; k < jacobian_->outerSize (); ++k)
+		for (typename function_t::jacobian_t::InnerIterator
+		       it (jacobian, k); it; ++it)
+		  coefficients.push_back
+		    (triplet_t (idx + it.row (), it.col (), it.value ()));
+	      jacobian_->setFromTriplets
+		(coefficients.begin (), coefficients.end ());
 	      idx += g->outputSize ();
 	    }
 
+	  LOG4CXX_TRACE
+	    (GenericSolver::logger, "full problem jacobian...\n" << *jacobian_);
+
 	  // Then look for non-zero values.
+	  LOG4CXX_TRACE (GenericSolver::logger, "filling iRow and jCol...");
 	  idx = 0;
 	  for (int k = 0; k < jacobian_->outerSize (); ++k)
 	    for (function_t::jacobian_t::InnerIterator it (*jacobian_, k);
 		 it; ++it)
 	      {
 		iRow[idx] = it.row (), jCol[idx] = it.col ();
+		LOG4CXX_TRACE
+		  (GenericSolver::logger, "row: " << it.row ()
+		   << " / col: " << it.col ()
+		   << " / index: " << it.index ()
+		   << " / value: " << it.value ()
+		   << "\nidx: " << idx);
 		++idx;
 	      }
 	}
@@ -486,7 +543,10 @@ namespace roboptim
 	  for (int k = 0; k < jacobian_->outerSize (); ++k)
 	    for (function_t::jacobian_t::InnerIterator it (*jacobian_, k);
 		 it; ++it)
-	      values[++idx] = it.value ();
+	      {
+		assert (idx < nele_jac);
+		values[idx++] = it.value ();
+	      }
 	}
 
       return true;
