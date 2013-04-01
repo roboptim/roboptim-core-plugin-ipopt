@@ -19,6 +19,10 @@ SET(PLUGIN_PATH "${CMAKE_BINARY_DIR}/src")
 SET(SOLVER_NAME "ipopt")
 SET(FUNCTION_TYPE ::roboptim::EigenMatrixDense)
 SET(PROGRAM_SUFFIX "")
+SET(COST_FUNCTION_TYPE ::roboptim::GenericDifferentiableFunction)
+SET(CONSTRAINT_TYPE_1 ::roboptim::GenericLinearFunction)
+SET(CONSTRAINT_TYPE_2 ::roboptim::GenericDifferentiableFunction)
+
 INCLUDE(shared-tests/CMakeLists.txt)
 
 SET(SOLVER_NAME "ipopt-sparse")
