@@ -91,12 +91,12 @@ namespace roboptim
       if (!values)
 	{
 	  LOG4CXX_TRACE
-	    (GenericSolver::logger, "Looking for non-zeros elements.");
-	  LOG4CXX_TRACE (GenericSolver::logger, "nele_jac = " << nele_jac);
+	    (logger, "Looking for non-zeros elements.");
+	  LOG4CXX_TRACE (logger, "nele_jac = " << nele_jac);
 
 	  // Emptying iRow/jCol arrays.
-	  memset (iRow, 0, nele_jac * sizeof (Index));
-	  memset (jCol, 0, nele_jac * sizeof (Index));
+	  memset (iRow, 0, static_cast<std::size_t> (nele_jac) * sizeof (Index));
+	  memset (jCol, 0, static_cast<std::size_t> (nele_jac) * sizeof (Index));
 
 	  // First evaluate the constraints in zero to build the
 	  // constraints jacobian.
@@ -113,7 +113,7 @@ namespace roboptim
 	       ++it, ++constraintId)
 	    {
 	      LOG4CXX_TRACE
-		(GenericSolver::logger,
+		(logger,
 		 "Compute jacobian of constraint id = " << constraintId
 		 << "to count for non-zeros elements");
 
@@ -158,8 +158,12 @@ namespace roboptim
 	      for (int k = 0; k < jacobian.outerSize (); ++k)
 		for (typename function_t::jacobian_t::InnerIterator
 		       it (jacobian, k); it; ++it)
-		  coefficients.push_back
-		    (triplet_t (idx + it.row (), it.col (), it.value ()));
+		  {
+		    unsigned int row = static_cast<unsigned> (idx + it.row ());
+		    unsigned int col = static_cast<unsigned> (it.col ());
+		    coefficients.push_back
+		      (triplet_t (row, col, it.value ()));
+		  }
 	      idx += g->outputSize ();
 	    }
 
@@ -167,10 +171,10 @@ namespace roboptim
 	    (coefficients.begin (), coefficients.end ());
 
 	  LOG4CXX_TRACE
-	    (GenericSolver::logger, "full problem jacobian...\n" << *jacobian_);
+	    (logger, "full problem jacobian...\n" << *jacobian_);
 
 	  // Then look for non-zero values.
-	  LOG4CXX_TRACE (GenericSolver::logger, "filling iRow and jCol...");
+	  LOG4CXX_TRACE (logger, "filling iRow and jCol...");
 	  idx = 0;
 
 	  for (int k = 0; k < jacobian_->outerSize (); ++k)
@@ -179,7 +183,7 @@ namespace roboptim
 	      {
 		iRow[idx] = it.row (), jCol[idx] = it.col ();
 		LOG4CXX_TRACE
-		  (GenericSolver::logger, "row: " << it.row ()
+		  (logger, "row: " << it.row ()
 		   << " / col: " << it.col ()
 		   << " / index: " << it.index ()
 		   << " / value: " << it.value ()

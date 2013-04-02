@@ -146,6 +146,9 @@ namespace roboptim
 			    Number obj_factor,
 			    const Number* lambda) throw ();
 
+    /// \brief Pointer to function logger (see log4cxx documentation).
+    static log4cxx::LoggerPtr logger;
+
     private:
       /// \brief Non-linear function type.
       ///
