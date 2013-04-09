@@ -13,9 +13,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with roboptim-core.  If not, see <http://www.gnu.org/licenses/>.
 
-# Define the directory where plug-ins will be installed.
-SET(PLUGINDIR lib/roboptim-core)
-
 MACRO(IPOPT_PLUGIN NAME)
   ADD_LIBRARY(roboptim-core-plugin-${NAME} MODULE
     ${NAME}.cc tnlp.cc tnlp.hh tnlp.hxx doc.hh ${HEADERS}
@@ -23,7 +20,8 @@ MACRO(IPOPT_PLUGIN NAME)
   SET_TARGET_PROPERTIES(roboptim-core-plugin-${NAME} PROPERTIES
     PREFIX ""
     SOVERSION 1.1.0)
-  INSTALL(TARGETS roboptim-core-plugin-${NAME} DESTINATION ${PLUGINDIR})
+  INSTALL(TARGETS roboptim-core-plugin-${NAME}
+    DESTINATION ${ROBOPTIM_CORE_PLUGINDIR})
   PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-${NAME} ipopt)
   PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-${NAME} roboptim-core)
 ENDMACRO()
