@@ -178,6 +178,11 @@ namespace roboptim
     DEFINE_PARAMETER ("ipopt.mu_strategy",
 		      "update strategy for barrier parameter", "adaptive");
 
+    //  Restoration Phase
+    DEFINE_PARAMETER
+      ("ipopt.expect_infeasible_problem",
+       "enable heuristics to quickly detect an infeasible problem", "no");
+
     // Solver choice.
     // Enable by default MUMPS which is the only open source
     // solver provided by Ipopt.
