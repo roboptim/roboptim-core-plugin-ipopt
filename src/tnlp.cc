@@ -69,7 +69,7 @@ namespace roboptim
     template <>
     bool
     Tnlp<IpoptSolverSparse>::eval_jac_g(Index n, const Number* x, bool,
-					Index m,
+					Index ROBOPTIM_DEBUG_ONLY(m),
 					Index nele_jac,
 					Index* iRow, Index *jCol,
 					Number* values)
