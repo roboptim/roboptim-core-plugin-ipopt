@@ -349,8 +349,8 @@ namespace roboptim
 	     throw ()
     {
       using namespace boost;
-      typename function_t::size_type n_ =
-	static_cast<typename function_t::size_type> (n);
+      ROBOPTIM_DEBUG_ONLY(typename function_t::size_type n_ =
+			  static_cast<typename function_t::size_type> (n));
 
       assert (solver_.problem ().function ().inputSize () == n_);
       assert (constraintsOutputSize () == m);
@@ -405,8 +405,9 @@ namespace roboptim
 	     throw ()
     {
       using namespace boost;
-      typename function_t::size_type n_ =
-	static_cast<typename function_t::size_type> (n);
+
+      ROBOPTIM_DEBUG_ONLY(typename function_t::size_type n_ =
+			  static_cast<typename function_t::size_type> (n));
       assert (solver_.problem ().function ().inputSize () == n_);
       assert (constraintsOutputSize () == m);
 
@@ -500,8 +501,8 @@ namespace roboptim
        Index* jCol, Number* values)
       throw ()
     {
-      typename function_t::size_type n_ =
-	static_cast<typename function_t::size_type> (n);
+      ROBOPTIM_DEBUG_ONLY(typename function_t::size_type n_ =
+			  static_cast<typename function_t::size_type> (n));
 
       assert (solver_.problem ().function ().inputSize () == n_);
       assert (constraintsOutputSize () == m);
