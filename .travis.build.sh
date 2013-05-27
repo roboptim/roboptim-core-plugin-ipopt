@@ -17,8 +17,8 @@ mkdir -p "$install_dir"
 
 # Setup environment variables.
 export LD_LIBRARY_PATH="$install_dir/lib:$LD_LIBRARY_PATH"
-export LD_LIBRARY_PATH="$install_dir/lib/roboptim-core:$LD_LIBRARY_PATH"
-export PKG_CONFIG_PATH="$install_dir/lib/pkgconfig:$PKG_CONFIG_PATH"
+export LD_LIBRARY_PATH="$install_dir/lib/roboptim-core:$install_dir/lib/x86_64-linux-gnu/roboptim-core:$LD_LIBRARY_PATH"
+export PKG_CONFIG_PATH="$install_dir/lib/pkgconfig:$install_dir/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
 
 # Checkout Eigen.
 cd "$build_dir"
