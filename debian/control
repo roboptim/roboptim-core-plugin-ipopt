@@ -1,0 +1,62 @@
+Source: roboptim-core-plugin-ipopt
+Maintainer: Debian Science Maintainers <debian-science-maintainers@lists.alioth.debian.org>
+Uploaders: Thomas Moulard <thomas.moulard@gmail.com>
+Section: libs
+Priority: extra
+Build-Depends: debhelper (>= 9),
+	       pkg-kde-tools (>= 0.6),
+               cmake,
+	       pkg-config,
+               doxygen,
+               doxygen-latex,
+	       coinor-libipopt-dev,
+	       libroboptim-core-dev
+Standards-Version: 3.9.4
+Vcs-Browser: https://github.com/roboptim/roboptim-core-plugin-ipopt
+Vcs-Git: git://github.com/roboptim/roboptim-core-plugin-ipopt.git
+Homepage: http://www.roboptim.net/
+
+
+Package: libroboptim-core-plugin-ipopt-dev
+Section: libdevel
+Architecture: any
+Depends: coinor-libipopt-dev,
+	 libroboptim-core-dev,
+	 pkg-config,
+	 libroboptim-core-plugin-ipopt (= ${binary:Version}),
+         ${misc:Depends}
+Suggests: libroboptim-core-plugin-ipopt-doc
+Multi-Arch: same
+Description: numerical optimization library - development files
+ RobOptim is a set of packages designed to make robotics non-linear
+ optimization problem easier to solve. It is composed of several
+ packages which are focusing on different kind of problem related to
+ robotics, especially humanoid robotics.
+ .
+ This package contains development files (headers and shared library
+ symbolic link).
+
+Package: libroboptim-core-plugin-ipopt
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Pre-Depends: ${misc:Pre-Depends}
+Description: numerical optimization library
+ RobOptim is a set of packages designed to make robotics non-linear
+ optimization problem easier to solve. It is composed of several
+ packages which are focusing on different kind of problem related to
+ robotics, especially humanoid robotics.
+
+Package: libroboptim-core-plugin-ipopt-doc
+Architecture: all
+Section: doc
+Depends: ${misc:Depends}
+Multi-Arch: foreign
+Description: numerical optimization library - documentation
+ RobOptim is a set of packages designed to make robotics non-linear
+ optimization problem easier to solve. It is composed of several
+ packages which are focusing on different kind of problem related to
+ robotics, especially humanoid robotics.
+ .
+ This package contains the Doxygen generated documentation.

@@ -1,0 +1,3 @@
+usr/include/*
+usr/lib/*/roboptim-core/*.so
+usr/lib/*/pkgconfig/*.pc

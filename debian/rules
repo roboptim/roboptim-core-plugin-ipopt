@@ -1,0 +1,35 @@
+#!/usr/bin/make -f
+
+# Hardening.
+export DEB_BUILD_MAINT_OPTIONS=hardening=+all,-pie,+fortify
+
+CPPFLAGS:=$(shell dpkg-buildflags --get CPPFLAGS) -DHAVE_CSTDDEF
+CFLAGS:=$(shell dpkg-buildflags --get CFLAGS)
+CXXFLAGS:=$(shell dpkg-buildflags --get CXXFLAGS)
+LDFLAGS:=$(shell dpkg-buildflags --get LDFLAGS) -Wl,--as-needed
+
+CFLAGS+=$(CPPFLAGS)
+CXXFLAGS+=$(CPPFLAGS)
+
+# Multiarch.
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+# Set default symbol visibility to hidden.
+CXXFLAGS+=-fvisibility=hidden
+
+.PHONY: override_dh_auto_configure	\
+	override_dh_makeshlibs		\
+	override_dh_auto_test
+
+%:
+	dh  $@ --parallel --with pkgkde-symbolshelper
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+	-DCMAKE_INSTALL_LIBDIR=lib/${DEB_HOST_MULTIARCH} \
+	-DCMAKE_INSTALL_DOCDIR=share/doc/libroboptim-core-plugin-ipopt-doc
+
+override_dh_makeshlibs:
+	dh_makeshlibs -Xroboptim-core-plugin-
+
+override_dh_auto_test:
