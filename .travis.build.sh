@@ -16,9 +16,13 @@ mkdir -p "$build_dir"
 mkdir -p "$install_dir"
 
 # Setup environment variables.
-export LD_LIBRARY_PATH="$install_dir/lib:$LD_LIBRARY_PATH"
-export LD_LIBRARY_PATH="$install_dir/lib/roboptim-core:$LD_LIBRARY_PATH"
-export PKG_CONFIG_PATH="$install_dir/lib/pkgconfig:$PKG_CONFIG_PATH"
+export LD_LIBRARY_PATH="$install_dir/lib/$(dpkg-architecture -qDEB_BUILD_MULTIARCH):$install_dir/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$install_dir/lib/$(dpkg-architecture -qDEB_BUILD_MULTIARCH)/roboptim-core:$LD_LIBRARY_PATH"
+export PKG_CONFIG_PATH="$install_dir/lib/$(dpkg-architecture -qDEB_BUILD_MULTIARCH)/pkgconfig:$install_dir/lib/pkgconfig:$PKG_CONFIG_PATH"
+
+# Print paths for debugging
+echo "Printing environment variables..."
+env
 
 # Checkout Eigen.
 cd "$build_dir"
@@ -28,7 +32,7 @@ cd "$build_dir/eigen-eigen-5097c01bcdc4/"
 mkdir -p "$build_dir/eigen-eigen-5097c01bcdc4/_build"
 cd "$build_dir/eigen-eigen-5097c01bcdc4/_build"
 cmake .. -DCMAKE_INSTALL_PREFIX:STRING="$install_dir" \
-          -Dpkg_config_libdir:STRING="$install_dir/lib"
+         -Dpkg_config_libdir:STRING="$install_dir/lib/$(dpkg-architecture -qDEB_BUILD_MULTIARCH)"
 make
 make install
 
@@ -43,6 +47,7 @@ cd "$build_dir/Ipopt-3.10.3"
 # Force GCC for Ipopt, clang will not work.
 CC=gcc CXX=g++ ./configure --prefix="$install_dir"
 make
+make test
 make install
 
 # Checkout roboptim-core
@@ -59,4 +64,6 @@ cd "$build_dir"
 cmake "$root_dir" -DCMAKE_INSTALL_PREFIX="$install_dir"
 make
 make install
+# Print error logs when tests fail
+export CTEST_OUTPUT_ON_FAILURE=1
 make test
