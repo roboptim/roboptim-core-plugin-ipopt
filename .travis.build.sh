@@ -59,4 +59,6 @@ cd "$build_dir"
 cmake "$root_dir" -DCMAKE_INSTALL_PREFIX="$install_dir"
 make
 make install
+# Print error logs when tests fail
+export CTEST_OUTPUT_ON_FAILURE=1
 make test
