@@ -17,6 +17,7 @@
 
 #include <cassert>
 #include <cstring>
+#include <typeinfo>
 
 #include <boost/foreach.hpp>
 #include <boost/variant/apply_visitor.hpp>
@@ -62,12 +63,18 @@ extern "C"
   typedef IpoptSolverTd::solver_t solver_t;
 
   ROBOPTIM_DLLEXPORT unsigned getSizeOfProblem ();
+  ROBOPTIM_DLLEXPORT const char* getTypeIdOfConstraintsList ();
   ROBOPTIM_DLLEXPORT solver_t* create (const IpoptSolverTd::problem_t& pb);
   ROBOPTIM_DLLEXPORT void destroy (solver_t* p);
 
   ROBOPTIM_DLLEXPORT unsigned getSizeOfProblem ()
   {
     return sizeof (IpoptSolverTd::problem_t);
+  }
+
+  ROBOPTIM_DLLEXPORT const char* getTypeIdOfConstraintsList ()
+  {
+    return typeid (IpoptSolverTd::problem_t::constraintsList_t).name ();
   }
 
   ROBOPTIM_DLLEXPORT solver_t* create (const IpoptSolverTd::problem_t& pb)
