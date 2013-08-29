@@ -1,4 +1,4 @@
-// Copyright (C) 2010 by Thomas Moulard, AIST, CNRS, INRIA.
+// Copyright (C) 2009 by Thomas Moulard, AIST, CNRS, INRIA.
 //
 // This file is part of the roboptim.
 //
@@ -15,26 +15,23 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with roboptim.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef ROBOPTIM_CORE_IPOPT_HH
-# define ROBOPTIM_CORE_IPOPT_HH
+#ifndef ROBOPTIM_CORE_IPOPT_TD_HH
+# define ROBOPTIM_CORE_IPOPT_TD_HH
 # include <roboptim/core/sys.hh>
 # include <roboptim/core/portability.hh>
 
 # include <boost/mpl/vector.hpp>
 
 # include <coin/IpSmartPtr.hpp>
-# include <coin/IpReturnCodes.hpp> // for AlgorithmMode
 
 # include <roboptim/core/solver.hh>
-# include <roboptim/core/derivable-function.hh>
-# include <roboptim/core/plugin/ipopt-common.hh>
+# include <roboptim/core/twice-derivable-function.hh>
+# include <roboptim/core/plugin/ipopt/ipopt-common.hh>
 
 /// \brief Ipopt classes.
 namespace Ipopt
 {
   class IpoptApplication;
-  class IpoptData;
-  class IpoptCalculatedQuantities;
 } // end of namespace Ipopt
 
 
@@ -56,16 +53,16 @@ namespace roboptim
   ///
   /// \warning Ipopt needs twice derivable functions, so be sure
   /// to provide hessians in your function's problems.
-  class ROBOPTIM_DLLEXPORT IpoptSolver
+  class ROBOPTIM_DLLEXPORT IpoptSolverTd
     : public IpoptSolverCommon<
-    Solver<DifferentiableFunction,
-	   boost::mpl::vector<LinearFunction, DifferentiableFunction> > >
+    Solver <TwiceDifferentiableFunction,
+	    boost::mpl::vector<LinearFunction, TwiceDifferentiableFunction> > >
   {
   public:
     /// \brief RobOptim solver type.
-    typedef Solver<
-      DifferentiableFunction,
-      boost::mpl::vector<LinearFunction, DifferentiableFunction> > solver_t;
+    typedef Solver<TwiceDifferentiableFunction,
+      boost::mpl::vector<LinearFunction,
+			 TwiceDifferentiableFunction> > solver_t;
 
     /// \brief Parent type.
     typedef IpoptSolverCommon<solver_t> parent_t;
@@ -73,14 +70,14 @@ namespace roboptim
     /// \brief Common function type.
     ///
     /// Fuction type which can contain any kind of constraint.
-    typedef DifferentiableFunction commonConstraintFunction_t;
+    typedef TwiceDifferentiableFunction commonConstraintFunction_t;
 
     /// \brief Instantiate the solver from a problem.
     ///
     /// \param problem problem that will be solved
-    explicit IpoptSolver (const problem_t& problem) throw ();
+    explicit IpoptSolverTd (const problem_t& problem) throw ();
 
-    virtual ~IpoptSolver () throw () {}
+    virtual ~IpoptSolverTd () throw () {}
 
     template <typename T>
       friend class ::roboptim::detail::Tnlp;
@@ -88,5 +85,4 @@ namespace roboptim
 
   /// @}
 } // end of namespace roboptim
-
-#endif //! ROBOPTIM_CORE_IPOPT_HH
+#endif //! ROBOPTIM_CORE_IPOPT_TD_HH

@@ -27,8 +27,8 @@
 
 #include <roboptim/core/util.hh>
 
-#include "roboptim/core/plugin/ipopt-td.hh"
-#include "roboptim/core/plugin/ipopt-parameters-updater.hh"
+#include "roboptim/core/plugin/ipopt/ipopt-td.hh"
+#include "roboptim/core/plugin/ipopt/ipopt-parameters-updater.hh"
 #include "ipopt-common.hxx"
 #include "tnlp.hh"
 

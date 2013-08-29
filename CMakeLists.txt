@@ -25,11 +25,11 @@ SET(PROJECT_DESCRIPTION "RobOptim core IPOPT plug-in")
 SET(PROJECT_URL "http://github.com/laas/roboptim-core-plugin-ipopt")
 
 SET(HEADERS
-  ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt-common.hh
-  ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt-parameters-updater.hh
-  ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt-td.hh
-  ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt.hh
-  ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt-sparse.hh
+  ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt/ipopt-common.hh
+  ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt/ipopt-parameters-updater.hh
+  ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt/ipopt-td.hh
+  ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt/ipopt.hh
+  ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt/ipopt-sparse.hh
   )
 
 SET(PKG_CONFIG_ADDITIONAL_VARIABLES plugindir ${PKG_CONFIG_ADDITIONAL_VARIABLES})

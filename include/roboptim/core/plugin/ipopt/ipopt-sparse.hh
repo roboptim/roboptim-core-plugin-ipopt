@@ -1,4 +1,4 @@
-// Copyright (C) 2009 by Thomas Moulard, AIST, CNRS, INRIA.
+// Copyright (C) 2013 by Thomas Moulard, AIST, CNRS, INRIA.
 //
 // This file is part of the roboptim.
 //
@@ -15,23 +15,28 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with roboptim.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef ROBOPTIM_CORE_IPOPT_TD_HH
-# define ROBOPTIM_CORE_IPOPT_TD_HH
+#ifndef ROBOPTIM_CORE_IPOPT_SPARSE_HH
+# define ROBOPTIM_CORE_IPOPT_SPARSE_HH
 # include <roboptim/core/sys.hh>
 # include <roboptim/core/portability.hh>
 
 # include <boost/mpl/vector.hpp>
 
 # include <coin/IpSmartPtr.hpp>
+# include <coin/IpReturnCodes.hpp> // for AlgorithmMode
 
+# include <roboptim/core/fwd.hh>
 # include <roboptim/core/solver.hh>
-# include <roboptim/core/twice-derivable-function.hh>
-# include <roboptim/core/plugin/ipopt-common.hh>
+# include <roboptim/core/linear-function.hh>
+# include <roboptim/core/differentiable-function.hh>
+# include <roboptim/core/plugin/ipopt/ipopt-common.hh>
 
 /// \brief Ipopt classes.
 namespace Ipopt
 {
   class IpoptApplication;
+  class IpoptData;
+  class IpoptCalculatedQuantities;
 } // end of namespace Ipopt
 
 
@@ -53,16 +58,18 @@ namespace roboptim
   ///
   /// \warning Ipopt needs twice derivable functions, so be sure
   /// to provide hessians in your function's problems.
-  class ROBOPTIM_DLLEXPORT IpoptSolverTd
+  class ROBOPTIM_DLLEXPORT IpoptSolverSparse
     : public IpoptSolverCommon<
-    Solver <TwiceDifferentiableFunction,
-	    boost::mpl::vector<LinearFunction, TwiceDifferentiableFunction> > >
+    Solver<DifferentiableSparseFunction,
+	   boost::mpl::vector<LinearSparseFunction,
+			      DifferentiableSparseFunction> > >
   {
   public:
     /// \brief RobOptim solver type.
-    typedef Solver<TwiceDifferentiableFunction,
-      boost::mpl::vector<LinearFunction,
-			 TwiceDifferentiableFunction> > solver_t;
+    typedef Solver<
+      DifferentiableSparseFunction,
+      boost::mpl::vector<LinearSparseFunction,
+			 DifferentiableSparseFunction> > solver_t;
 
     /// \brief Parent type.
     typedef IpoptSolverCommon<solver_t> parent_t;
@@ -70,14 +77,14 @@ namespace roboptim
     /// \brief Common function type.
     ///
     /// Fuction type which can contain any kind of constraint.
-    typedef TwiceDifferentiableFunction commonConstraintFunction_t;
+    typedef DifferentiableSparseFunction commonConstraintFunction_t;
 
     /// \brief Instantiate the solver from a problem.
     ///
     /// \param problem problem that will be solved
-    explicit IpoptSolverTd (const problem_t& problem) throw ();
+    explicit IpoptSolverSparse (const problem_t& problem) throw ();
 
-    virtual ~IpoptSolverTd () throw () {}
+    virtual ~IpoptSolverSparse () throw () {}
 
     template <typename T>
       friend class ::roboptim::detail::Tnlp;
@@ -85,4 +92,5 @@ namespace roboptim
 
   /// @}
 } // end of namespace roboptim
-#endif //! ROBOPTIM_CORE_IPOPT_TD_HH
+
+#endif //! ROBOPTIM_CORE_IPOPT_SPARSE_HH

@@ -25,8 +25,8 @@
 # include <coin/IpSmartPtr.hpp>
 # include <coin/IpIpoptApplication.hpp>
 
-# include "roboptim/core/plugin/ipopt-parameters-updater.hh"
-# include "roboptim/core/plugin/ipopt-common.hh"
+# include "roboptim/core/plugin/ipopt/ipopt-parameters-updater.hh"
+# include "roboptim/core/plugin/ipopt/ipopt-common.hh"
 
 namespace roboptim
 {
@@ -40,16 +40,16 @@ namespace roboptim
       uic_ (new UserIntermediateCallback)
   {
     app_->Jnlst()->DeleteAllJournals();
-    
+
     // Initialize parameters.
     initializeParameters ();
   }
-  
+
   template<typename T>
   IpoptSolverCommon<T>::
   ~IpoptSolverCommon () throw ()
   {}
-  
+
   // /!\ this->result_ is filled by tnlp.hxx, do not overwrite!
 #define SWITCH_ERROR(NAME, ERROR)		\
   case NAME:					\

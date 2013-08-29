@@ -22,8 +22,8 @@
 # include <boost/mpl/size.hpp>
 # include <boost/mpl/vector.hpp>
 
-# include <roboptim/core/plugin/ipopt-td.hh>
-# include <roboptim/core/plugin/ipopt-sparse.hh>
+# include <roboptim/core/plugin/ipopt/ipopt-td.hh>
+# include <roboptim/core/plugin/ipopt/ipopt-sparse.hh>
 # include <roboptim/core/debug.hh>
 
 namespace roboptim

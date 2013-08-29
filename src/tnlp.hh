@@ -23,7 +23,7 @@
 # include <coin/IpSmartPtr.hpp>
 # include <coin/IpIpoptApplication.hpp>
 
-# include <roboptim/core/plugin/ipopt.hh>
+# include <roboptim/core/plugin/ipopt/ipopt.hh>
 
 #ifdef ROBOPTIM_CORE_IPOPT_PLUGIN_CHECK_GRADIENT
 # include <boost/format.hpp>

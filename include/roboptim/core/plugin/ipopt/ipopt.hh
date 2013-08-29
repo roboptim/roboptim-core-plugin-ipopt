@@ -1,4 +1,4 @@
-// Copyright (C) 2013 by Thomas Moulard, AIST, CNRS, INRIA.
+// Copyright (C) 2010 by Thomas Moulard, AIST, CNRS, INRIA.
 //
 // This file is part of the roboptim.
 //
@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with roboptim.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef ROBOPTIM_CORE_IPOPT_SPARSE_HH
-# define ROBOPTIM_CORE_IPOPT_SPARSE_HH
+#ifndef ROBOPTIM_CORE_IPOPT_HH
+# define ROBOPTIM_CORE_IPOPT_HH
 # include <roboptim/core/sys.hh>
 # include <roboptim/core/portability.hh>
 
@@ -25,11 +25,9 @@
 # include <coin/IpSmartPtr.hpp>
 # include <coin/IpReturnCodes.hpp> // for AlgorithmMode
 
-# include <roboptim/core/fwd.hh>
 # include <roboptim/core/solver.hh>
-# include <roboptim/core/linear-function.hh>
-# include <roboptim/core/differentiable-function.hh>
-# include <roboptim/core/plugin/ipopt-common.hh>
+# include <roboptim/core/derivable-function.hh>
+# include <roboptim/core/plugin/ipopt/ipopt-common.hh>
 
 /// \brief Ipopt classes.
 namespace Ipopt
@@ -58,18 +56,16 @@ namespace roboptim
   ///
   /// \warning Ipopt needs twice derivable functions, so be sure
   /// to provide hessians in your function's problems.
-  class ROBOPTIM_DLLEXPORT IpoptSolverSparse
+  class ROBOPTIM_DLLEXPORT IpoptSolver
     : public IpoptSolverCommon<
-    Solver<DifferentiableSparseFunction,
-	   boost::mpl::vector<LinearSparseFunction,
-			      DifferentiableSparseFunction> > >
+    Solver<DifferentiableFunction,
+	   boost::mpl::vector<LinearFunction, DifferentiableFunction> > >
   {
   public:
     /// \brief RobOptim solver type.
     typedef Solver<
-      DifferentiableSparseFunction,
-      boost::mpl::vector<LinearSparseFunction,
-			 DifferentiableSparseFunction> > solver_t;
+      DifferentiableFunction,
+      boost::mpl::vector<LinearFunction, DifferentiableFunction> > solver_t;
 
     /// \brief Parent type.
     typedef IpoptSolverCommon<solver_t> parent_t;
@@ -77,14 +73,14 @@ namespace roboptim
     /// \brief Common function type.
     ///
     /// Fuction type which can contain any kind of constraint.
-    typedef DifferentiableSparseFunction commonConstraintFunction_t;
+    typedef DifferentiableFunction commonConstraintFunction_t;
 
     /// \brief Instantiate the solver from a problem.
     ///
     /// \param problem problem that will be solved
-    explicit IpoptSolverSparse (const problem_t& problem) throw ();
+    explicit IpoptSolver (const problem_t& problem) throw ();
 
-    virtual ~IpoptSolverSparse () throw () {}
+    virtual ~IpoptSolver () throw () {}
 
     template <typename T>
       friend class ::roboptim::detail::Tnlp;
@@ -93,4 +89,4 @@ namespace roboptim
   /// @}
 } // end of namespace roboptim
 
-#endif //! ROBOPTIM_CORE_IPOPT_SPARSE_HH
+#endif //! ROBOPTIM_CORE_IPOPT_HH
