@@ -62,6 +62,10 @@ ADD_REQUIRED_DEPENDENCY("roboptim-core >= 0.5")
 # It does not defined HAVE_STDDEF even when it is needed so we will do
 # it manually
 CHECK_INCLUDE_FILE_CXX(stddef.h HAVE_STDDEF)
+IF(HAVE_STDDEF)
+  ADD_DEFINITIONS(-DHAVE_STDDEF)
+  PKG_CONFIG_APPEND_CFLAGS(-DHAVE_STDDEF)
+ENDIF()
 ADD_REQUIRED_DEPENDENCY("ipopt")
 
 # patch for ipopt: in the .pc file, the header path may be IpoptPath/include/coin
