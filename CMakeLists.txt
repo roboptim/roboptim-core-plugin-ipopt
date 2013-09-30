@@ -73,6 +73,14 @@ IF(HAVE_STDDEF_H)
 ENDIF()
 ADD_REQUIRED_DEPENDENCY("ipopt")
 
+# Make sure the MPI version of mumps is not used.
+#
+# This is a workaround a bug in the pkg-config file provided by some
+# Ubuntu releases where pkg-config always provide information about
+# how to link with the MPI version of MUMPS.
+STRING(REPLACE "-ldmumps" "-ldmumps_seq" IPOPT_LDFLAGS "${IPOPT_LDFLAGS}")
+
+
 # patch for ipopt: in the .pc file, the header path may be IpoptPath/include/coin
 #  for clarity, we want to have IpoptPath/include/ instead
 # This patch assumes that the initial header path has the following form :

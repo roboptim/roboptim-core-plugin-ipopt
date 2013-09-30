@@ -28,7 +28,7 @@ MACRO(IPOPT_PLUGIN NAME)
   # Make sure all symbols are defined.
   # See:
   # http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=592752
-  TARGET_LINK_LIBRARY(roboptim-core-plugin-${NAME} dmumps_seq)
+  TARGET_LINK_LIBRARIES(roboptim-core-plugin-${NAME} dmumps_seq)
 ENDMACRO()
 
 # Ipopt plug-in (with only gradient computation).
