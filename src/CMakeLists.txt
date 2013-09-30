@@ -24,6 +24,11 @@ MACRO(IPOPT_PLUGIN NAME)
     DESTINATION ${ROBOPTIM_CORE_PLUGINDIR})
   PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-${NAME} ipopt)
   PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-${NAME} roboptim-core)
+
+  # Make sure all symbols are defined.
+  # See:
+  # http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=592752
+  TARGET_LINK_LIBRARY(roboptim-core-plugin-${NAME} dmumps_seq)
 ENDMACRO()
 
 # Ipopt plug-in (with only gradient computation).
