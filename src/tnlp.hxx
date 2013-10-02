@@ -26,6 +26,11 @@
 # include <roboptim/core/plugin/ipopt/ipopt-sparse.hh>
 # include <roboptim/core/debug.hh>
 
+# include <coin/IpIpoptCalculatedQuantities.hpp>
+# include <coin/IpIpoptData.hpp>
+# include <coin/IpOrigIpoptNLP.hpp>
+# include <coin/IpTNLPAdapter.hpp>
+
 namespace roboptim
 {
   using namespace Ipopt;
@@ -649,21 +654,35 @@ namespace roboptim
 
     template <typename T>
     bool
-    Tnlp<T>::intermediate_callback (AlgorithmMode mode,
-				    Index iter, Number obj_value,
-				    Number inf_pr, Number inf_du,
-				    Number mu, Number d_norm,
-				    Number regularization_size,
-				    Number alpha_du, Number alpha_pr,
-				    Index ls_trials,
+    Tnlp<T>::intermediate_callback (AlgorithmMode /*mode*/,
+				    Index /*iter*/, Number /*obj_value*/,
+				    Number /*inf_pr*/, Number /*inf_du*/,
+				    Number /*mu*/, Number /*d_norm*/,
+				    Number /*regularization_size*/,
+				    Number /*alpha_du*/, Number /*alpha_pr*/,
+				    Index /*ls_trials*/,
 				    const IpoptData* ip_data,
 				    IpoptCalculatedQuantities* ip_cq)
       throw ()
     {
-      return (*solver_.userIntermediateCallback ())
-            (mode, iter, obj_value, inf_pr, inf_du, mu, d_norm,
-            regularization_size, alpha_du, alpha_pr, ls_trials,
-            ip_data, ip_cq);
+      if (!solver_.callback ())
+	return true;
+      if (!ip_cq)
+	return true;
+      Ipopt::OrigIpoptNLP* orignlp = dynamic_cast<OrigIpoptNLP*>
+	(GetRawPtr (ip_cq->GetIpoptNLP ()));
+      if (!orignlp)
+	return true;
+      Ipopt::TNLPAdapter* tnlp_adapter = dynamic_cast<TNLPAdapter*>
+	(GetRawPtr (orignlp->nlp ()));
+
+
+      typename function_t::vector_t primals
+	(solver_.problem ().function ().inputSize ());
+      tnlp_adapter->ResortX (*ip_data->curr ()->x (), &primals[0]);
+
+      solver_.callback () (primals, solver_.problem ());
+      return true;
     }
 
     template <typename T>

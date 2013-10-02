@@ -47,51 +47,6 @@ namespace roboptim
   template <typename T>
   class IpoptSolverCommon;
 
-  /// \brief Functor called at the end of each iteration.
-  ///
-  /// By inheriting this type and implementing the operator ()
-  /// method, then setting it as the userIntermediateCallback
-  /// of your solver, one can define a custom behavior to be
-  /// executed at the end of each iteration.
-  ///
-  /// See http://en.wikipedia.org/wiki/Function_object#In_C_and_C.2B.2B
-  /// for more information about functors.
-  ///
-  /// Functor parameters match original Ipopt parameters, see Ipopt
-  /// documentation to read explanation regarding their mathematical
-  /// meaning.
-  struct UserIntermediateCallback
-  {
-    /// \brief Default constructor.
-    UserIntermediateCallback () {}
-
-    /// \brief Virtual destructor.
-    virtual ~UserIntermediateCallback () {}
-
-    //FIXME: this is wrong. We should not rely here on IPOPT types
-    //directly as it forces our user to link against the library.
-    //Ipopt types should be wrapped/replaced with custom ones.
-
-    /// \brief Callback to be called.
-    /// You can implement this function yourself. Default version returns true.
-    ///
-    /// \return true means continue optimizating (or finish if it is the
-    ///         last iteration), false interrupt the optimization now.
-    virtual bool operator () (Ipopt::AlgorithmMode,
-                  int, double,
-                  double, double,
-                  double, double,
-                  double,
-                  double, double,
-                  int,
-                  const Ipopt::IpoptData*,
-                  Ipopt::IpoptCalculatedQuantities*)
-    {
-      return true;
-    }
-  };
-
-
   /// \brief Ipopt common solver.
   ///
   /// This solver shares common piece of code of the two solvers.
@@ -118,6 +73,7 @@ namespace roboptim
     /// \brief Parent type.
     typedef T parent_t;
 
+    typedef typename T::callback_t callback_t;
     typedef typename T::problem_t problem_t;
 
     /// \brief Instantiate the solver from a problem.
@@ -138,20 +94,16 @@ namespace roboptim
     virtual Ipopt::SmartPtr<Ipopt::IpoptApplication> getIpoptApplication ()
       throw ();
 
-    /// \brief Retrieve user intermeditate callback.
-    const boost::shared_ptr<UserIntermediateCallback>&
-    userIntermediateCallback () const
+    virtual void
+    setIterationCallback (callback_t callback) throw (std::runtime_error)
     {
-      return uic_;
+      callback_ = callback;
     }
 
-    /// \brief Retrieve user intermeditate callback.
-    boost::shared_ptr<UserIntermediateCallback>&
-    userIntermediateCallback ()
+    const callback_t& callback () const throw ()
     {
-      return uic_;
+      return callback_;
     }
-
   private:
     /// \brief Initialize parameters.
     ///
@@ -170,7 +122,7 @@ namespace roboptim
 
     /// \brief Intermediate callback (called at each end
     /// of iteration).
-    boost::shared_ptr<UserIntermediateCallback> uic_;
+    callback_t callback_;
   };
 
   /// @}
