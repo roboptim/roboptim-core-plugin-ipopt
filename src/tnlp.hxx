@@ -124,9 +124,10 @@ namespace roboptim
     }
 
     template <typename T>
-    Tnlp<T>::Tnlp (const typename solver_t::problem_t&, solver_t& solver)
+    Tnlp<T>::Tnlp (const typename solver_t::problem_t& pb, solver_t& solver)
       throw ()
       : solver_ (solver),
+        solverState_ (pb),
 	cost_ (),
 	costGradient_ (),
 	constraints_ (),
@@ -655,8 +656,8 @@ namespace roboptim
     template <typename T>
     bool
     Tnlp<T>::intermediate_callback (AlgorithmMode /*mode*/,
-				    Index /*iter*/, Number /*obj_value*/,
-				    Number /*inf_pr*/, Number /*inf_du*/,
+                                    Index /*iter*/, Number obj_value,
+                                    Number inf_pr, Number /*inf_du*/,
 				    Number /*mu*/, Number /*d_norm*/,
 				    Number /*regularization_size*/,
 				    Number /*alpha_du*/, Number /*alpha_pr*/,
@@ -676,12 +677,18 @@ namespace roboptim
       Ipopt::TNLPAdapter* tnlp_adapter = dynamic_cast<TNLPAdapter*>
 	(GetRawPtr (orignlp->nlp ()));
 
+      // current optimization parameters
+      tnlp_adapter->ResortX (*ip_data->curr ()->x (), &(solverState_.x ())[0]);
 
-      typename function_t::vector_t primals
-	(solver_.problem ().function ().inputSize ());
-      tnlp_adapter->ResortX (*ip_data->curr ()->x (), &primals[0]);
+      // unscaled objective value at the current point
+      solverState_.cost () = obj_value;
 
-      solver_.callback () (primals, solver_.problem ());
+      // unscaled constraint violation at the current point
+      solverState_.constraintViolation () = inf_pr;
+
+      // TODO: handle extra relevant parameters
+
+      solver_.callback () (solver_.problem (), solverState_);
       return true;
     }
 

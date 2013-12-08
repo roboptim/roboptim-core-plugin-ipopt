@@ -24,6 +24,7 @@
 # include <coin/IpIpoptApplication.hpp>
 
 # include <roboptim/core/plugin/ipopt/ipopt.hh>
+# include <roboptim/core/solver-state.hh>
 
 #ifdef ROBOPTIM_CORE_IPOPT_PLUGIN_CHECK_GRADIENT
 # include <boost/format.hpp>
@@ -44,6 +45,7 @@ namespace roboptim
     {
     public:
       typedef T solver_t;
+      typedef SolverState<typename solver_t::problem_t> solverState_t;
 
       Tnlp (const typename solver_t::problem_t& pb, solver_t& solver)
         throw ();
@@ -171,6 +173,9 @@ namespace roboptim
       /// \brief Reference to RobOptim structure which instantiated
       /// this one.
       solver_t& solver_;
+
+      /// \brief Current state of the solver (used by the callback function).
+      solverState_t solverState_;
 
       /// \brief Cost function type for this problem.
       typedef typename solver_t::problem_t::function_t function_t;
