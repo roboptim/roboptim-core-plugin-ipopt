@@ -655,7 +655,7 @@ namespace roboptim
 
     template <typename T>
     bool
-    Tnlp<T>::intermediate_callback (AlgorithmMode /*mode*/,
+    Tnlp<T>::intermediate_callback (AlgorithmMode mode,
                                     Index /*iter*/, Number obj_value,
                                     Number inf_pr, Number /*inf_du*/,
 				    Number /*mu*/, Number /*d_norm*/,
@@ -685,6 +685,11 @@ namespace roboptim
 
       // unscaled constraint violation at the current point
       solverState_.constraintViolation () = inf_pr;
+
+      solverState_.parameters()["ipopt.mode"].value =
+	(mode == RegularMode)? "RegularMode" : "RestorationPhaseMode";
+      solverState_.parameters()["ipopt.mode"].description =
+	"Indicates the mode in which the algorithm is";
 
       // TODO: handle extra relevant parameters
 
