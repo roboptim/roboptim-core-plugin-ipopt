@@ -686,15 +686,32 @@ namespace roboptim
       // unscaled constraint violation at the current point
       solverState_.constraintViolation () = inf_pr;
 
+      // handle extra relevant parameters
       solverState_.parameters()["ipopt.mode"].value =
 	(mode == RegularMode)? "RegularMode" : "RestorationPhaseMode";
-      solverState_.parameters()["ipopt.mode"].description =
-	"Indicates the mode in which the algorithm is";
+      solverState_.parameters()["ipopt.mode"].description
+        = "Indicates the mode in which the algorithm is";
 
-      // TODO: handle extra relevant parameters
+      bool stop_optim = false;
+      solverState_.parameters ()["ipopt.stop"].value = stop_optim;
+      solverState_.parameters ()["ipopt.stop"].description
+        = "Whether to stop the optimization process";
 
+      // call user-defined callback
       solver_.callback () (solver_.problem (), solverState_);
-      return true;
+
+      // ipopt.stop may have been unintentionally removed in the callback
+      try
+        {
+          stop_optim = solverState_.template getParameter<bool> ("ipopt.stop");
+        }
+      catch (std::out_of_range&)
+        {
+          stop_optim = false;
+        }
+
+      // return true if the solver should continue, false otherwise
+      return !stop_optim;
     }
 
     template <typename T>
