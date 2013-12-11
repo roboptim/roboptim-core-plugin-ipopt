@@ -124,9 +124,10 @@ namespace roboptim
     }
 
     template <typename T>
-    Tnlp<T>::Tnlp (const typename solver_t::problem_t&, solver_t& solver)
+    Tnlp<T>::Tnlp (const typename solver_t::problem_t& pb, solver_t& solver)
       throw ()
       : solver_ (solver),
+        solverState_ (pb),
 	cost_ (),
 	costGradient_ (),
 	constraints_ (),
@@ -134,7 +135,7 @@ namespace roboptim
     {
       BOOST_MPL_ASSERT_RELATION
 	( (boost::mpl::size<
-	     typename solver_t::problem_t::constraintsList_t>::value), ==, 2);
+           typename solver_t::problem_t::constraintsList_t>::value), ==, 2);
     }
 
     template <typename T>
@@ -154,7 +155,7 @@ namespace roboptim
     template <typename T>
     bool
     Tnlp<T>::get_nlp_info (Index& n, Index& m, Index& nnz_jac_g,
-			Index& nnz_h_lag, TNLP::IndexStyleEnum& index_style)
+                           Index& nnz_h_lag, TNLP::IndexStyleEnum& index_style)
       throw ()
     {
       n = static_cast<Index> (solver_.problem ().function ().inputSize ());
@@ -168,8 +169,8 @@ namespace roboptim
     template <typename T>
     bool
     Tnlp<T>::get_bounds_info (Index ROBOPTIM_DEBUG_ONLY(n), Number* x_l,
-			Number* x_u, Index ROBOPTIM_DEBUG_ONLY(m), Number* g_l,
-			Number* g_u)
+                              Number* x_u, Index ROBOPTIM_DEBUG_ONLY(m), Number* g_l,
+                              Number* g_u)
       throw ()
     {
       assert (solver_.problem ().function ().inputSize () - n == 0);
@@ -193,11 +194,11 @@ namespace roboptim
     template <typename T>
     bool
     Tnlp<T>::get_scaling_parameters (Number&,
-				  bool& use_x_scaling,
-				  Index ROBOPTIM_DEBUG_ONLY(n),
-				  Number* x_scaling,
-				  bool& use_g_scaling, Index m,
-				  Number* g_scaling)
+                                     bool& use_x_scaling,
+                                     Index ROBOPTIM_DEBUG_ONLY(n),
+                                     Number* x_scaling,
+                                     bool& use_g_scaling, Index m,
+                                     Number* g_scaling)
       throw ()
     {
       ROBOPTIM_DEBUG_ONLY(std::size_t n_ = static_cast<std::size_t> (n));
@@ -212,10 +213,10 @@ namespace roboptim
 
 
       for (std::size_t i = 0; i < m_; ++i)
-	     for (std::size_t j = 0;
-		  j < solver_.problem ().scalesVector ()[i].size (); ++j)
-		    g_scaling[i] = solver_.problem ().scalesVector ()[i][j];
-		  return true;
+        for (std::size_t j = 0;
+             j < solver_.problem ().scalesVector ()[i].size (); ++j)
+          g_scaling[i] = solver_.problem ().scalesVector ()[i][j];
+      return true;
     }
 
     template <typename T>
@@ -232,7 +233,7 @@ namespace roboptim
     template <typename T>
     bool
     Tnlp<T>::get_function_linearity (Index ROBOPTIM_DEBUG_ONLY(m),
-                  LinearityType* const_types) throw ()
+                                     LinearityType* const_types) throw ()
     {
       assert (constraintsOutputSize () - m == 0);
 
@@ -261,9 +262,9 @@ namespace roboptim
     template <typename T>
     bool
     Tnlp<T>::get_starting_point (Index n, bool init_x, Number* x, bool init_z,
-		  Number* z_L, Number* z_U, Index ROBOPTIM_DEBUG_ONLY(m),
-		  bool ROBOPTIM_DEBUG_ONLY(init_lambda), Number*)
-	     throw ()
+                                 Number* z_L, Number* z_U, Index ROBOPTIM_DEBUG_ONLY(m),
+                                 bool ROBOPTIM_DEBUG_ONLY(init_lambda), Number*)
+      throw ()
     {
       assert (solver_.problem ().function ().inputSize () - n == 0);
       assert (constraintsOutputSize () - m == 0);
@@ -328,7 +329,7 @@ namespace roboptim
     template <typename T>
     bool
     Tnlp<T>::eval_grad_f (Index n, const Number* x, bool, Number* grad_f)
-        throw ()
+      throw ()
     {
       assert (solver_.problem ().function ().inputSize () - n == 0);
 
@@ -351,7 +352,7 @@ namespace roboptim
     bool
     Tnlp<T>::eval_g (Index n, const Number* x, bool,
 		     Index m, Number* g)
-	     throw ()
+      throw ()
     {
       using namespace boost;
       ROBOPTIM_DEBUG_ONLY(typename function_t::size_type n_ =
@@ -407,7 +408,7 @@ namespace roboptim
     Tnlp<T>::eval_jac_g(Index n, const Number* x, bool,
 			Index m, Index, Index* iRow,
 			Index *jCol, Number* values)
-	     throw ()
+      throw ()
     {
       using namespace boost;
 
@@ -471,39 +472,39 @@ namespace roboptim
     template <>
     inline void
     Tnlp<IpoptSolverTd>::compute_hessian
-      (TwiceDifferentiableFunction::hessian_t& h,
-       const typename solver_t::vector_t& x,
-       Number obj_factor,
-       const Number* lambda)
-        throw ()
-      {
-        typedef typename
-	  solver_t::problem_t::constraints_t::const_iterator citer_t;
+    (TwiceDifferentiableFunction::hessian_t& h,
+     const typename solver_t::vector_t& x,
+     Number obj_factor,
+     const Number* lambda)
+      throw ()
+    {
+      typedef typename
+        solver_t::problem_t::constraints_t::const_iterator citer_t;
 
-        TwiceDifferentiableFunction::hessian_t fct_h =
-          solver_.problem ().function ().hessian (x, 0);
-        h = obj_factor * fct_h;
+      TwiceDifferentiableFunction::hessian_t fct_h =
+        solver_.problem ().function ().hessian (x, 0);
+      h = obj_factor * fct_h;
 
-        int i = 0;
-        for (citer_t it = solver_.problem ().constraints ().begin ();
-             it != solver_.problem ().constraints ().end (); ++it)
-	  {
-	    shared_ptr<TwiceDifferentiableFunction> g;
-	    if (it->which () == LINEAR)
-	      g = get<shared_ptr<linearFunction_t> > (*it);
-	    else
-	      g = get<shared_ptr<nonLinearFunction_t> > (*it);
-	    h += lambda[i++] * g->hessian (x, 0);
-	  }
-      }
+      int i = 0;
+      for (citer_t it = solver_.problem ().constraints ().begin ();
+           it != solver_.problem ().constraints ().end (); ++it)
+        {
+          shared_ptr<TwiceDifferentiableFunction> g;
+          if (it->which () == LINEAR)
+            g = get<shared_ptr<linearFunction_t> > (*it);
+          else
+            g = get<shared_ptr<nonLinearFunction_t> > (*it);
+          h += lambda[i++] * g->hessian (x, 0);
+        }
+    }
 
     template <>
     inline bool
     Tnlp<IpoptSolverTd>::eval_h
-      (Index n, const Number* x, bool,
-       Number obj_factor, Index ROBOPTIM_DEBUG_ONLY(m), const Number* lambda,
-       bool, Index ROBOPTIM_DEBUG_ONLY(nele_hess), Index* iRow,
-       Index* jCol, Number* values)
+    (Index n, const Number* x, bool,
+     Number obj_factor, Index ROBOPTIM_DEBUG_ONLY(m), const Number* lambda,
+     bool, Index ROBOPTIM_DEBUG_ONLY(nele_hess), Index* iRow,
+     Index* jCol, Number* values)
       throw ()
     {
       ROBOPTIM_DEBUG_ONLY(typename function_t::size_type n_ =
@@ -558,62 +559,62 @@ namespace roboptim
       return false;
     }
 
-#define FILL_RESULT()					\
-      array_to_vector (res.x, x);			\
-      res.constraints.resize (m);			\
-      array_to_vector (res.constraints, g);		\
-      res.lambda.resize (m);				\
-      array_to_vector (res.lambda, lambda);		\
-      res.value (0) = obj_value
+#define FILL_RESULT()                           \
+    array_to_vector (res.x, x);			\
+    res.constraints.resize (m);			\
+    array_to_vector (res.constraints, g);       \
+    res.lambda.resize (m);                      \
+    array_to_vector (res.lambda, lambda);       \
+    res.value (0) = obj_value
 
 #define SWITCH_ERROR(NAME, ERROR)			\
-      case NAME:					\
-      {						\
+    case NAME:                                          \
+    {                                                   \
       Result res (n, 1);				\
       FILL_RESULT ();					\
       solver_.result_ = SolverError (ERROR, res);	\
-      }						\
-      break
+    }                                                   \
+    break
 
 #define SWITCH_FATAL(NAME)			\
-      case NAME:				\
-      assert (0);				\
-      break
+    case NAME:                                  \
+    assert (0);                                 \
+    break
 
 #define MAP_IPOPT_ERRORS(MACRO)						\
-      MACRO(MAXITER_EXCEEDED, "Max iteration exceeded");		\
-      MACRO(STOP_AT_TINY_STEP,						\
-	    "Algorithm proceeds with very little progress");		\
-      MACRO(LOCAL_INFEASIBILITY,					\
-	    "Algorithm converged to a point of local infeasibility");	\
-      MACRO(DIVERGING_ITERATES, "Iterate diverges");			\
-      MACRO(RESTORATION_FAILURE, "Restoration phase failed");		\
-      MACRO(ERROR_IN_STEP_COMPUTATION,					\
-	    "Unrecoverable error while Ipopt tried to compute"		\
-	    " the search direction");					\
-      MACRO(INVALID_NUMBER_DETECTED,					\
-	    "Ipopt received an invalid number");			\
-      MACRO(INTERNAL_ERROR, "Unknown internal error");			\
-      MACRO(TOO_FEW_DEGREES_OF_FREEDOM, "Two few degrees of freedom");	\
-      MACRO(INVALID_OPTION, "Invalid option");				\
-      MACRO(OUT_OF_MEMORY, "Out of memory");				\
-      MACRO(CPUTIME_EXCEEDED, "Cpu time exceeded")
+    MACRO(MAXITER_EXCEEDED, "Max iteration exceeded");                  \
+    MACRO(STOP_AT_TINY_STEP,						\
+          "Algorithm proceeds with very little progress");		\
+    MACRO(LOCAL_INFEASIBILITY,                                          \
+          "Algorithm converged to a point of local infeasibility");	\
+    MACRO(DIVERGING_ITERATES, "Iterate diverges");			\
+    MACRO(RESTORATION_FAILURE, "Restoration phase failed");		\
+    MACRO(ERROR_IN_STEP_COMPUTATION,					\
+          "Unrecoverable error while Ipopt tried to compute"		\
+          " the search direction");					\
+    MACRO(INVALID_NUMBER_DETECTED,					\
+          "Ipopt received an invalid number");                          \
+    MACRO(INTERNAL_ERROR, "Unknown internal error");			\
+    MACRO(TOO_FEW_DEGREES_OF_FREEDOM, "Two few degrees of freedom");	\
+    MACRO(INVALID_OPTION, "Invalid option");				\
+    MACRO(OUT_OF_MEMORY, "Out of memory");				\
+    MACRO(CPUTIME_EXCEEDED, "Cpu time exceeded")
 
 
-#define MAP_IPOPT_FATALS(MACRO)						\
-      MACRO(USER_REQUESTED_STOP)
+#define MAP_IPOPT_FATALS(MACRO)                 \
+    MACRO(USER_REQUESTED_STOP)
 
 
     template <typename T>
     void
     Tnlp<T>::finalize_solution
-	     (SolverReturn status,
-	      Index n, const Number* x, const Number*,
-	      const Number*, Index m, const Number* g,
-	      const Number* lambda, Number obj_value,
-	      const IpoptData*,
-	      IpoptCalculatedQuantities*)
-        throw ()
+    (SolverReturn status,
+     Index n, const Number* x, const Number*,
+     const Number*, Index m, const Number* g,
+     const Number* lambda, Number obj_value,
+     const IpoptData*,
+     IpoptCalculatedQuantities*)
+    throw ()
     {
       assert (solver_.problem ().function ().inputSize () - n == 0);
       assert (constraintsOutputSize () - m == 0);
@@ -655,8 +656,8 @@ namespace roboptim
     template <typename T>
     bool
     Tnlp<T>::intermediate_callback (AlgorithmMode /*mode*/,
-				    Index /*iter*/, Number /*obj_value*/,
-				    Number /*inf_pr*/, Number /*inf_du*/,
+                                    Index /*iter*/, Number obj_value,
+                                    Number inf_pr, Number /*inf_du*/,
 				    Number /*mu*/, Number /*d_norm*/,
 				    Number /*regularization_size*/,
 				    Number /*alpha_du*/, Number /*alpha_pr*/,
@@ -676,12 +677,18 @@ namespace roboptim
       Ipopt::TNLPAdapter* tnlp_adapter = dynamic_cast<TNLPAdapter*>
 	(GetRawPtr (orignlp->nlp ()));
 
+      // current optimization parameters
+      tnlp_adapter->ResortX (*ip_data->curr ()->x (), &(solverState_.x ())[0]);
 
-      typename function_t::vector_t primals
-	(solver_.problem ().function ().inputSize ());
-      tnlp_adapter->ResortX (*ip_data->curr ()->x (), &primals[0]);
+      // unscaled objective value at the current point
+      solverState_.cost () = obj_value;
 
-      solver_.callback () (primals, solver_.problem ());
+      // unscaled constraint violation at the current point
+      solverState_.constraintViolation () = inf_pr;
+
+      // TODO: handle extra relevant parameters
+
+      solver_.callback () (solver_.problem (), solverState_);
       return true;
     }
 
@@ -696,7 +703,7 @@ namespace roboptim
     template <typename T>
     bool
     Tnlp<T>::get_list_of_nonlinear_variables (Index, Index*)
-	     throw ()
+      throw ()
     {
       //FIXME: implement this.
       return false;
