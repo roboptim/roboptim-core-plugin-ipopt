@@ -473,13 +473,12 @@ namespace roboptim
     inline void
     Tnlp<IpoptSolverTd>::compute_hessian
     (TwiceDifferentiableFunction::hessian_t& h,
-     const typename solver_t::vector_t& x,
+     const solver_t::vector_t& x,
      Number obj_factor,
      const Number* lambda)
       throw ()
     {
-      typedef typename
-        solver_t::problem_t::constraints_t::const_iterator citer_t;
+      typedef solver_t::problem_t::constraints_t::const_iterator citer_t;
 
       TwiceDifferentiableFunction::hessian_t fct_h =
         solver_.problem ().function ().hessian (x, 0);
@@ -507,8 +506,7 @@ namespace roboptim
      Index* jCol, Number* values)
       throw ()
     {
-      ROBOPTIM_DEBUG_ONLY(typename function_t::size_type n_ =
-			  static_cast<typename function_t::size_type> (n));
+      ROBOPTIM_DEBUG_ONLY(function_t::size_type n_ = static_cast<function_t::size_type> (n));
 
       assert (solver_.problem ().function ().inputSize () == n_);
       assert (constraintsOutputSize () == m);
@@ -529,7 +527,7 @@ namespace roboptim
 	}
       else
 	{
-	  typename solver_t::vector_t x_ (n);
+	  solver_t::vector_t x_ (n);
 	  array_to_vector (x_, x);
 
 	  TwiceDifferentiableFunction::hessian_t h

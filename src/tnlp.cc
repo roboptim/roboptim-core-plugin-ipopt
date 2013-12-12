@@ -42,16 +42,16 @@ namespace roboptim
 
       // compute number of non zeros elements in jacobian constraint.
       nnz_jac_g = 0;
-      typedef typename solver_t::problem_t::constraints_t::const_iterator
+      typedef solver_t::problem_t::constraints_t::const_iterator
 	citer_t;
       for (citer_t it = solver_.problem ().constraints ().begin ();
 	   it != solver_.problem ().constraints ().end (); ++it)
 	{
 	  // FIXME: should make sure we are in the bounds.
-	  typename function_t::vector_t x (n);
+	  function_t::vector_t x (n);
 	  x.setZero ();
 
-	  shared_ptr<typename solver_t::commonConstraintFunction_t> g;
+	  shared_ptr<solver_t::commonConstraintFunction_t> g;
 	  if (it->which () == LINEAR)
 	    g = get<shared_ptr<linearFunction_t> > (*it);
 	  else
@@ -101,7 +101,7 @@ namespace roboptim
 	  // First evaluate the constraints in zero to build the
 	  // constraints jacobian.
 	  int idx = 0;
-	  typedef typename solver_t::problem_t::constraints_t::const_iterator
+	  typedef solver_t::problem_t::constraints_t::const_iterator
 	    citer_t;
 	  unsigned constraintId = 0;
 
@@ -122,7 +122,7 @@ namespace roboptim
 	      // current constraint.
 	      // If we do not have an initial guess...
 	      if (!solver_.problem ().startingPoint ())
-		for (unsigned i = 0; i < x.size (); ++i)
+		for (function_t::vector_t::Index i = 0; i < x.size (); ++i)
 		  {
 		    // if constraint is in an interval, evaluate at middle.
 		    if (solver_.problem ().boundsVector ()[constraintId][i].first
@@ -148,15 +148,15 @@ namespace roboptim
 	      else // other use initial guess.
 		x = *(solver_.problem ().startingPoint ());
 
-	      shared_ptr<typename solver_t::commonConstraintFunction_t> g;
+	      shared_ptr<solver_t::commonConstraintFunction_t> g;
 	      if (it->which () == LINEAR)
 		g = get<shared_ptr<linearFunction_t> > (*it);
 	      else
 		g = get<shared_ptr<nonLinearFunction_t> > (*it);
 
-	      typename function_t::jacobian_t jacobian = g->jacobian (x);
+	      function_t::jacobian_t jacobian = g->jacobian (x);
 	      for (int k = 0; k < jacobian.outerSize (); ++k)
-		for (typename function_t::jacobian_t::InnerIterator
+		for (function_t::jacobian_t::InnerIterator
 		       it (jacobian, k); it; ++it)
 		  {
 		    unsigned int row = static_cast<unsigned> (idx + it.row ());
@@ -196,8 +196,7 @@ namespace roboptim
 
       Eigen::Map<const function_t::vector_t> x_ (x, n);
 
-      typedef typename
-	solver_t::problem_t::constraints_t::const_iterator
+      typedef solver_t::problem_t::constraints_t::const_iterator
 	citer_t;
 
       int idx = 0;
@@ -205,7 +204,7 @@ namespace roboptim
       for (citer_t it = solver_.problem ().constraints ().begin ();
 	   it != solver_.problem ().constraints ().end (); ++it)
 	{
-	  shared_ptr<typename solver_t::commonConstraintFunction_t> g;
+	  shared_ptr<solver_t::commonConstraintFunction_t> g;
 	  if (it->which () == LINEAR)
 	    g = get<shared_ptr<linearFunction_t> > (*it);
 	  else
