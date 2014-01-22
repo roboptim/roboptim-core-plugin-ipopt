@@ -188,6 +188,8 @@ namespace roboptim
     // solver provided by Ipopt.
     DEFINE_PARAMETER ("ipopt.linear_solver", "linear_solver", "mumps");
 
+    // Derivative test.
+    DEFINE_PARAMETER ("ipopt.derivative_test", "enable derivative checker", "none");
   }
 
 #undef DEFINE_PARAMETER
