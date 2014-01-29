@@ -172,7 +172,30 @@ namespace roboptim
 
     //  Termination
     DEFINE_PARAMETER ("ipopt.tol",
-		      "desired convergence tolerance (relative)", 1e-7);
+		      "desired convergence tolerance (relative)", 1e-8);
+    DEFINE_PARAMETER ("ipopt.dual_inf_tol",
+		      "desired threshold for the dual infeasibility", 1.);
+    DEFINE_PARAMETER ("ipopt.constr_viol_tol",
+		      "desired threshold for the constraint violation", 1e-4);
+    DEFINE_PARAMETER
+      ("ipopt.compl_inf_tol",
+       "desired threshold for the complementarity conditions", 1e-4);
+
+    DEFINE_PARAMETER ("ipopt.acceptable_tol",
+		      "\"acceptable\" convergence tolerance (relative)", 1e-6);
+    DEFINE_PARAMETER
+      ("ipopt.acceptable_iter",
+       "number of \"acceptable\" iterates before triggering termination", 15);
+    DEFINE_PARAMETER
+      ("ipopt.acceptable_constr_viol_tol",
+       "\"acceptance\" threshold for the constraint violation", 1e-2);
+    DEFINE_PARAMETER
+      ("ipopt.acceptable_dual_inf_tol",
+       "\"acceptance\" threshold for the dual infeasibility", 1e10);
+    DEFINE_PARAMETER
+      ("ipopt.acceptable_compl_inf_tol",
+       "\"acceptance\" threshold for the complementarity conditions", 1e-2);
+
 
     //  Barrier parameter
     DEFINE_PARAMETER ("ipopt.mu_strategy",
