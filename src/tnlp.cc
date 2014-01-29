@@ -76,7 +76,8 @@ namespace roboptim
       throw ()
     {
       using namespace boost;
-      function_t::size_type n_ = static_cast<function_t::size_type> (n);
+      ROBOPTIM_DEBUG_ONLY
+	(function_t::size_type n_ = static_cast<function_t::size_type> (n));
       assert (solver_.problem ().function ().inputSize () == n_);
       assert (constraintsOutputSize () == m);
 
