@@ -13,19 +13,33 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with roboptim-core.  If not, see <http://www.gnu.org/licenses/>.
 
-# Include shared test suite.
+# Prepare test suite
 SET(PLUGIN_PATH "${CMAKE_BINARY_DIR}/src")
+INCLUDE(shared-tests/tests.cmake)
 
+# Schittkowski problems
 SET(SOLVER_NAME "ipopt")
 SET(FUNCTION_TYPE ::roboptim::EigenMatrixDense)
 SET(PROGRAM_SUFFIX "")
 SET(COST_FUNCTION_TYPE ::roboptim::GenericDifferentiableFunction)
 SET(CONSTRAINT_TYPE_1 ::roboptim::GenericLinearFunction)
 SET(CONSTRAINT_TYPE_2 ::roboptim::GenericDifferentiableFunction)
-
-INCLUDE(shared-tests/CMakeLists.txt)
+BUILD_SCHITTKOWSKI_PROBLEMS()
 
 SET(SOLVER_NAME "ipopt-sparse")
 SET(FUNCTION_TYPE ::roboptim::EigenMatrixSparse)
 SET(PROGRAM_SUFFIX "-sparse")
-INCLUDE(shared-tests/CMakeLists.txt)
+BUILD_SCHITTKOWSKI_PROBLEMS()
+
+# RobOptim test problems
+SET(SOLVER_NAME "ipopt")
+SET(FUNCTION_TYPE ::roboptim::EigenMatrixDense)
+SET(PROGRAM_SUFFIX "")
+SET(COST_FUNCTION_TYPE ::roboptim::GenericDifferentiableFunction)
+BUILD_ROBOPTIM_PROBLEMS()
+
+SET(SOLVER_NAME "ipopt-sparse")
+SET(FUNCTION_TYPE ::roboptim::EigenMatrixSparse)
+SET(PROGRAM_SUFFIX "-sparse")
+SET(COST_FUNCTION_TYPE ::roboptim::GenericDifferentiableFunction)
+BUILD_ROBOPTIM_PROBLEMS()

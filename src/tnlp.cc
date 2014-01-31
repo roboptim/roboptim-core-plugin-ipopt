@@ -123,28 +123,30 @@ namespace roboptim
 	      // current constraint.
 	      // If we do not have an initial guess...
 	      if (!solver_.problem ().startingPoint ())
-		for (function_t::vector_t::Index i = 0; i < x.size (); ++i)
-		  {
+                for (function_t::vector_t::Index i = 0; i < x.size (); ++i)
+                  {
+                    std::size_t ii = static_cast<std::size_t> (i);
+
 		    // if constraint is in an interval, evaluate at middle.
-		    if (solver_.problem ().boundsVector ()[constraintId][i].first
+                    if (solver_.problem ().boundsVector ()[constraintId][ii].first
 			!= Function::infinity ()
 			&&
-			solver_.problem ().boundsVector ()[constraintId][i].second
+                        solver_.problem ().boundsVector ()[constraintId][ii].second
 			!= Function::infinity ())
-		      x[i] =
+                      x[i] =
 			(solver_.problem ().boundsVector ()
-			 [constraintId][i].second
+                         [constraintId][ii].second
 			 - solver_.problem ().boundsVector ()
-			 [constraintId][i].first) / 2.;
+                         [constraintId][ii].first) / 2.;
 		    // otherwise use the non-infinite bound.
 		    else if (solver_.problem ().boundsVector ()
-			     [constraintId][i].first
+                             [constraintId][ii].first
 			     != Function::infinity ())
 		      x[i] = solver_.problem ().boundsVector ()
-			[constraintId][i].first;
+                        [constraintId][ii].first;
 		    else
 		      x[i] = solver_.problem ().boundsVector ()
-			[constraintId][i].second;
+                        [constraintId][ii].second;
 		  }
 	      else // other use initial guess.
 		x = *(solver_.problem ().startingPoint ());
@@ -160,8 +162,8 @@ namespace roboptim
 		for (function_t::jacobian_t::InnerIterator
 		       it (jacobian, k); it; ++it)
 		  {
-		    unsigned int row = static_cast<unsigned> (idx + it.row ());
-		    unsigned int col = static_cast<unsigned> (it.col ());
+                    const int row = static_cast<int> (idx + it.row ());
+                    const int col = static_cast<int> (it.col ());
 		    coefficients.push_back
 		      (triplet_t (row, col, it.value ()));
 		  }
