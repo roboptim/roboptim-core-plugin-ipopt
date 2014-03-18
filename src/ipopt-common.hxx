@@ -28,6 +28,12 @@
 # include "roboptim/core/plugin/ipopt/ipopt-parameters-updater.hh"
 # include "roboptim/core/plugin/ipopt/ipopt-common.hh"
 
+# ifndef IPOPT_DEFAULT_LINEAR_SOLVER
+   // Enable by default MUMPS which is the only open-source
+   // solver provided by Ipopt.
+#  define IPOPT_DEFAULT_LINEAR_SOLVER "mumps"
+# endif //! IPOPT_DEFAULT_LINEAR_SOLVER
+
 namespace roboptim
 {
   template<typename T>
@@ -206,10 +212,9 @@ namespace roboptim
       ("ipopt.expect_infeasible_problem",
        "enable heuristics to quickly detect an infeasible problem", "no");
 
-    // Solver choice.
-    // Enable by default MUMPS which is the only open source
-    // solver provided by Ipopt.
-    DEFINE_PARAMETER ("ipopt.linear_solver", "linear_solver", "mumps");
+    // Linear solver choice.
+    DEFINE_PARAMETER ("ipopt.linear_solver", "linear_solver",
+                      IPOPT_DEFAULT_LINEAR_SOLVER);
 
     // Derivative test.
     DEFINE_PARAMETER ("ipopt.derivative_test", "enable derivative checker", "none");
