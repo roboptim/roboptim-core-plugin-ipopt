@@ -18,7 +18,7 @@ SET(PLUGIN_PATH "${CMAKE_BINARY_DIR}/src")
 INCLUDE(shared-tests/tests.cmake)
 
 # Schittkowski problems that are expected to fail
-SET(SCHITTKOWSKI_PROBLEMS_FAIL 11 13 16 20 21 22 24 25 28 33)
+SET(SCHITTKOWSKI_PROBLEMS_FAIL 13 16 20 25 28)
 
 SET(SOLVER_NAME "ipopt")
 SET(FUNCTION_TYPE ::roboptim::EigenMatrixDense)
@@ -27,9 +27,6 @@ SET(COST_FUNCTION_TYPE ::roboptim::GenericDifferentiableFunction)
 SET(CONSTRAINT_TYPE_1 ::roboptim::GenericLinearFunction)
 SET(CONSTRAINT_TYPE_2 ::roboptim::GenericDifferentiableFunction)
 BUILD_SCHITTKOWSKI_PROBLEMS()
-
-# Schittkowski problems that are expected to fail
-SET(SCHITTKOWSKI_PROBLEMS_FAIL 11 13 16 20 21 22 23 24 25 28)
 
 SET(SOLVER_NAME "ipopt-sparse")
 SET(FUNCTION_TYPE ::roboptim::EigenMatrixSparse)
