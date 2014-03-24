@@ -18,7 +18,12 @@ SET(PLUGIN_PATH "${CMAKE_BINARY_DIR}/src")
 INCLUDE(shared-tests/tests.cmake)
 
 # Schittkowski problems that are expected to fail
-SET(SCHITTKOWSKI_PROBLEMS_FAIL 13 16 20 25 28)
+SET(SCHITTKOWSKI_PROBLEMS_FAIL
+  13 16
+  20 25 28
+  44
+  55 56
+  )
 
 # Schittkowski problems
 SET(SOLVER_NAME "ipopt")
