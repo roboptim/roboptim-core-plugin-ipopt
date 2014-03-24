@@ -87,7 +87,9 @@ ADD_REQUIRED_DEPENDENCY("ipopt")
 # This is a workaround a bug in the pkg-config file provided by some
 # Ubuntu releases where pkg-config always provide information about
 # how to link with the MPI version of MUMPS.
-IF(CMAKE_SYSTEM_NAME MATCHES "Linux" AND EXISTS "/etc/debian_version")
+IF(CMAKE_SYSTEM_NAME MATCHES "Linux"
+    AND EXISTS "/etc/debian_version"
+    AND IPOPT_PREFIX MATCHES "/usr")
   STRING(REPLACE "-ldmumps" "-ldmumps_seq" IPOPT_LDFLAGS "${IPOPT_LDFLAGS}")
 ENDIF()
 

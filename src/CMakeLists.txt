@@ -35,7 +35,11 @@ MACRO(IPOPT_PLUGIN NAME)
   # Make sure all symbols are defined.
   # See:
   # http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=592752
+  IF(CMAKE_SYSTEM_NAME MATCHES "Linux"
+    AND EXISTS "/etc/debian_version"
+    AND IPOPT_PREFIX MATCHES "/usr")
   TARGET_LINK_LIBRARIES(roboptim-core-plugin-${NAME} dmumps_seq)
+  ENDIF()
 ENDMACRO()
 
 # Ipopt plug-in (with only gradient computation).
