@@ -20,6 +20,7 @@ INCLUDE(shared-tests/tests.cmake)
 # Schittkowski problems that are expected to fail
 SET(SCHITTKOWSKI_PROBLEMS_FAIL 13 16 20 25 28)
 
+# Schittkowski problems
 SET(SOLVER_NAME "ipopt")
 SET(FUNCTION_TYPE ::roboptim::EigenMatrixDense)
 SET(PROGRAM_SUFFIX "")
