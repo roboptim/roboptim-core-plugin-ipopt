@@ -78,7 +78,8 @@ namespace roboptim
 
     /// \brief Instantiate the solver from a problem.
     ///
-    /// \param problem problem that will be solved
+    /// \param pb problem that will be solved.
+    /// \param tnlp pointer to Ipopt solver.
     explicit IpoptSolverCommon (const problem_t& pb,
 				Ipopt::SmartPtr<Ipopt::TNLP> tnlp) throw ();
 
