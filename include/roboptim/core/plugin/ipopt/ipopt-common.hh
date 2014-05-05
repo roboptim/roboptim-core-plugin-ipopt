@@ -81,27 +81,26 @@ namespace roboptim
     /// \param pb problem that will be solved.
     /// \param tnlp pointer to Ipopt solver.
     explicit IpoptSolverCommon (const problem_t& pb,
-				Ipopt::SmartPtr<Ipopt::TNLP> tnlp) throw ();
+				Ipopt::SmartPtr<Ipopt::TNLP> tnlp);
 
-    virtual ~IpoptSolverCommon () throw ();
+    virtual ~IpoptSolverCommon ();
 
     /// \brief Solve the problem.
-    void solve () throw ();
+    void solve ();
 
     /// \brief Get Ipopt Application object for Ipopt specific tuning.
     ///
     /// Consult Ipopt documentation for information regarding
     /// IpoptApplication class.
-    virtual Ipopt::SmartPtr<Ipopt::IpoptApplication> getIpoptApplication ()
-      throw ();
+    virtual Ipopt::SmartPtr<Ipopt::IpoptApplication> getIpoptApplication ();
 
     virtual void
-    setIterationCallback (callback_t callback) throw (std::runtime_error)
+    setIterationCallback (callback_t callback)
     {
       callback_ = callback;
     }
 
-    const callback_t& callback () const throw ()
+    const callback_t& callback () const
     {
       return callback_;
     }
@@ -109,12 +108,12 @@ namespace roboptim
     /// \brief Initialize parameters.
     ///
     /// Add solver parameters. Called during construction.
-    void initializeParameters () throw ();
+    void initializeParameters ();
 
     /// \brief Read parameters and update associated options in Ipopt.
     ///
     /// Called before solving problem.
-    void updateParameters () throw ();
+    void updateParameters ();
 
     /// \brief Smart pointer to the Ipopt non linear problem description.
     Ipopt::SmartPtr<Ipopt::TNLP> nlp_;

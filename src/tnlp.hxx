@@ -48,7 +48,7 @@ namespace roboptim
 			     unsigned functionId,
 			     Eigen::Map<const Function::vector_t>& x,
 			     int constraintId,
-			     T& solver) throw ()
+			     T& solver)
     {
       using boost::format;
       try
@@ -76,7 +76,7 @@ namespace roboptim
 			     unsigned,
 			     Eigen::Map<const Function::vector_t>&,
 			     int,
-			     T&) throw ()
+			     T&)
     {}
 #endif //!ROBOPTIM_CORE_IPOPT_PLUGIN_CHECK_GRADIENT
 
@@ -125,7 +125,6 @@ namespace roboptim
 
     template <typename T>
     Tnlp<T>::Tnlp (const typename solver_t::problem_t& pb, solver_t& solver)
-      throw ()
       : solver_ (solver),
         solverState_ (pb),
 	cost_ (),
@@ -149,14 +148,12 @@ namespace roboptim
     bool
     Tnlp<IpoptSolverSparse>::get_nlp_info (Index& n, Index& m, Index& nnz_jac_g,
 					   Index& nnz_h_lag,
-					   TNLP::IndexStyleEnum& index_style)
-      throw ();
+					   TNLP::IndexStyleEnum& index_style);
 
     template <typename T>
     bool
     Tnlp<T>::get_nlp_info (Index& n, Index& m, Index& nnz_jac_g,
                            Index& nnz_h_lag, TNLP::IndexStyleEnum& index_style)
-      throw ()
     {
       n = static_cast<Index> (solver_.problem ().function ().inputSize ());
       m = static_cast<Index> (constraintsOutputSize ());
@@ -171,7 +168,6 @@ namespace roboptim
     Tnlp<T>::get_bounds_info (Index ROBOPTIM_DEBUG_ONLY(n), Number* x_l,
                               Number* x_u, Index ROBOPTIM_DEBUG_ONLY(m), Number* g_l,
                               Number* g_u)
-      throw ()
     {
       assert (solver_.problem ().function ().inputSize () - n == 0);
       assert (constraintsOutputSize () - m == 0);
@@ -199,7 +195,6 @@ namespace roboptim
                                      Number* x_scaling,
                                      bool& use_g_scaling, Index m,
                                      Number* g_scaling)
-      throw ()
     {
       ROBOPTIM_DEBUG_ONLY(std::size_t n_ = static_cast<std::size_t> (n));
       std::size_t m_ = static_cast<std::size_t> (m);
@@ -221,7 +216,7 @@ namespace roboptim
 
     template <typename T>
     bool
-    Tnlp<T>::get_variables_linearity (Index n, LinearityType* var_types) throw ()
+    Tnlp<T>::get_variables_linearity (Index n, LinearityType* var_types)
     {
       assert (solver_.problem ().function ().inputSize () - n == 0);
       //FIXME: detect from problem.
@@ -233,7 +228,7 @@ namespace roboptim
     template <typename T>
     bool
     Tnlp<T>::get_function_linearity (Index ROBOPTIM_DEBUG_ONLY(m),
-                                     LinearityType* const_types) throw ()
+                                     LinearityType* const_types)
     {
       assert (constraintsOutputSize () - m == 0);
 
@@ -264,7 +259,6 @@ namespace roboptim
     Tnlp<T>::get_starting_point (Index n, bool init_x, Number* x, bool init_z,
                                  Number* z_L, Number* z_U, Index ROBOPTIM_DEBUG_ONLY(m),
                                  bool ROBOPTIM_DEBUG_ONLY(init_lambda), Number*)
-      throw ()
     {
       assert (solver_.problem ().function ().inputSize () - n == 0);
       assert (constraintsOutputSize () - m == 0);
@@ -298,7 +292,7 @@ namespace roboptim
 
     template <typename T>
     bool
-    Tnlp<T>::get_warm_start_iterate (IteratesVector&) throw ()
+    Tnlp<T>::get_warm_start_iterate (IteratesVector&)
     {
       //FIXME: implement this.
       //IteratesVector is defined in src/Algorithm/IteratesVector.hpp
@@ -314,7 +308,6 @@ namespace roboptim
     template <typename T>
     bool
     Tnlp<T>::eval_f (Index n, const Number* x, bool, Number& obj_value)
-      throw ()
     {
       assert (solver_.problem ().function ().inputSize () - n == 0);
 
@@ -329,7 +322,6 @@ namespace roboptim
     template <typename T>
     bool
     Tnlp<T>::eval_grad_f (Index n, const Number* x, bool, Number* grad_f)
-      throw ()
     {
       assert (solver_.problem ().function ().inputSize () - n == 0);
 
@@ -352,7 +344,6 @@ namespace roboptim
     bool
     Tnlp<T>::eval_g (Index n, const Number* x, bool,
 		     Index m, Number* g)
-      throw ()
     {
       using namespace boost;
       ROBOPTIM_DEBUG_ONLY(typename function_t::size_type n_ =
@@ -400,15 +391,13 @@ namespace roboptim
 					Index m,
 					Index nele_jac,
 					Index* iRow, Index *jCol,
-					Number* values)
-      throw ();
+					Number* values);
 
     template <typename T>
     bool
     Tnlp<T>::eval_jac_g(Index n, const Number* x, bool,
 			Index m, Index, Index* iRow,
 			Index *jCol, Number* values)
-      throw ()
     {
       using namespace boost;
 
@@ -476,7 +465,6 @@ namespace roboptim
      const solver_t::vector_t& x,
      Number obj_factor,
      const Number* lambda)
-      throw ()
     {
       typedef solver_t::problem_t::constraints_t::const_iterator citer_t;
 
@@ -504,7 +492,6 @@ namespace roboptim
      Number obj_factor, Index ROBOPTIM_DEBUG_ONLY(m), const Number* lambda,
      bool, Index ROBOPTIM_DEBUG_ONLY(nele_hess), Index* iRow,
      Index* jCol, Number* values)
-      throw ()
     {
       ROBOPTIM_DEBUG_ONLY(function_t::size_type n_ = static_cast<function_t::size_type> (n));
 
@@ -552,7 +539,6 @@ namespace roboptim
      Number, Index, const Number*,
      bool, Index, Index*,
      Index*, Number*)
-      throw ()
     {
       return false;
     }
@@ -612,7 +598,6 @@ namespace roboptim
      const Number* lambda, Number obj_value,
      const IpoptData*,
      IpoptCalculatedQuantities*)
-    throw ()
     {
       assert (solver_.problem ().function ().inputSize () - n == 0);
       assert (constraintsOutputSize () - m == 0);
@@ -662,7 +647,6 @@ namespace roboptim
 				    Index /*ls_trials*/,
 				    const IpoptData* ip_data,
 				    IpoptCalculatedQuantities* ip_cq)
-      throw ()
     {
       if (!solver_.callback ())
 	return true;
@@ -714,7 +698,7 @@ namespace roboptim
 
     template <typename T>
     Index
-    Tnlp<T>::get_number_of_nonlinear_variables () throw ()
+    Tnlp<T>::get_number_of_nonlinear_variables ()
     {
       //FIXME: implement this.
       return -1;
@@ -723,7 +707,6 @@ namespace roboptim
     template <typename T>
     bool
     Tnlp<T>::get_list_of_nonlinear_variables (Index, Index*)
-      throw ()
     {
       //FIXME: implement this.
       return false;

@@ -39,7 +39,7 @@ namespace roboptim
   template<typename T>
   IpoptSolverCommon<T>::
   IpoptSolverCommon (const problem_t& pb,
-		     Ipopt::SmartPtr<Ipopt::TNLP> tnlp) throw ()
+		     Ipopt::SmartPtr<Ipopt::TNLP> tnlp)
     : parent_t (pb),
       nlp_ (tnlp),
       app_ (IpoptApplicationFactory ()),
@@ -53,7 +53,7 @@ namespace roboptim
 
   template<typename T>
   IpoptSolverCommon<T>::
-  ~IpoptSolverCommon () throw ()
+  ~IpoptSolverCommon ()
   {}
 
   // /!\ this->result_ is filled by tnlp.hxx, do not overwrite!
@@ -112,7 +112,7 @@ namespace roboptim
 
   template<typename T>
   void IpoptSolverCommon<T>::
-  solve () throw ()
+  solve ()
   {
     // Read parameters and forward them to Ipopt.
     updateParameters ();
@@ -137,7 +137,6 @@ namespace roboptim
   template<typename T>
   Ipopt::SmartPtr<Ipopt::IpoptApplication> IpoptSolverCommon<T>::
   getIpoptApplication ()
-    throw ()
   {
     return app_;
   }
@@ -150,7 +149,7 @@ namespace roboptim
 
   template<typename T>
   void IpoptSolverCommon<T>::
-  initializeParameters () throw ()
+  initializeParameters ()
   {
     this->parameters_.clear ();
 
@@ -224,7 +223,7 @@ namespace roboptim
 
   template<typename T>
   void IpoptSolverCommon<T>::
-  updateParameters () throw ()
+  updateParameters ()
   {
     const std::string prefix = "ipopt.";
     typedef const std::pair<const std::string, Parameter> const_iterator_t;

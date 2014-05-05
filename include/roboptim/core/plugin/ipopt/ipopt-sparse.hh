@@ -82,9 +82,9 @@ namespace roboptim
     /// \brief Instantiate the solver from a problem.
     ///
     /// \param problem problem that will be solved
-    explicit IpoptSolverSparse (const problem_t& problem) throw ();
+    explicit IpoptSolverSparse (const problem_t& problem);
 
-    virtual ~IpoptSolverSparse () throw () {}
+    virtual ~IpoptSolverSparse () {}
 
     template <typename T>
       friend class ::roboptim::detail::Tnlp;

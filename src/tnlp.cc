@@ -35,7 +35,6 @@ namespace roboptim
     Tnlp<IpoptSolverSparse>::get_nlp_info (Index& n, Index& m, Index& nnz_jac_g,
 					   Index& nnz_h_lag,
 					   TNLP::IndexStyleEnum& index_style)
-      throw ()
     {
       n = static_cast<Index> (solver_.problem ().function ().inputSize ());
       m = static_cast<Index> (constraintsOutputSize ());
@@ -73,7 +72,6 @@ namespace roboptim
 					Index nele_jac,
 					Index* iRow, Index *jCol,
 					Number* values)
-      throw ()
     {
       using namespace boost;
       ROBOPTIM_DEBUG_ONLY

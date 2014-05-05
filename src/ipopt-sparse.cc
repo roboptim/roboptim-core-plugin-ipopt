@@ -41,7 +41,7 @@ namespace roboptim
 
   template class IpoptSolverCommon<ipopt_solver_t>;
 
-  IpoptSolverSparse::IpoptSolverSparse (const problem_t& pb) throw ()
+  IpoptSolverSparse::IpoptSolverSparse (const problem_t& pb)
     : parent_t (pb, Ipopt::SmartPtr<Ipopt::TNLP>
 		(new detail::Tnlp<IpoptSolverSparse> (pb, *this)))
 

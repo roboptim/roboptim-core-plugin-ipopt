@@ -43,7 +43,7 @@ namespace roboptim
 
   // On Microsoft Windows, working with pre-built Ipopt
   // binaries requires the use of the IpoptApplicationFactory.
-  IpoptSolverTd::IpoptSolverTd (const problem_t& pb) throw ()
+  IpoptSolverTd::IpoptSolverTd (const problem_t& pb)
     : parent_t (pb, Ipopt::SmartPtr<Ipopt::TNLP>
 		(new detail::Tnlp<IpoptSolverTd> (pb, *this)))
   {

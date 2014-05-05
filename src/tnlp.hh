@@ -47,71 +47,60 @@ namespace roboptim
       typedef T solver_t;
       typedef SolverState<typename solver_t::problem_t> solverState_t;
 
-      Tnlp (const typename solver_t::problem_t& pb, solver_t& solver)
-        throw ();
+      Tnlp (const typename solver_t::problem_t& pb, solver_t& solver);
 
       Function::size_type constraintsOutputSize ();
 
       virtual bool
       get_nlp_info (Index& n, Index& m, Index& nnz_jac_g,
-                    Index& nnz_h_lag, TNLP::IndexStyleEnum& index_style)
-        throw ();
+                    Index& nnz_h_lag, TNLP::IndexStyleEnum& index_style);
 
       virtual bool
       get_bounds_info (Index n, Number* x_l, Number* x_u,
-                       Index m, Number* g_l, Number* g_u)
-        throw ();
+                       Index m, Number* g_l, Number* g_u);
 
       virtual bool
       get_scaling_parameters (Number&,
                               bool& use_x_scaling, Index n,
                               Number* x_scaling,
                               bool& use_g_scaling, Index m,
-                              Number* g_scaling)
-        throw ();
+                              Number* g_scaling);
 
       virtual bool
-      get_variables_linearity (Index n, LinearityType* var_types) throw ();
+      get_variables_linearity (Index n, LinearityType* var_types);
 
       virtual bool
-      get_function_linearity (Index m, LinearityType* const_types) throw ();
+      get_function_linearity (Index m, LinearityType* const_types);
 
       virtual bool
       get_starting_point (Index n, bool init_x, Number* x,
                           bool init_z, Number* z_L, Number* z_U,
                           Index m, bool init_lambda,
-                          Number*)
-        throw ();
+                          Number*);
 
       virtual bool
-      get_warm_start_iterate (Ipopt::IteratesVector&) throw ();
+      get_warm_start_iterate (Ipopt::IteratesVector&);
 
       virtual bool
-      eval_f (Index n, const Number* x, bool new_x, Number& obj_value)
-        throw ();
+      eval_f (Index n, const Number* x, bool new_x, Number& obj_value);
 
       virtual bool
-      eval_grad_f (Index n, const Number* x, bool new_x, Number* grad_f)
-        throw ();
+      eval_grad_f (Index n, const Number* x, bool new_x, Number* grad_f);
 
       virtual bool
       eval_g (Index n, const Number* x, bool new_x,
-              Index m, Number* g)
-        throw ();
+              Index m, Number* g);
 
       virtual bool
       eval_jac_g(Index n, const Number* x, bool new_x,
                  Index m, Index, Index* iRow,
-                 Index *jCol, Number* values)
-        throw ();
+                 Index *jCol, Number* values);
 
       virtual bool
       eval_h (Index n, const Number* x, bool,
               Number obj_factor, Index m, const Number* lambda,
               bool, Index nele_hess, Index* iRow,
-              Index* jCol, Number* values)
-        throw ();
-
+              Index* jCol, Number* values);
 
       virtual void
       finalize_solution(Ipopt::SolverReturn status,
@@ -119,8 +108,7 @@ namespace roboptim
                         const Number*, Index m, const Number* g,
                         const Number* lambda, Number obj_value,
                         const Ipopt::IpoptData*,
-                        Ipopt::IpoptCalculatedQuantities*)
-        throw ();
+                        Ipopt::IpoptCalculatedQuantities*);
 
       virtual bool
       intermediate_callback (Ipopt::AlgorithmMode,
@@ -131,22 +119,20 @@ namespace roboptim
                              Number, Number,
                              Index,
                              const Ipopt::IpoptData*,
-                             Ipopt::IpoptCalculatedQuantities*)
-        throw ();
+                             Ipopt::IpoptCalculatedQuantities*);
 
       virtual Index
-      get_number_of_nonlinear_variables () throw ();
+      get_number_of_nonlinear_variables ();
 
       virtual bool
       get_list_of_nonlinear_variables (Index,
-                                       Index*)
-        throw ();
+                                       Index*);
 
     protected:
       void compute_hessian (TwiceDifferentiableFunction::hessian_t& h,
 			    const typename solver_t::vector_t& x,
 			    Number obj_factor,
-			    const Number* lambda) throw ();
+			    const Number* lambda);
 
     /// \brief Pointer to function logger (see log4cxx documentation).
     static log4cxx::LoggerPtr logger;
