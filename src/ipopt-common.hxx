@@ -201,6 +201,14 @@ namespace roboptim
       ("ipopt.acceptable_compl_inf_tol",
        "\"acceptance\" threshold for the complementarity conditions", 1e-2);
 
+    // NLP scaling
+    DEFINE_PARAMETER
+      ("ipopt.nlp_scaling_method",
+       "technique used for scaling the problem internally before it is solved",
+       "gradient-based");
+    DEFINE_PARAMETER
+      ("ipopt.nlp_scaling_max_gradient",
+       "maximum gradient after NLP scaling", 1e2);
 
     //  Barrier parameter
     DEFINE_PARAMETER ("ipopt.mu_strategy",
@@ -210,9 +218,13 @@ namespace roboptim
     DEFINE_PARAMETER
       ("ipopt.expect_infeasible_problem",
        "enable heuristics to quickly detect an infeasible problem", "no");
+    DEFINE_PARAMETER
+      ("ipopt.start_with_resto",
+       "tells algorithm to switch to restoration phase in first iteration",
+       "no");
 
     // Linear solver choice.
-    DEFINE_PARAMETER ("ipopt.linear_solver", "linear_solver",
+    DEFINE_PARAMETER ("ipopt.linear_solver", "linear solver",
                       IPOPT_DEFAULT_LINEAR_SOLVER);
 
     // Derivative test.
