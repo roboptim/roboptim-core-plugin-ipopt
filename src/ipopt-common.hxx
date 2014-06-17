@@ -99,15 +99,16 @@ namespace roboptim
   MACRO (Ipopt::Maximum_CpuTime_Exceeded, "Maximum CPU time exceeded")
 
 #define MAP_IPOPT_FATALS(MACRO)			\
-  MACRO(Ipopt::User_Requested_Stop);		\
   MACRO(Ipopt::NonIpopt_Exception_Thrown)
 
 #define MAP_IPOPT_OKS(MACRO)						\
   MACRO (Ipopt::Solve_Succeeded, MAP_IPOPT_ERRORS(SWITCH_ERROR);	\
 	 MAP_IPOPT_FATALS(SWITCH_FATAL));				\
-  MACRO (Ipopt::Solved_To_Acceptable_Level,MAP_IPOPT_ERRORS(SWITCH_ERROR); \
+  MACRO (Ipopt::Solved_To_Acceptable_Level, MAP_IPOPT_ERRORS(SWITCH_ERROR); \
 	 MAP_IPOPT_FATALS(SWITCH_FATAL));				\
-  MACRO (Ipopt::Feasible_Point_Found,MAP_IPOPT_ERRORS(SWITCH_ERROR);	\
+  MACRO (Ipopt::Feasible_Point_Found, MAP_IPOPT_ERRORS(SWITCH_ERROR);	\
+	 MAP_IPOPT_FATALS(SWITCH_FATAL));				\
+  MACRO (Ipopt::User_Requested_Stop, MAP_IPOPT_ERRORS(SWITCH_ERROR);	\
 	 MAP_IPOPT_FATALS(SWITCH_FATAL))
 
   template<typename T>
