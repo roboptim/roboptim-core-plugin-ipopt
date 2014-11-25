@@ -560,10 +560,17 @@ namespace roboptim
     }                                                   \
     break
 
-#define SWITCH_FATAL(NAME)			\
-    case NAME:                                  \
-    assert (0);                                 \
+#define SWITCH_WARNING(NAME, WARNING)			\
+    case NAME:                                          \
+    {                                                   \
+      ResultWithWarnings res (n, 1);			\
+      FILL_RESULT ();					\
+      res.warnings.push_back (SolverWarning (WARNING)); \
+      solver_.result_ = res;				\
+      break;						\
+    }                                                   \
     break
+
 
 #define MAP_IPOPT_ERRORS(MACRO)						\
     MACRO(MAXITER_EXCEEDED, "Max iteration exceeded");                  \
@@ -582,11 +589,12 @@ namespace roboptim
     MACRO(TOO_FEW_DEGREES_OF_FREEDOM, "Two few degrees of freedom");	\
     MACRO(INVALID_OPTION, "Invalid option");				\
     MACRO(OUT_OF_MEMORY, "Out of memory");				\
-    MACRO(CPUTIME_EXCEEDED, "Cpu time exceeded")
+    MACRO(CPUTIME_EXCEEDED, "CPU time exceeded")
 
 
-#define MAP_IPOPT_FATALS(MACRO)                 \
-    MACRO(USER_REQUESTED_STOP)
+#define MAP_IPOPT_WARNINGS(MACRO)			\
+    MACRO(USER_REQUESTED_STOP, "User-requested stop");	\
+    MACRO(STOP_AT_ACCEPTABLE_POINT, "Acceptable point")
 
 
     template <typename T>
@@ -612,17 +620,9 @@ namespace roboptim
 	    solver_.result_ = res;
 	    break;
 	  }
-	case STOP_AT_ACCEPTABLE_POINT:
-	  {
-	    ResultWithWarnings res (n, 1);
-	    FILL_RESULT ();
-	    res.warnings.push_back (SolverWarning ("Acceptable point"));
-	    solver_.result_ = res;
-	    break;
-	  }
 
 	  MAP_IPOPT_ERRORS(SWITCH_ERROR);
-	  MAP_IPOPT_FATALS(SWITCH_FATAL);
+	  MAP_IPOPT_WARNINGS(SWITCH_WARNING);
 
 	case UNASSIGNED:
 	  assert (0 && "should never happen");
@@ -632,9 +632,9 @@ namespace roboptim
 
 #undef FILL_RESULT
 #undef SWITCH_ERROR
-#undef SWITCH_FATAL
+#undef SWITCH_WARNING
 #undef MAP_IPOPT_ERRORS
-#undef MAP_IPOPT_FATALS
+#undef MAP_IPOPT_WARNINGS
 
     template <typename T>
     bool
