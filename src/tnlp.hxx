@@ -670,7 +670,7 @@ namespace roboptim
 
       // handle extra relevant parameters
       solverState_.parameters()["ipopt.mode"].value =
-	(mode == RegularMode)? "RegularMode" : "RestorationPhaseMode";
+	(mode == RegularMode)? std::string ("RegularMode") : std::string ("RestorationPhaseMode");
       solverState_.parameters()["ipopt.mode"].description
         = "Indicates the mode in which the algorithm is";
 
