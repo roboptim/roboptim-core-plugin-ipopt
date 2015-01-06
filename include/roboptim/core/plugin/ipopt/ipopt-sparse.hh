@@ -56,7 +56,7 @@ namespace roboptim
   ///
   /// Instantiate this solver to solve problems with Ipopt.
   ///
-  /// \warning Ipopt needs twice derivable functions, so be sure
+  /// \warning Ipopt needs twice-differentiable functions, so be sure
   /// to provide hessians in your function's problems.
   class ROBOPTIM_DLLEXPORT IpoptSolverSparse
     : public IpoptSolverCommon<

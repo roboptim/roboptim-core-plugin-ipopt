@@ -68,8 +68,8 @@ ENDIF()
 ADD_REQUIRED_DEPENDENCY("roboptim-core >= 0.5")
 
 # Workaround Ipopt package issue.
-# It does not defined HAVE_STDDEF even when it is needed so we will do
-# it manually
+# It does not define HAVE_STDDEF even when it is needed, so we will do
+# it manually.
 CHECK_INCLUDE_FILE_CXX(cstddef HAVE_CSTDDEF)
 IF(HAVE_CSTDDEF)
   ADD_DEFINITIONS(-DHAVE_CSTDDEF)
@@ -84,8 +84,8 @@ ADD_REQUIRED_DEPENDENCY("ipopt")
 
 # Make sure the MPI version of mumps is not used.
 #
-# This is a workaround a bug in the pkg-config file provided by some
-# Ubuntu releases where pkg-config always provide information about
+# This is a workaround for a bug in the pkg-config file provided by some
+# Ubuntu releases where pkg-config always provides information about
 # how to link with the MPI version of MUMPS.
 IF(CMAKE_SYSTEM_NAME MATCHES "Linux"
     AND EXISTS "/etc/debian_version"
