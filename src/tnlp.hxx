@@ -409,13 +409,26 @@ namespace roboptim
       if (!values)
 	{
 	  int idx = 0;
-	  // DENSE RobOptim jacobian matrices are column-major.
-	  for (int j = 0; j < n; ++j)
-	    for (int i = 0; i < m; ++i)
-	      {
-		iRow[idx] = i, jCol[idx] = j;
-		++idx;
-	      }
+	  // If dense RobOptim jacobian matrices are column-major:
+	  if (GenericFunctionTraits<typename function_t::traits_t>::
+	      StorageOrder == Eigen::ColMajor)
+	    {
+	      for (int j = 0; j < n; ++j)
+		for (int i = 0; i < m; ++i)
+		  {
+		    iRow[idx] = i, jCol[idx] = j;
+		    ++idx;
+		  }
+	    }
+	  else
+	    {
+	      for (int i = 0; i < m; ++i)
+		for (int j = 0; j < n; ++j)
+		  {
+		    iRow[idx] = i, jCol[idx] = j;
+		    ++idx;
+		  }
+	    }
 	}
       else
 	{
@@ -449,8 +462,8 @@ namespace roboptim
 		(*g, 0, x_,
 		 constraintId++, solver_);
 	    }
-	  Eigen::Map<typename function_t::matrix_t> values_
-	    (values, m, n);
+
+	  Eigen::Map<ipoptMatrix_t> values_ (values, m, n);
 	  values_ =  *jacobian_;
 	}
 

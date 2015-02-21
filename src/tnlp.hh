@@ -47,6 +47,9 @@ namespace roboptim
       typedef T solver_t;
       typedef SolverState<typename solver_t::problem_t> solverState_t;
 
+      typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic,
+                            Eigen::RowMajor> ipoptMatrix_t;
+
       Tnlp (const typename solver_t::problem_t& pb, solver_t& solver);
 
       Function::size_type constraintsOutputSize ();
