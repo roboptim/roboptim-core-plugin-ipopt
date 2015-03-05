@@ -83,9 +83,9 @@ namespace roboptim
 
     void
     jacobianFromGradients
-    (DerivableFunction::matrix_t& jac,
+    (DerivableFunction::matrix_ref jac,
      const IpoptSolver::problem_t::constraints_t& c,
-     const DerivableFunction::vector_t& x);
+     DerivableFunction::const_vector_ref x);
 
     template  <typename T>
     Function::size_type
@@ -474,8 +474,8 @@ namespace roboptim
     template <>
     inline void
     Tnlp<IpoptSolverTd>::compute_hessian
-    (TwiceDifferentiableFunction::hessian_t& h,
-     const solver_t::vector_t& x,
+    (TwiceDifferentiableFunction::hessian_ref h,
+     function_t::const_vector_ref x,
      Number obj_factor,
      const Number* lambda)
     {
