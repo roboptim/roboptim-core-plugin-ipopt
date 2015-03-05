@@ -45,6 +45,10 @@ namespace roboptim
     {
     public:
       typedef T solver_t;
+
+      /// \brief Cost function type for this problem.
+      typedef typename solver_t::problem_t::function_t function_t;
+
       typedef SolverState<typename solver_t::problem_t> solverState_t;
 
       typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic,
@@ -132,8 +136,8 @@ namespace roboptim
                                        Index*);
 
     protected:
-      void compute_hessian (TwiceDifferentiableFunction::hessian_t& h,
-			    const typename solver_t::vector_t& x,
+      void compute_hessian (TwiceDifferentiableFunction::hessian_ref h,
+			    typename function_t::const_vector_ref x,
 			    Number obj_factor,
 			    const Number* lambda);
 
@@ -166,17 +170,11 @@ namespace roboptim
       /// \brief Current state of the solver (used by the callback function).
       solverState_t solverState_;
 
-      /// \brief Cost function type for this problem.
-      typedef typename solver_t::problem_t::function_t function_t;
-
       /// \brief Cost function buffer.
       boost::optional<typename function_t::result_t> cost_;
 
       /// \brief Cost gradient buffer.
       boost::optional<typename function_t::gradient_t> costGradient_;
-
-      /// \brief Constraints buffer.
-      boost::optional<typename function_t::result_t> constraints_;
 
       /// \brief Constraints jacobian buffer.
       boost::optional<typename function_t::matrix_t> jacobian_;
