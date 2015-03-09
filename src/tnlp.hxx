@@ -83,9 +83,9 @@ namespace roboptim
 
     void
     jacobianFromGradients
-    (DerivableFunction::matrix_t& jac,
+    (DerivableFunction::matrix_ref jac,
      const IpoptSolver::problem_t::constraints_t& c,
-     const DerivableFunction::vector_t& x);
+     DerivableFunction::const_vector_ref x);
 
     template  <typename T>
     Function::size_type
@@ -129,7 +129,6 @@ namespace roboptim
         solverState_ (pb),
 	cost_ (),
 	costGradient_ (),
-	constraints_ (),
 	jacobian_ ()
     {
       BOOST_MPL_ASSERT_RELATION
@@ -311,7 +310,8 @@ namespace roboptim
     {
       assert (solver_.problem ().function ().inputSize () - n == 0);
 
-      cost_ = typename function_t::vector_t (1);
+      if (!cost_)
+        cost_ = typename function_t::vector_t (1);
       Eigen::Map<const typename function_t::argument_t> x_ (x, n);
       solver_.problem ().function () (*cost_, x_);
 
@@ -351,21 +351,13 @@ namespace roboptim
 
       assert (solver_.problem ().function ().inputSize () == n_);
       assert (constraintsOutputSize () == m);
-
-      if (!constraints_)
-	constraints_ =
-	  typename function_t::result_t (constraintsOutputSize ());
-
-#ifndef ROBOPTIM_DO_NOT_CHECK_ALLOCATION
-      Eigen::internal::set_is_malloc_allowed (true);
-#endif //! ROBOPTIM_DO_NOT_CHECK_ALLOCATION
-
       Eigen::Map<const typename function_t::argument_t> x_ (x, n);
 
       typedef typename solver_t::problem_t::constraints_t::const_iterator
 	citer_t;
 
       typename function_t::size_type idx = 0;
+      Eigen::Map<typename function_t::result_t> g_ (g, m, 1);
       for (citer_t it = solver_.problem ().constraints ().begin ();
 	   it != solver_.problem ().constraints ().end (); ++it)
 	{
@@ -375,12 +367,10 @@ namespace roboptim
 	  else
 	    g = get<shared_ptr<nonLinearFunction_t> > (*it);
 
-	  constraints_->segment (idx, g->outputSize ()) = (*g) (x_);
+	  (*g) (g_.segment (idx, g->outputSize ()), x_);
 	  idx += g->outputSize ();
         }
 
-      Eigen::Map<typename function_t::result_t> g_ (g, m, 1);
-      g_ =  *constraints_;
       return true;
     }
 
@@ -432,11 +422,6 @@ namespace roboptim
 	}
       else
 	{
-	  if (!jacobian_)
-	    jacobian_ = typename function_t::matrix_t
-	      (constraintsOutputSize (),
-	       solver_.problem ().function ().inputSize ());
-
 	  Eigen::Map<const typename function_t::vector_t> x_ (x, n);
 
 	  typedef typename
@@ -444,6 +429,7 @@ namespace roboptim
 	    citer_t;
 
 	  typename function_t::size_type idx = 0;
+	  Eigen::Map<ipoptMatrix_t> values_ (values, m, n);
 	  int constraintId = 0;
 	  for (citer_t it = solver_.problem ().constraints ().begin ();
 	       it != solver_.problem ().constraints ().end (); ++it)
@@ -454,8 +440,7 @@ namespace roboptim
 	      else
 		g = get<shared_ptr<nonLinearFunction_t> > (*it);
 
-	      jacobian_->block
-		(idx, 0, g->outputSize (), n) = g->jacobian (x_);
+	      g->jacobian (values_.block(idx, 0, g->outputSize (), n), x_);
 	      idx += g->outputSize ();
 
 	      IpoptCheckGradient
@@ -463,8 +448,6 @@ namespace roboptim
 		 constraintId++, solver_);
 	    }
 
-	  Eigen::Map<ipoptMatrix_t> values_ (values, m, n);
-	  values_ =  *jacobian_;
 	}
 
       return true;
@@ -474,8 +457,8 @@ namespace roboptim
     template <>
     inline void
     Tnlp<IpoptSolverTd>::compute_hessian
-    (TwiceDifferentiableFunction::hessian_t& h,
-     const solver_t::vector_t& x,
+    (TwiceDifferentiableFunction::hessian_ref h,
+     function_t::const_vector_ref x,
      Number obj_factor,
      const Number* lambda)
     {
