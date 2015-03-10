@@ -127,7 +127,6 @@ namespace roboptim
     Tnlp<T>::Tnlp (const typename solver_t::problem_t& pb, solver_t& solver)
       : solver_ (solver),
         solverState_ (pb),
-	cost_ (),
 	costGradient_ (),
 	jacobian_ ()
     {
@@ -310,12 +309,10 @@ namespace roboptim
     {
       assert (solver_.problem ().function ().inputSize () - n == 0);
 
-      if (!cost_)
-        cost_ = typename function_t::vector_t (1);
+      Eigen::Map<typename function_t::result_t> cost_ (&obj_value, 1);
       Eigen::Map<const typename function_t::argument_t> x_ (x, n);
-      solver_.problem ().function () (*cost_, x_);
+      solver_.problem ().function () (cost_, x_);
 
-      obj_value = (*cost_)[0];
       return true;
     }
 
