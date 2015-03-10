@@ -67,6 +67,27 @@ namespace roboptim
 
     template <>
     bool
+    Tnlp<IpoptSolverSparse>::eval_grad_f(Index n, const Number* x, bool, Number* grad_f)
+    {
+      assert (solver_.problem ().function ().inputSize () - n == 0);
+
+      if (!costGradient_)
+	costGradient_ = typename function_t::gradient_t
+	  (solver_.problem ().function ().inputSize ());
+
+      Eigen::Map<const typename function_t::argument_t> x_ (x, n);
+      solver_.problem ().function ().gradient (*costGradient_, x_, 0);
+
+      IpoptCheckGradient
+        (solver_.problem ().function (), 0, x_, -1, solver_);
+
+      Eigen::Map<typename function_t::vector_t> grad_f_ (grad_f, n);
+      grad_f_ =  *costGradient_;
+      return true;
+    }
+
+    template <>
+    bool
     Tnlp<IpoptSolverSparse>::eval_jac_g(Index n, const Number* x, bool,
 					Index ROBOPTIM_DEBUG_ONLY(m),
 					Index nele_jac,
