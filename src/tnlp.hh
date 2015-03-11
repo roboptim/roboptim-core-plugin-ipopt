@@ -170,14 +170,11 @@ namespace roboptim
       /// \brief Current state of the solver (used by the callback function).
       solverState_t solverState_;
 
-      /// \brief Cost function buffer.
-      boost::optional<typename function_t::result_t> cost_;
-
       /// \brief Cost gradient buffer.
       boost::optional<typename function_t::gradient_t> costGradient_;
 
       /// \brief Constraints jacobian buffer.
-      boost::optional<typename function_t::matrix_t> jacobian_;
+      boost::optional<typename function_t::jacobian_t> jacobian_;
     };
   } // end of namespace detail.
 } // end of namespace roboptim.

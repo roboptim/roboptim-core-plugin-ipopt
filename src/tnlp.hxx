@@ -127,7 +127,6 @@ namespace roboptim
     Tnlp<T>::Tnlp (const typename solver_t::problem_t& pb, solver_t& solver)
       : solver_ (solver),
         solverState_ (pb),
-	cost_ (),
 	costGradient_ (),
 	jacobian_ ()
     {
@@ -310,14 +309,16 @@ namespace roboptim
     {
       assert (solver_.problem ().function ().inputSize () - n == 0);
 
-      if (!cost_)
-        cost_ = typename function_t::vector_t (1);
+      Eigen::Map<typename function_t::result_t> cost_ (&obj_value, 1);
       Eigen::Map<const typename function_t::argument_t> x_ (x, n);
-      solver_.problem ().function () (*cost_, x_);
+      solver_.problem ().function () (cost_, x_);
 
-      obj_value = (*cost_)[0];
       return true;
     }
+
+    template <>
+    bool
+    Tnlp<IpoptSolverSparse>::eval_grad_f(Index n, const Number* x, bool, Number* grad_f);
 
     template <typename T>
     bool
@@ -325,18 +326,13 @@ namespace roboptim
     {
       assert (solver_.problem ().function ().inputSize () - n == 0);
 
-      if (!costGradient_)
-	costGradient_ = typename function_t::gradient_t
-	  (solver_.problem ().function ().inputSize ());
-
       Eigen::Map<const typename function_t::argument_t> x_ (x, n);
-      solver_.problem ().function ().gradient (*costGradient_, x_, 0);
+      Eigen::Map<typename function_t::gradient_t> grad_f_ (grad_f, n);
+      solver_.problem ().function ().gradient (grad_f_, x_, 0);
 
       IpoptCheckGradient
         (solver_.problem ().function (), 0, x_, -1, solver_);
 
-      Eigen::Map<typename function_t::vector_t> grad_f_ (grad_f, n);
-      grad_f_ =  *costGradient_;
       return true;
     }
 
