@@ -653,7 +653,7 @@ namespace roboptim
     bool
     Tnlp<T>::intermediate_callback (AlgorithmMode mode,
                                     Index /*iter*/, Number obj_value,
-                                    Number inf_pr, Number /*inf_du*/,
+                                    Number /*inf_pr*/, Number /*inf_du*/,
 				    Number /*mu*/, Number /*d_norm*/,
 				    Number /*regularization_size*/,
 				    Number /*alpha_du*/, Number /*alpha_pr*/,
@@ -679,7 +679,7 @@ namespace roboptim
       solverState_.cost () = obj_value;
 
       // unscaled constraint violation at the current point
-      solverState_.constraintViolation () = inf_pr;
+      solverState_.constraintViolation () = ip_cq->unscaled_curr_nlp_constraint_violation (Ipopt::NORM_MAX);
 
       // handle extra relevant parameters
       solverState_.parameters()["ipopt.mode"].value =
