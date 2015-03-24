@@ -45,6 +45,7 @@ SET(FUNCTION_TYPE ::roboptim::EigenMatrixDense)
 SET(PROGRAM_SUFFIX "")
 SET(COST_FUNCTION_TYPE ::roboptim::GenericDifferentiableFunction)
 BUILD_ROBOPTIM_PROBLEMS()
+BUILD_QP_PROBLEMS()
 
 SET(SOLVER_NAME "ipopt-sparse")
 SET(FUNCTION_TYPE ::roboptim::EigenMatrixSparse)
