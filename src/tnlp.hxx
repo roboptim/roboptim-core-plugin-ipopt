@@ -454,8 +454,7 @@ namespace roboptim
 	      else
 		g = get<shared_ptr<nonLinearFunction_t> > (*it);
 
-	      jacobian_->block
-		(idx, 0, g->outputSize (), n) = g->jacobian (x_);
+	      g->jacobian (jacobian_->block (idx, 0, g->outputSize (), n), x_);
 	      idx += g->outputSize ();
 
 	      IpoptCheckGradient
@@ -463,7 +462,7 @@ namespace roboptim
 		 constraintId++, solver_);
 	    }
 
-	  Eigen::Map<ipoptMatrix_t> values_ (values, m, n);
+	  Eigen::Map<typename function_t::jacobian_t> values_ (values, m, n);
 	  values_ =  *jacobian_;
 	}
 

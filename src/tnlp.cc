@@ -83,7 +83,7 @@ namespace roboptim
 
       if (!jacobian_)
 	{
-	  jacobian_ = function_t::matrix_t
+	  jacobian_ = function_t::jacobian_t
 	    (static_cast<function_t::matrix_t::Index> (constraintsOutputSize ()),
 	     solver_.problem ().function ().inputSize ());
 	  jacobian_->reserve (nele_jac);
