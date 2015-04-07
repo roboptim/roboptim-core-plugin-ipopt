@@ -20,7 +20,9 @@
 
 #include <roboptim/core/plugin/ipopt/ipopt-td.hh>
 #include <roboptim/core/plugin/ipopt/ipopt-sparse.hh>
+
 #include <roboptim/core/debug.hh>
+#include <roboptim/core/util.hh>
 
 #include "tnlp.hh"
 
@@ -211,8 +213,10 @@ namespace roboptim
 	  else
 	    g = get<shared_ptr<nonLinearFunction_t> > (*it);
 
-	  jacobian_->middleRows
-	    (idx, g->outputSize ()) = g->jacobian (x_);
+	  // TODO: use middleRows once Eigen is fixed
+	  // TODO: avoid allocation here (may be solved with
+	  // http://eigen.tuxfamily.org/bz/show_bug.cgi?id=910)
+	  copySparseBlock (*jacobian_, g->jacobian (x_), idx, 0);
 	  idx += g->outputSize ();
 
 	  IpoptCheckGradient
@@ -220,7 +224,7 @@ namespace roboptim
 	     constraintId++, solver_);
 	}
 
-      // Copy jacobian values from interal sparse matrix.
+      // Copy jacobian values from internal sparse matrix.
       idx = 0;
       for (int k = 0; k < jacobian_->outerSize (); ++k)
 	for (function_t::jacobian_t::InnerIterator it (*jacobian_, k);
