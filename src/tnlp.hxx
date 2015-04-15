@@ -433,9 +433,12 @@ namespace roboptim
       else
 	{
 	  if (!jacobian_)
-	    jacobian_ = typename function_t::matrix_t
-	      (constraintsOutputSize (),
-	       solver_.problem ().function ().inputSize ());
+	    {
+	      jacobian_ = typename function_t::matrix_t
+		(constraintsOutputSize (),
+		 solver_.problem ().function ().inputSize ());
+	      jacobian_->setZero ();
+	    }
 
 	  Eigen::Map<const typename function_t::vector_t> x_ (x, n);
 
