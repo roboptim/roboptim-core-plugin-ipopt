@@ -59,7 +59,7 @@ namespace roboptim
 
       template <typename T>
       void
-      operator () (const T& val) const
+      operator () (const T&) const
       {
         throw std::runtime_error ("option type not supported by Ipopt.");
       }
