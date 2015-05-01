@@ -51,6 +51,19 @@ namespace roboptim
 	app->Options ()->SetStringValue (key, val);
       }
 
+      void
+      operator () (const bool& val) const
+      {
+	app->Options ()->SetStringValue (key, val? "yes" : "no");
+      }
+
+      template <typename T>
+      void
+      operator () (const T& val) const
+      {
+        throw std::runtime_error ("option type not supported by Ipopt.");
+      }
+
     private:
       const Ipopt::SmartPtr<Ipopt::IpoptApplication>& app;
       const std::string& key;
