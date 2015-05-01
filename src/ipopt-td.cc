@@ -47,7 +47,7 @@ namespace roboptim
     : parent_t (pb, Ipopt::SmartPtr<Ipopt::TNLP>
 		(new detail::Tnlp<IpoptSolverTd> (pb, *this)))
   {
-    parameters ()["ipopt.hessian_approximation"].value = "exact";
+    parameters ()["ipopt.hessian_approximation"].value = std::string ("exact");
 
 #ifdef ROBOPTIM_CORE_PLUGIN_IPOPT_VERBOSE
     Ipopt::SmartPtr<Ipopt::Journal> stdout_jrnl =

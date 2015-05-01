@@ -46,7 +46,7 @@ namespace roboptim
 		(new detail::Tnlp<IpoptSolverSparse> (pb, *this)))
 
   {
-    parameters ()["ipopt.hessian_approximation"].value = "limited-memory";
+    parameters ()["ipopt.hessian_approximation"].value = std::string ("limited-memory");
 
 #ifdef ROBOPTIM_CORE_PLUGIN_IPOPT_VERBOSE
     Ipopt::SmartPtr<Ipopt::Journal> stdout_jrnl =
