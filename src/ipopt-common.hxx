@@ -164,17 +164,17 @@ namespace roboptim
     //  Output
     DEFINE_PARAMETER ("ipopt.print_level", "output verbosity level", 5);
     DEFINE_PARAMETER ("ipopt.print_user_options",
-		      "print all options set by the user", "no");
+		      "print all options set by the user", std::string ("no"));
     DEFINE_PARAMETER ("ipopt.print_options_documentation",
-		      "switch to print all algorithmic options", "no");
+		      "switch to print all algorithmic options", std::string ("no"));
     DEFINE_PARAMETER
       ("ipopt.output_file",
        "file name of desired output file (leave unset for no file output)",
-       "");
+       std::string (""));
     DEFINE_PARAMETER ("ipopt.file_print_level",
 		      "verbosity level for output file", 5);
     DEFINE_PARAMETER ("ipopt.option_file_name",
-		      "file name of options file (to overwrite default)", "");
+		      "file name of options file (to overwrite default)", std::string (""));
 
     //  Termination
     DEFINE_PARAMETER ("ipopt.tol",
@@ -206,30 +206,32 @@ namespace roboptim
     DEFINE_PARAMETER
       ("ipopt.nlp_scaling_method",
        "technique used for scaling the problem internally before it is solved",
-       "gradient-based");
+       std::string ("gradient-based"));
     DEFINE_PARAMETER
       ("ipopt.nlp_scaling_max_gradient",
        "maximum gradient after NLP scaling", 1e2);
 
     //  Barrier parameter
     DEFINE_PARAMETER ("ipopt.mu_strategy",
-		      "update strategy for barrier parameter", "adaptive");
+		      "update strategy for barrier parameter", std::string ("adaptive"));
 
     //  Restoration Phase
     DEFINE_PARAMETER
       ("ipopt.expect_infeasible_problem",
-       "enable heuristics to quickly detect an infeasible problem", "no");
+       "enable heuristics to quickly detect an infeasible problem",
+       std::string ("no"));
     DEFINE_PARAMETER
       ("ipopt.start_with_resto",
        "tells algorithm to switch to restoration phase in first iteration",
-       "no");
+       std::string ("no"));
 
     // Linear solver choice.
     DEFINE_PARAMETER ("ipopt.linear_solver", "linear solver",
-                      IPOPT_DEFAULT_LINEAR_SOLVER);
+                      std::string (IPOPT_DEFAULT_LINEAR_SOLVER));
 
     // Derivative test.
-    DEFINE_PARAMETER ("ipopt.derivative_test", "enable derivative checker", "none");
+    DEFINE_PARAMETER ("ipopt.derivative_test", "enable derivative checker",
+                      std::string ("none"));
   }
 
 #undef DEFINE_PARAMETER
