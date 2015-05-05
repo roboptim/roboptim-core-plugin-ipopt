@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with roboptim.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <boost/shared_ptr.hpp>
+
 #include <coin/IpIpoptApplication.hpp>
 #include <coin/IpTNLP.hpp>
 
@@ -38,6 +40,8 @@ namespace roboptim
 					   Index& nnz_h_lag,
 					   TNLP::IndexStyleEnum& index_style)
     {
+      using namespace boost;
+
       n = static_cast<Index> (solver_.problem ().function ().inputSize ());
       m = static_cast<Index> (constraintsOutputSize ());
 

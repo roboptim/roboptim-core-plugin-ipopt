@@ -17,6 +17,9 @@
 
 #ifndef ROBOPTIM_CORE_PLUGING_IPOPT_TNLP_HXX
 # define ROBOPTIM_CORE_PLUGING_IPOPT_TNLP_HXX
+
+# include <boost/shared_ptr.hpp>
+
 # include <boost/mpl/assert.hpp>
 # include <boost/mpl/at.hpp>
 # include <boost/mpl/size.hpp>
@@ -91,6 +94,8 @@ namespace roboptim
     Function::size_type
     computeConstraintsOutputSize (const T& solver)
     {
+      using namespace boost;
+
       BOOST_MPL_ASSERT_RELATION
 	( (boost::mpl::size<typename T::problem_t::constraintsList_t>::value),
 	  ==, 2);
@@ -99,13 +104,13 @@ namespace roboptim
       // constraint type and the linear function type is the
       // first.
       typedef typename
-	boost::mpl::at<typename T::problem_t::constraintsList_t,
-		       boost::mpl::int_<1> >::type
+	mpl::at<typename T::problem_t::constraintsList_t,
+		mpl::int_<1> >::type
 	nonLinearFunction_t;
 
       typedef typename
-	boost::mpl::at<typename T::problem_t::constraintsList_t,
-		       boost::mpl::int_<0> >::type
+	mpl::at<typename T::problem_t::constraintsList_t,
+		mpl::int_<0> >::type
 	linearFunction_t;
 
       Function::size_type result = 0;
@@ -230,6 +235,8 @@ namespace roboptim
     Tnlp<T>::get_function_linearity (Index ROBOPTIM_DEBUG_ONLY(m),
                                      LinearityType* const_types)
     {
+      using namespace boost;
+
       assert (constraintsOutputSize () - m == 0);
 
       typedef typename solver_t::problem_t::constraints_t::const_iterator
@@ -481,6 +488,8 @@ namespace roboptim
      Number obj_factor,
      const Number* lambda)
     {
+      using namespace boost;
+
       typedef solver_t::problem_t::constraints_t::const_iterator citer_t;
 
       TwiceDifferentiableFunction::hessian_t fct_h =
