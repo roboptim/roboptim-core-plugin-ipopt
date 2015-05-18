@@ -45,6 +45,15 @@ namespace roboptim
       n = static_cast<Index> (solver_.problem ().function ().inputSize ());
       m = static_cast<Index> (constraintsOutputSize ());
 
+      function_t::vector_t x (n);
+      if (solver_.problem ().startingPoint ())
+        x = *(solver_.problem ().startingPoint ());
+      else
+	{
+	  // FIXME: should make sure we are in the bounds.
+	  x.setZero ();
+	}
+
       // compute number of non zeros elements in jacobian constraint.
       nnz_jac_g = 0;
       typedef solver_t::problem_t::constraints_t::const_iterator
@@ -52,10 +61,6 @@ namespace roboptim
       for (citer_t it = solver_.problem ().constraints ().begin ();
 	   it != solver_.problem ().constraints ().end (); ++it)
 	{
-	  // FIXME: should make sure we are in the bounds.
-	  function_t::vector_t x (n);
-	  x.setZero ();
-
 	  shared_ptr<solver_t::commonConstraintFunction_t> g;
 	  if (it->which () == LINEAR)
 	    g = get<shared_ptr<linearFunction_t> > (*it);
