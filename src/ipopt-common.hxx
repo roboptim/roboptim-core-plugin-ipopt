@@ -27,6 +27,7 @@
 
 # include <coin/IpSmartPtr.hpp>
 # include <coin/IpIpoptApplication.hpp>
+# include <coin/IpoptConfig.h>
 
 # include "roboptim/core/plugin/ipopt/ipopt-parameters-updater.hh"
 # include "roboptim/core/plugin/ipopt/ipopt-common.hh"
@@ -50,8 +51,12 @@ namespace roboptim
   {
     app_->Jnlst()->DeleteAllJournals();
 
-    // Re-throw non-Ipopt exceptions
+    // Re-throw non-Ipopt exceptions (Ipopt ≥ 3.11.5)
+# ifdef IPOPT_VERSION_MAJOR
+#  if (IPOPT_VERSION_MAJOR >= 3) && (IPOPT_VERSION_MINOR >= 11) && (IPOPT_VERSION_RELEASE >= 5)
     app_->RethrowNonIpoptException (true);
+#  endif //! (IPOPT_VERSION_MAJOR >= 3) && (IPOPT_VERSION_MINOR >= 11) && (IPOPT_VERSION_RELEASE >= 5)
+# endif //! IPOPT_VERSION_MAJOR
 
     // Initialize parameters.
     initializeParameters ();
