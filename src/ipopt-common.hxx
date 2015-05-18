@@ -50,6 +50,9 @@ namespace roboptim
   {
     app_->Jnlst()->DeleteAllJournals();
 
+    // Re-throw non-Ipopt exceptions
+    app_->RethrowNonIpoptException (true);
+
     // Initialize parameters.
     initializeParameters ();
   }
