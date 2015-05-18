@@ -17,8 +17,11 @@
 
 #ifndef ROBOPTIM_CORE_IPOPT_COMMON_HXX
 # define ROBOPTIM_CORE_IPOPT_COMMON_HXX
+
 # include <roboptim/core/sys.hh>
 # include <roboptim/core/portability.hh>
+
+# include <stdexcept>
 
 # include <boost/mpl/vector.hpp>
 
@@ -61,9 +64,9 @@ namespace roboptim
   case NAME:					\
   break
 
-#define SWITCH_FATAL(NAME)			\
+#define SWITCH_FATAL(NAME, ERROR)		\
   case NAME:					\
-  assert (0);					\
+  throw std::runtime_error (ERROR);		\
   break
 
 #define SWITCH_OK(NAME, CASES)			\
@@ -98,8 +101,8 @@ namespace roboptim
   MACRO (Ipopt::Internal_Error, "Internal error");			\
   MACRO (Ipopt::Maximum_CpuTime_Exceeded, "Maximum CPU time exceeded")
 
-#define MAP_IPOPT_FATALS(MACRO)			\
-  MACRO(Ipopt::NonIpopt_Exception_Thrown)
+#define MAP_IPOPT_FATALS(MACRO)						\
+  MACRO(Ipopt::NonIpopt_Exception_Thrown, "Non-Ipopt exception thrown")
 
 #define MAP_IPOPT_OKS(MACRO)						\
   MACRO (Ipopt::Solve_Succeeded, MAP_IPOPT_ERRORS(SWITCH_ERROR);	\
