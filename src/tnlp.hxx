@@ -204,18 +204,18 @@ namespace roboptim
       ROBOPTIM_DEBUG_ONLY(std::size_t n_ = static_cast<std::size_t> (n));
       std::size_t m_ = static_cast<std::size_t> (m);
 
-      assert (solver_.problem ().argumentScales ().size () == n_);
+      assert (solver_.problem ().argumentScaling ().size () == n_);
 
       use_x_scaling = true, use_g_scaling = true;
-      std::copy (solver_.problem ().argumentScales ().begin (),
-		 solver_.problem ().argumentScales ().end (),
+      std::copy (solver_.problem ().argumentScaling ().begin (),
+		 solver_.problem ().argumentScaling ().end (),
 		 x_scaling);
 
 
       for (std::size_t i = 0; i < m_; ++i)
         for (std::size_t j = 0;
-             j < solver_.problem ().scalesVector ()[i].size (); ++j)
-          g_scaling[i] = solver_.problem ().scalesVector ()[i][j];
+             j < solver_.problem ().scalingVector ()[i].size (); ++j)
+          g_scaling[i] = solver_.problem ().scalingVector ()[i][j];
       return true;
     }
 
