@@ -9,13 +9,13 @@ env:
   - GIT_DEPENDENCIES="roboptim/roboptim-core"
   - DEBSIGN_KEYID=5AE5CD75
   - PPA_URI="roboptim/ppa"
-  - NSIQCPPSTYLE_FILEFILTERPATH=cmake/filefilter.txt
   - GH_USERNAME=thomas-moulard
   - GH_REPO=roboptim/roboptim-core-plugin-ipopt
   - LCOV_IGNORE_RULES="*tests*"
   - secure: fURGUkCIPnZZ4G+Gaf9wMPH2P8sXiDA0kA1S6qVdCbenIyilRNnLmPiqHoqwtVEl4pqpdmRoFnMbJMGIuh+61gdo23+MZ1TBeNUp86nkH4v+qVRw5n1Nm2cKJZiqiuRHcTF3jVCVgx7eUvDkPAjJ9ff4vxB8sQhOQkQeGilJyak=
   - secure: TBMOOJtRFuQK9NWIlKuBg+/LiuTa8Hz+8PsnZB/vGlc4FpoRJkz7DmnQS/sCDxunhaXZX6rac7THzCn6lrp5wksXNRRqUwRiv+JixyE1WbAnn22JBEouhs4o4fjRtwPvvkH0+EpAxuSebltCESrdxfjjkeLine4CZvV0e6HPquw=
   - secure: ALE6izEg9T+fqCBUvvhKEgOgCnR+43DSOFT/DDBIj2hCXlf9R9dQ8upaG/6JXl08i5hwVRvQMK9+zJfU25cTTM/xpC8O/5G8t7pG9Y+/QeVOMbOCQnHMDe7dB8azO8CHnC91pP00ychf8KSL2Exz+o1k1fha/9BaZZDo5zCrKKU=
+  - secure: "YOeurB3pqF+B5iJHQBq4HtBoTW6PcDaNFuvDqVC64huArDZ9jjZt7EqDVEHJwuwMxrLW94lgdR9DAOwAM+X5EaMlekJ2h56not7U+553/NZYLC4MgimGOAn127kaO7CacZmdYNjQNq+G8pXJX/N+VSaqLy+WhM6Kuxts0CDC1UM="
 notifications:
   hipchat:
     rooms:
@@ -25,8 +25,11 @@ branches:
   only:
   - master
   - debian
+  - travis
+  - coverity_scan
 script:
-- export LD_LIBRARY_PATH=`pkg-config --variable=plugindir roboptim-core`:$LD_LIBRARY_PATH; ./.travis/run build
+- export LD_LIBRARY_PATH=`pkg-config --variable=plugindir roboptim-core`:$LD_LIBRARY_PATH;
+- if [ "${COVERITY_SCAN_BRANCH}" != "1" ]; then ./.travis/run build; fi
 after_success: ./.travis/run after_success
 after_failure: ./.travis/run after_failure
 before_install:
@@ -35,7 +38,17 @@ before_install:
 matrix:
   allow_failures:
     - compiler: clang
-    - os: osx
+    - env: COVERITY_SCAN_BRANCH=1
 os:
   - linux
   - osx
+
+addons:
+  coverity_scan:
+    project:
+      name: "roboptim/roboptim-core-plugin-ipopt"
+      description: "Build submitted via Travis CI"
+    notification_email: roboptim@googlegroups.com
+    build_command_prepend: ". .travis/common.sh && mkdir coverity && cd coverity && cmake .."
+    build_command: "make"
+    branch_pattern: coverity_scan
