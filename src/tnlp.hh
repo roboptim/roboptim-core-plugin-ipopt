@@ -70,7 +70,7 @@ namespace roboptim
       get_variables_linearity (Index n, LinearityType* var_types);
 
       virtual bool
-      get_function_linearity (Index m, LinearityType* const_types);
+      get_constraints_linearity (Index m, LinearityType* const_types);
 
       virtual bool
       get_starting_point (Index n, bool init_x, Number* x,

@@ -232,7 +232,7 @@ namespace roboptim
 
     template <typename T>
     bool
-    Tnlp<T>::get_function_linearity (Index ROBOPTIM_DEBUG_ONLY(m),
+    Tnlp<T>::get_constraints_linearity (Index ROBOPTIM_DEBUG_ONLY(m),
                                      LinearityType* const_types)
     {
       using namespace boost;
