@@ -90,7 +90,9 @@ ADD_REQUIRED_DEPENDENCY("ipopt")
 IF(CMAKE_SYSTEM_NAME MATCHES "Linux"
     AND EXISTS "/etc/debian_version"
     AND IPOPT_PREFIX MATCHES "/usr")
-  STRING(REPLACE "-ldmumps" "-ldmumps_seq" IPOPT_LDFLAGS "${IPOPT_LDFLAGS}")
+  IF(NOT IPOPT_LDFLAGS MATCHES "-ldmumps_seq")
+    STRING(REPLACE "-ldmumps" "-ldmumps_seq" IPOPT_LDFLAGS "${IPOPT_LDFLAGS}")
+  ENDIF()
 ENDIF()
 
 
