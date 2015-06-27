@@ -18,6 +18,10 @@
 SET(IPOPT_DEFAULT_LINEAR_SOLVER "mumps"
     CACHE STRING "Which linear solver should be used by Ipopt by default?")
 
+# Define the directory where plug-ins will be installed.
+GET_FILENAME_COMPONENT(RELPLUGINDIR ${ROBOPTIM_CORE_PLUGINDIR} NAME)
+SET(PLUGINDIR ${CMAKE_INSTALL_LIBDIR}/${RELPLUGINDIR})
+
 MACRO(IPOPT_PLUGIN NAME)
   ADD_LIBRARY(roboptim-core-plugin-${NAME} MODULE
     ${NAME}.cc tnlp.cc tnlp.hh tnlp.hxx doc.hh ${HEADERS}
@@ -28,7 +32,7 @@ MACRO(IPOPT_PLUGIN NAME)
     PREFIX ""
     SOVERSION 3 VERSION 3.1.0)
   INSTALL(TARGETS roboptim-core-plugin-${NAME}
-    DESTINATION ${ROBOPTIM_CORE_PLUGINDIR})
+    DESTINATION ${PLUGINDIR})
   PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-${NAME} ipopt)
   PKG_CONFIG_USE_COMPILE_DEPENDENCY(roboptim-core-plugin-${NAME} roboptim-core)
 
