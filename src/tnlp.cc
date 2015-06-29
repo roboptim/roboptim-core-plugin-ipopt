@@ -42,7 +42,7 @@ namespace roboptim
     {
       using namespace boost;
 
-      n = static_cast<Index> (solver_.problem ().function ().inputSize ());
+      n = static_cast<Index> (costFunction_->inputSize ());
       m = static_cast<Index> (constraintsOutputSize ());
 
       function_t::vector_t x (n);
@@ -56,18 +56,12 @@ namespace roboptim
 
       // compute number of non zeros elements in jacobian constraint.
       nnz_jac_g = 0;
-      typedef solver_t::problem_t::constraints_t::const_iterator
+      typedef std::vector<differentiableFunctionPtr_t>::const_iterator
 	citer_t;
-      for (citer_t it = solver_.problem ().constraints ().begin ();
-	   it != solver_.problem ().constraints ().end (); ++it)
+      for (citer_t it = differentiableConstraintFunctions_.begin ();
+	   it != differentiableConstraintFunctions_.end (); ++it)
 	{
-	  shared_ptr<solver_t::commonConstraintFunction_t> g;
-	  if (it->which () == LINEAR)
-	    g = get<shared_ptr<linearFunction_t> > (*it);
-	  else
-	    g = get<shared_ptr<nonLinearFunction_t> > (*it);
-
-	  nnz_jac_g += g->jacobian (x).nonZeros ();
+	  nnz_jac_g += (*it)->jacobian (x).nonZeros ();
 	}
 
 
@@ -87,14 +81,14 @@ namespace roboptim
       using namespace boost;
       ROBOPTIM_DEBUG_ONLY
 	(function_t::size_type n_ = static_cast<function_t::size_type> (n));
-      assert (solver_.problem ().function ().inputSize () == n_);
+      assert (costFunction_->inputSize () == n_);
       assert (constraintsOutputSize () == m);
 
       if (!jacobian_)
 	{
-	  jacobian_ = function_t::jacobian_t
-	    (static_cast<function_t::matrix_t::Index> (constraintsOutputSize ()),
-	     solver_.problem ().function ().inputSize ());
+	  jacobian_ = differentiableFunction_t::jacobian_t
+	    (static_cast<differentiableFunction_t::matrix_t::Index> (constraintsOutputSize ()),
+	     costFunction_->inputSize ());
 	  jacobian_->reserve (nele_jac);
 	}
 
@@ -111,15 +105,15 @@ namespace roboptim
 	  // First evaluate the constraints in zero to build the
 	  // constraints jacobian.
 	  int idx = 0;
-	  typedef solver_t::problem_t::constraints_t::const_iterator
+	  typedef std::vector<differentiableFunctionPtr_t>::const_iterator
 	    citer_t;
 	  unsigned constraintId = 0;
 
 	  typedef Eigen::Triplet<double> triplet_t;
 	  std::vector<triplet_t> coefficients;
 
-	  for (citer_t it = solver_.problem ().constraints ().begin ();
-	       it != solver_.problem ().constraints ().end ();
+	  for (citer_t it = differentiableConstraintFunctions_.begin ();
+	       it != differentiableConstraintFunctions_.end ();
 	       ++it, ++constraintId)
 	    {
 	      LOG4CXX_TRACE
@@ -160,15 +154,9 @@ namespace roboptim
 	      else // other use initial guess.
 		x = *(solver_.problem ().startingPoint ());
 
-	      shared_ptr<solver_t::commonConstraintFunction_t> g;
-	      if (it->which () == LINEAR)
-		g = get<shared_ptr<linearFunction_t> > (*it);
-	      else
-		g = get<shared_ptr<nonLinearFunction_t> > (*it);
-
-	      function_t::jacobian_t jacobian = g->jacobian (x);
+	      differentiableFunction_t::jacobian_t jacobian = (*it)->jacobian (x);
 	      for (int k = 0; k < jacobian.outerSize (); ++k)
-		for (function_t::jacobian_t::InnerIterator
+		for (differentiableFunction_t::jacobian_t::InnerIterator
 		       it (jacobian, k); it; ++it)
 		  {
                     const int row = static_cast<int> (idx + it.row ());
@@ -176,7 +164,7 @@ namespace roboptim
 		    coefficients.push_back
 		      (triplet_t (row, col, it.value ()));
 		  }
-	      idx += g->outputSize ();
+	      idx += (*it)->outputSize ();
 	    }
 
 	  jacobian_->setFromTriplets
@@ -190,7 +178,7 @@ namespace roboptim
 	  idx = 0;
 
 	  for (int k = 0; k < jacobian_->outerSize (); ++k)
-	    for (function_t::jacobian_t::InnerIterator it (*jacobian_, k);
+	    for (differentiableFunction_t::jacobian_t::InnerIterator it (*jacobian_, k);
 		 it; ++it)
 	      {
 		iRow[idx] = it.row (), jCol[idx] = it.col ();
@@ -208,35 +196,29 @@ namespace roboptim
 
       Eigen::Map<const function_t::vector_t> x_ (x, n);
 
-      typedef solver_t::problem_t::constraints_t::const_iterator
+      typedef std::vector<differentiableFunctionPtr_t>::const_iterator
 	citer_t;
 
       int idx = 0;
       int constraintId = 0;
-      for (citer_t it = solver_.problem ().constraints ().begin ();
-	   it != solver_.problem ().constraints ().end (); ++it)
+      for (citer_t it = differentiableConstraintFunctions_.begin ();
+	   it != differentiableConstraintFunctions_.end (); ++it)
 	{
-	  shared_ptr<solver_t::commonConstraintFunction_t> g;
-	  if (it->which () == LINEAR)
-	    g = get<shared_ptr<linearFunction_t> > (*it);
-	  else
-	    g = get<shared_ptr<nonLinearFunction_t> > (*it);
-
 	  // TODO: use middleRows once Eigen is fixed
 	  // TODO: avoid allocation here (may be solved with
 	  // http://eigen.tuxfamily.org/bz/show_bug.cgi?id=910)
-	  copySparseBlock (*jacobian_, g->jacobian (x_), idx, 0);
-	  idx += g->outputSize ();
+	  copySparseBlock (*jacobian_, (*it)->jacobian (x_), idx, 0);
+	  idx += (*it)->outputSize ();
 
 	  IpoptCheckGradient
-	    (*g, 0, x_,
+	    (*(*it), 0, x_,
 	     constraintId++, solver_);
 	}
 
       // Copy jacobian values from internal sparse matrix.
       idx = 0;
       for (int k = 0; k < jacobian_->outerSize (); ++k)
-	for (function_t::jacobian_t::InnerIterator it (*jacobian_, k);
+	for (differentiableFunction_t::jacobian_t::InnerIterator it (*jacobian_, k);
 	     it; ++it)
 	  {
 	    assert (idx < nele_jac);

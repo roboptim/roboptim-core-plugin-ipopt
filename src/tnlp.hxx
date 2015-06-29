@@ -96,34 +96,12 @@ namespace roboptim
     {
       using namespace boost;
 
-      BOOST_MPL_ASSERT_RELATION
-	( (boost::mpl::size<typename T::problem_t::constraintsList_t>::value),
-	  ==, 2);
-
-      // Non-linear function type is supposed to be the second
-      // constraint type and the linear function type is the
-      // first.
-      typedef typename
-	mpl::at<typename T::problem_t::constraintsList_t,
-		mpl::int_<1> >::type
-	nonLinearFunction_t;
-
-      typedef typename
-	mpl::at<typename T::problem_t::constraintsList_t,
-		mpl::int_<0> >::type
-	linearFunction_t;
-
       Function::size_type result = 0;
       typedef typename T::problem_t::constraints_t::const_iterator citer_t;
       for (citer_t it = solver.problem ().constraints ().begin ();
 	   it != solver.problem ().constraints ().end (); ++it)
 	{
-	  shared_ptr<typename T::commonConstraintFunction_t> g;
-	  if (it->which () == IpoptSolver::LINEAR)
-	    g = get<shared_ptr<linearFunction_t> > (*it);
-	  else
-	    g = get<shared_ptr<nonLinearFunction_t> > (*it);
-	  result += g->outputSize ();
+	  result += (*it)->outputSize ();
 	}
       return result;
     }
@@ -132,14 +110,39 @@ namespace roboptim
     Tnlp<T>::Tnlp (const typename solver_t::problem_t& pb, solver_t& solver)
       : solver_ (solver),
         solverState_ (pb),
+	costFunction_ (&pb.function()),
+	differentiableCostFunction_ (),
+	twiceDifferentiableCostFunction_ (),
+	constraintFunctions_ (),
+	differentiableConstraintFunctions_ (),
+	twiceDifferentiableConstraintFunctions_ (),
 	cost_ (),
 	costGradient_ (),
 	constraints_ (),
 	jacobian_ ()
     {
-      BOOST_MPL_ASSERT_RELATION
-	( (boost::mpl::size<
-           typename solver_t::problem_t::constraintsList_t>::value), ==, 2);
+      if (pb.function().template asType<differentiableFunction_t>())
+      {
+        if (pb.function().template asType<twiceDifferentiableFunction_t>())
+        {
+          twiceDifferentiableCostFunction_ = pb.function().template castInto<twiceDifferentiableFunction_t>();
+        }
+        differentiableCostFunction_ = pb.function().template castInto<differentiableFunction_t>();
+      }
+      typedef typename T::problem_t::constraints_t::const_iterator citer_t;
+      for (citer_t it = pb.constraints ().begin ();
+           it != pb.constraints ().end (); ++it)
+      {
+        if ((*(*it)).template asType<differentiableFunction_t>())
+        {
+          if ((*(*it)).template asType<twiceDifferentiableFunction_t>())
+          {
+            twiceDifferentiableConstraintFunctions_.push_back(boost::static_pointer_cast<twiceDifferentiableFunction_t>(*it));
+          }
+            differentiableConstraintFunctions_.push_back(boost::static_pointer_cast<differentiableFunction_t>(*it));
+        }
+        constraintFunctions_.push_back(*it);
+      }
     }
 
     template <typename T>
@@ -160,7 +163,7 @@ namespace roboptim
     Tnlp<T>::get_nlp_info (Index& n, Index& m, Index& nnz_jac_g,
                            Index& nnz_h_lag, TNLP::IndexStyleEnum& index_style)
     {
-      n = static_cast<Index> (solver_.problem ().function ().inputSize ());
+      n = static_cast<Index> ((*costFunction_).inputSize ());
       m = static_cast<Index> (constraintsOutputSize ());
       nnz_jac_g = n * m;
       nnz_h_lag = n * (n + 1) / 2;
@@ -174,7 +177,7 @@ namespace roboptim
                               Number* x_u, Index ROBOPTIM_DEBUG_ONLY(m), Number* g_l,
                               Number* g_u)
     {
-      assert (solver_.problem ().function ().inputSize () - n == 0);
+      assert ((*costFunction_).inputSize () - n == 0);
       assert (constraintsOutputSize () - m == 0);
 
       typedef IpoptSolver::problem_t::intervals_t::const_iterator citer_t;
@@ -223,7 +226,7 @@ namespace roboptim
     bool
     Tnlp<T>::get_variables_linearity (Index n, LinearityType* var_types)
     {
-      assert (solver_.problem ().function ().inputSize () - n == 0);
+      assert ((*costFunction_).inputSize () - n == 0);
       //FIXME: detect from problem.
       for (Index i = 0; i < n; ++i)
 	var_types[i] = TNLP::NON_LINEAR;
@@ -239,23 +242,18 @@ namespace roboptim
 
       assert (constraintsOutputSize () - m == 0);
 
-      typedef typename solver_t::problem_t::constraints_t::const_iterator
+      typedef typename std::vector<functionPtr_t>::const_iterator
 	citer_t;
 
       unsigned idx = 0;
-      for (citer_t it = solver_.problem ().constraints ().begin ();
-	   it != solver_.problem ().constraints ().end (); ++it)
+      for (citer_t it = constraintFunctions_.begin();
+	   it != constraintFunctions_.end (); ++it)
 
 	{
 	  LinearityType type =
-	    (it->which () == LINEAR) ? TNLP::LINEAR : TNLP::NON_LINEAR;
-	  shared_ptr<typename solver_t::commonConstraintFunction_t> g;
-	  if (type == LINEAR)
-	    g = get<shared_ptr<linearFunction_t> > (*it);
-	  else
-	    g = get<shared_ptr<nonLinearFunction_t> > (*it);
+	    ((*it)->template asType<GenericLinearFunction<traits_t> >()) ? TNLP::LINEAR : TNLP::NON_LINEAR;
 
-	  for (Function::size_type j = 0; j < g->outputSize (); ++j)
+	  for (Function::size_type j = 0; j < (*it)->outputSize (); ++j)
 	    const_types[idx++] = type;
 	}
       return true;
@@ -267,7 +265,7 @@ namespace roboptim
                                  Number* z_L, Number* z_U, Index ROBOPTIM_DEBUG_ONLY(m),
                                  bool ROBOPTIM_DEBUG_ONLY(init_lambda), Number*)
     {
-      assert (solver_.problem ().function ().inputSize () - n == 0);
+      assert ((*costFunction_).inputSize () - n == 0);
       assert (constraintsOutputSize () - m == 0);
 
       //FIXME: handle all modes.
@@ -316,11 +314,11 @@ namespace roboptim
     bool
     Tnlp<T>::eval_f (Index n, const Number* x, bool, Number& obj_value)
     {
-      assert (solver_.problem ().function ().inputSize () - n == 0);
+      assert ((*costFunction_).inputSize () - n == 0);
 
       cost_ = typename function_t::vector_t (1);
       Eigen::Map<const typename function_t::argument_t> x_ (x, n);
-      solver_.problem ().function () (*cost_, x_);
+      (*costFunction_) (*cost_, x_);
 
       obj_value = (*cost_)[0];
       return true;
@@ -330,17 +328,17 @@ namespace roboptim
     bool
     Tnlp<T>::eval_grad_f (Index n, const Number* x, bool, Number* grad_f)
     {
-      assert (solver_.problem ().function ().inputSize () - n == 0);
+      assert ((*costFunction_).inputSize () - n == 0);
 
       if (!costGradient_)
-	costGradient_ = typename function_t::gradient_t
-	  (solver_.problem ().function ().inputSize ());
+	costGradient_ = typename differentiableFunction_t::gradient_t
+	  ((*costFunction_).inputSize ());
 
       Eigen::Map<const typename function_t::argument_t> x_ (x, n);
-      solver_.problem ().function ().gradient (*costGradient_, x_, 0);
+      differentiableCostFunction_->gradient (*costGradient_, x_, 0);
 
       IpoptCheckGradient
-        (solver_.problem ().function (), 0, x_, -1, solver_);
+        (differentiableCostFunction_, 0, x_, -1, solver_);
 
       Eigen::Map<typename function_t::vector_t> grad_f_ (grad_f, n);
       grad_f_ =  *costGradient_;
@@ -356,7 +354,7 @@ namespace roboptim
       ROBOPTIM_DEBUG_ONLY(typename function_t::size_type n_ =
 			  static_cast<typename function_t::size_type> (n));
 
-      assert (solver_.problem ().function ().inputSize () == n_);
+      assert ((*costFunction_).inputSize () == n_);
       assert (constraintsOutputSize () == m);
 
       if (!constraints_)
@@ -369,21 +367,15 @@ namespace roboptim
 
       Eigen::Map<const typename function_t::argument_t> x_ (x, n);
 
-      typedef typename solver_t::problem_t::constraints_t::const_iterator
+      typedef typename std::vector<functionPtr_t>::const_iterator
 	citer_t;
 
       typename function_t::size_type idx = 0;
-      for (citer_t it = solver_.problem ().constraints ().begin ();
-	   it != solver_.problem ().constraints ().end (); ++it)
+      for (citer_t it = constraintFunctions_.begin ();
+	   it != constraintFunctions_.end (); ++it)
 	{
-	  shared_ptr<typename solver_t::commonConstraintFunction_t> g;
-	  if (it->which () == LINEAR)
-	    g = get<shared_ptr<linearFunction_t> > (*it);
-	  else
-	    g = get<shared_ptr<nonLinearFunction_t> > (*it);
-
-	  constraints_->segment (idx, g->outputSize ()) = (*g) (x_);
-	  idx += g->outputSize ();
+	  constraints_->segment (idx, (*it)->outputSize ()) = (*(*it)) (x_);
+	  idx += (*it)->outputSize ();
         }
 
       Eigen::Map<typename function_t::result_t> g_ (g, m, 1);
@@ -410,14 +402,14 @@ namespace roboptim
 
       ROBOPTIM_DEBUG_ONLY(typename function_t::size_type n_ =
 			  static_cast<typename function_t::size_type> (n));
-      assert (solver_.problem ().function ().inputSize () == n_);
+      assert ((*costFunction_).inputSize () == n_);
       assert (constraintsOutputSize () == m);
 
       if (!values)
 	{
 	  int idx = 0;
 	  // If dense RobOptim jacobian matrices are column-major:
-	  if (GenericFunctionTraits<typename function_t::traits_t>::
+	  if (GenericFunctionTraits<traits_t>::
 	      StorageOrder == Eigen::ColMajor)
 	    {
 	      for (int j = 0; j < n; ++j)
@@ -441,38 +433,32 @@ namespace roboptim
 	{
 	  if (!jacobian_)
 	    {
-	      jacobian_ = typename function_t::matrix_t
+	      jacobian_ = typename differentiableFunction_t::matrix_t
 		(constraintsOutputSize (),
-		 solver_.problem ().function ().inputSize ());
+		 (*costFunction_).inputSize ());
 	      jacobian_->setZero ();
 	    }
 
 	  Eigen::Map<const typename function_t::vector_t> x_ (x, n);
 
 	  typedef typename
-	    solver_t::problem_t::constraints_t::const_iterator
+	    std::vector<differentiableFunctionPtr_t>::const_iterator
 	    citer_t;
 
 	  typename function_t::size_type idx = 0;
 	  int constraintId = 0;
-	  for (citer_t it = solver_.problem ().constraints ().begin ();
-	       it != solver_.problem ().constraints ().end (); ++it)
+	  for (citer_t it = differentiableConstraintFunctions_.begin ();
+	       it != differentiableConstraintFunctions_.end (); ++it)
 	    {
-	      shared_ptr<typename solver_t::commonConstraintFunction_t> g;
-	      if (it->which () == LINEAR)
-		g = get<shared_ptr<linearFunction_t> > (*it);
-	      else
-		g = get<shared_ptr<nonLinearFunction_t> > (*it);
-
-	      g->jacobian (jacobian_->block (idx, 0, g->outputSize (), n), x_);
-	      idx += g->outputSize ();
+	      (*it)->jacobian (jacobian_->block (idx, 0, (*it)->outputSize (), n), x_);
+	      idx += (*it)->outputSize ();
 
 	      IpoptCheckGradient
-		(*g, 0, x_,
+		(*it, 0, x_,
 		 constraintId++, solver_);
 	    }
 
-	  Eigen::Map<typename function_t::jacobian_t> values_ (values, m, n);
+	  Eigen::Map<typename differentiableFunction_t::jacobian_t> values_ (values, m, n);
 	  values_ =  *jacobian_;
 	}
 
@@ -490,22 +476,17 @@ namespace roboptim
     {
       using namespace boost;
 
-      typedef solver_t::problem_t::constraints_t::const_iterator citer_t;
+      typedef std::vector<twiceDifferentiableFunctionPtr_t>::const_iterator citer_t;
 
       TwiceDifferentiableFunction::hessian_t fct_h =
-        solver_.problem ().function ().hessian (x, 0);
+        twiceDifferentiableCostFunction_->hessian (x, 0);
       h = obj_factor * fct_h;
 
       int i = 0;
-      for (citer_t it = solver_.problem ().constraints ().begin ();
-           it != solver_.problem ().constraints ().end (); ++it)
+      for (citer_t it = twiceDifferentiableConstraintFunctions_.begin();
+           it != twiceDifferentiableConstraintFunctions_.end (); ++it)
         {
-          shared_ptr<TwiceDifferentiableFunction> g;
-          if (it->which () == LINEAR)
-            g = get<shared_ptr<linearFunction_t> > (*it);
-          else
-            g = get<shared_ptr<nonLinearFunction_t> > (*it);
-          h += lambda[i++] * g->hessian (x, 0);
+          h += lambda[i++] * (*it)->hessian (x, 0);
         }
     }
 
@@ -519,7 +500,7 @@ namespace roboptim
     {
       ROBOPTIM_DEBUG_ONLY(function_t::size_type n_ = static_cast<function_t::size_type> (n));
 
-      assert (solver_.problem ().function ().inputSize () == n_);
+      assert ((*costFunction_).inputSize () == n_);
       assert (constraintsOutputSize () == m);
 
       //FIXME: check if a hessian is provided.
@@ -542,8 +523,8 @@ namespace roboptim
 	  array_to_vector (x_, x);
 
 	  TwiceDifferentiableFunction::hessian_t h
-	    (solver_.problem ().function ().inputSize (),
-	     solver_.problem ().function ().inputSize ());
+	    ((*costFunction_).inputSize (),
+	     (*costFunction_).inputSize ());
 	  compute_hessian (h, x_, obj_factor, lambda);
 
 	  int idx = 0;
@@ -631,7 +612,7 @@ namespace roboptim
      const IpoptData*,
      IpoptCalculatedQuantities*)
     {
-      assert (solver_.problem ().function ().inputSize () - n == 0);
+      assert ((*costFunction_).inputSize () - n == 0);
       assert (constraintsOutputSize () - m == 0);
 
       switch (status)

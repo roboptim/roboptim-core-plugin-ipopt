@@ -34,10 +34,7 @@
 
 namespace roboptim
 {
-  typedef Solver<DifferentiableSparseFunction,
-                 boost::mpl::vector<LinearSparseFunction,
-				    DifferentiableSparseFunction> >
-  ipopt_solver_t;
+  typedef Solver<EigenMatrixSparse> ipopt_solver_t;
 
   template class IpoptSolverCommon<ipopt_solver_t>;
 

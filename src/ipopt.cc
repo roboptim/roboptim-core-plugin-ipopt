@@ -34,9 +34,7 @@
 
 namespace roboptim
 {
-  typedef Solver<DifferentiableFunction,
-		 boost::mpl::vector<LinearFunction, DifferentiableFunction> >
-  ipopt_solver_t;
+  typedef Solver<EigenMatrixDense> ipopt_solver_t;
 
   template class IpoptSolverCommon<ipopt_solver_t>;
 
