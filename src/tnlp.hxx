@@ -96,34 +96,12 @@ namespace roboptim
     {
       using namespace boost;
 
-      BOOST_MPL_ASSERT_RELATION
-	( (boost::mpl::size<typename T::problem_t::constraintsList_t>::value),
-	  ==, 2);
-
-      // Non-linear function type is supposed to be the second
-      // constraint type and the linear function type is the
-      // first.
-      typedef typename
-	mpl::at<typename T::problem_t::constraintsList_t,
-		mpl::int_<1> >::type
-	nonLinearFunction_t;
-
-      typedef typename
-	mpl::at<typename T::problem_t::constraintsList_t,
-		mpl::int_<0> >::type
-	linearFunction_t;
-
       Function::size_type result = 0;
       typedef typename T::problem_t::constraints_t::const_iterator citer_t;
       for (citer_t it = solver.problem ().constraints ().begin ();
 	   it != solver.problem ().constraints ().end (); ++it)
 	{
-	  shared_ptr<typename T::commonConstraintFunction_t> g;
-	  if (it->which () == IpoptSolver::LINEAR)
-	    g = get<shared_ptr<linearFunction_t> > (*it);
-	  else
-	    g = get<shared_ptr<nonLinearFunction_t> > (*it);
-	  result += g->outputSize ();
+	  result += (*it)->outputSize ();
 	}
       return result;
     }
@@ -137,9 +115,6 @@ namespace roboptim
 	constraints_ (),
 	jacobian_ ()
     {
-      BOOST_MPL_ASSERT_RELATION
-	( (boost::mpl::size<
-           typename solver_t::problem_t::constraintsList_t>::value), ==, 2);
     }
 
     template <typename T>
@@ -248,14 +223,9 @@ namespace roboptim
 
 	{
 	  LinearityType type =
-	    (it->which () == LINEAR) ? TNLP::LINEAR : TNLP::NON_LINEAR;
-	  shared_ptr<typename solver_t::commonConstraintFunction_t> g;
-	  if (type == LINEAR)
-	    g = get<shared_ptr<linearFunction_t> > (*it);
-	  else
-	    g = get<shared_ptr<nonLinearFunction_t> > (*it);
+	    ((*it)->template asType<GenericLinearFunction<traits_t> >()) ? TNLP::LINEAR : TNLP::NON_LINEAR;
 
-	  for (Function::size_type j = 0; j < g->outputSize (); ++j)
+	  for (Function::size_type j = 0; j < (*it)->outputSize (); ++j)
 	    const_types[idx++] = type;
 	}
       return true;
@@ -318,8 +288,8 @@ namespace roboptim
     {
       assert (solver_.problem ().function ().inputSize () - n == 0);
 
-      cost_ = typename function_t::vector_t (1);
-      Eigen::Map<const typename function_t::argument_t> x_ (x, n);
+      cost_ = typename GenericFunction<traits_t>::vector_t (1);
+      Eigen::Map<const typename GenericFunction<traits_t>::argument_t> x_ (x, n);
       solver_.problem ().function () (*cost_, x_);
 
       obj_value = (*cost_)[0];
@@ -333,16 +303,16 @@ namespace roboptim
       assert (solver_.problem ().function ().inputSize () - n == 0);
 
       if (!costGradient_)
-	costGradient_ = typename function_t::gradient_t
+	costGradient_ = typename GenericDifferentiableFunction<traits_t>::gradient_t
 	  (solver_.problem ().function ().inputSize ());
 
-      Eigen::Map<const typename function_t::argument_t> x_ (x, n);
-      solver_.problem ().function ().gradient (*costGradient_, x_, 0);
+      Eigen::Map<const typename GenericFunction<traits_t>::argument_t> x_ (x, n);
+      solver_.problem ().function ().template castInto<GenericDifferentiableFunction<traits_t> > ()->gradient (*costGradient_, x_, 0);
 
       IpoptCheckGradient
         (solver_.problem ().function (), 0, x_, -1, solver_);
 
-      Eigen::Map<typename function_t::vector_t> grad_f_ (grad_f, n);
+      Eigen::Map<typename GenericFunction<traits_t>::vector_t> grad_f_ (grad_f, n);
       grad_f_ =  *costGradient_;
       return true;
     }
@@ -353,40 +323,36 @@ namespace roboptim
 		     Index m, Number* g)
     {
       using namespace boost;
-      ROBOPTIM_DEBUG_ONLY(typename function_t::size_type n_ =
-			  static_cast<typename function_t::size_type> (n));
+      ROBOPTIM_DEBUG_ONLY(typename GenericFunction<traits_t>::size_type n_ =
+			  static_cast<typename GenericFunction<traits_t>::size_type> (n));
 
       assert (solver_.problem ().function ().inputSize () == n_);
       assert (constraintsOutputSize () == m);
 
       if (!constraints_)
 	constraints_ =
-	  typename function_t::result_t (constraintsOutputSize ());
+	  typename GenericFunction<traits_t>::result_t (constraintsOutputSize ());
 
 #ifndef ROBOPTIM_DO_NOT_CHECK_ALLOCATION
       Eigen::internal::set_is_malloc_allowed (true);
 #endif //! ROBOPTIM_DO_NOT_CHECK_ALLOCATION
 
-      Eigen::Map<const typename function_t::argument_t> x_ (x, n);
+      Eigen::Map<const typename GenericFunction<traits_t>::argument_t> x_ (x, n);
 
       typedef typename solver_t::problem_t::constraints_t::const_iterator
 	citer_t;
 
-      typename function_t::size_type idx = 0;
+      typename GenericFunction<traits_t>::size_type idx = 0;
       for (citer_t it = solver_.problem ().constraints ().begin ();
 	   it != solver_.problem ().constraints ().end (); ++it)
 	{
-	  shared_ptr<typename solver_t::commonConstraintFunction_t> g;
-	  if (it->which () == LINEAR)
-	    g = get<shared_ptr<linearFunction_t> > (*it);
-	  else
-	    g = get<shared_ptr<nonLinearFunction_t> > (*it);
+	  GenericFunction<traits_t>* g = (*it)->template castInto<GenericFunction<traits_t> >();
 
 	  constraints_->segment (idx, g->outputSize ()) = (*g) (x_);
 	  idx += g->outputSize ();
         }
 
-      Eigen::Map<typename function_t::result_t> g_ (g, m, 1);
+      Eigen::Map<typename GenericFunction<traits_t>::result_t> g_ (g, m, 1);
       g_ =  *constraints_;
       return true;
     }
@@ -408,8 +374,8 @@ namespace roboptim
     {
       using namespace boost;
 
-      ROBOPTIM_DEBUG_ONLY(typename function_t::size_type n_ =
-			  static_cast<typename function_t::size_type> (n));
+      ROBOPTIM_DEBUG_ONLY(typename GenericFunction<traits_t>::size_type n_ =
+			  static_cast<typename GenericFunction<traits_t>::size_type> (n));
       assert (solver_.problem ().function ().inputSize () == n_);
       assert (constraintsOutputSize () == m);
 
@@ -417,7 +383,7 @@ namespace roboptim
 	{
 	  int idx = 0;
 	  // If dense RobOptim jacobian matrices are column-major:
-	  if (GenericFunctionTraits<typename function_t::traits_t>::
+	  if (GenericFunctionTraits<traits_t>::
 	      StorageOrder == Eigen::ColMajor)
 	    {
 	      for (int j = 0; j < n; ++j)
@@ -441,38 +407,32 @@ namespace roboptim
 	{
 	  if (!jacobian_)
 	    {
-	      jacobian_ = typename function_t::matrix_t
+	      jacobian_ = typename GenericDifferentiableFunction<traits_t>::matrix_t
 		(constraintsOutputSize (),
 		 solver_.problem ().function ().inputSize ());
 	      jacobian_->setZero ();
 	    }
 
-	  Eigen::Map<const typename function_t::vector_t> x_ (x, n);
+	  Eigen::Map<const typename GenericFunction<traits_t>::vector_t> x_ (x, n);
 
 	  typedef typename
 	    solver_t::problem_t::constraints_t::const_iterator
 	    citer_t;
 
-	  typename function_t::size_type idx = 0;
+	  typename GenericFunction<traits_t>::size_type idx = 0;
 	  int constraintId = 0;
 	  for (citer_t it = solver_.problem ().constraints ().begin ();
 	       it != solver_.problem ().constraints ().end (); ++it)
 	    {
-	      shared_ptr<typename solver_t::commonConstraintFunction_t> g;
-	      if (it->which () == LINEAR)
-		g = get<shared_ptr<linearFunction_t> > (*it);
-	      else
-		g = get<shared_ptr<nonLinearFunction_t> > (*it);
-
-	      g->jacobian (jacobian_->block (idx, 0, g->outputSize (), n), x_);
-	      idx += g->outputSize ();
+	      (*it)->template castInto<GenericDifferentiableFunction<traits_t> >()->jacobian (jacobian_->block (idx, 0, (*it)->outputSize (), n), x_);
+	      idx += (*it)->outputSize ();
 
 	      IpoptCheckGradient
-		(*g, 0, x_,
+		(*it, 0, x_,
 		 constraintId++, solver_);
 	    }
 
-	  Eigen::Map<typename function_t::jacobian_t> values_ (values, m, n);
+	  Eigen::Map<typename GenericDifferentiableFunction<traits_t>::jacobian_t> values_ (values, m, n);
 	  values_ =  *jacobian_;
 	}
 
@@ -493,18 +453,14 @@ namespace roboptim
       typedef solver_t::problem_t::constraints_t::const_iterator citer_t;
 
       TwiceDifferentiableFunction::hessian_t fct_h =
-        solver_.problem ().function ().hessian (x, 0);
+        solver_.problem ().function ().castInto<TwiceDifferentiableFunction>()->hessian (x, 0);
       h = obj_factor * fct_h;
 
       int i = 0;
       for (citer_t it = solver_.problem ().constraints ().begin ();
            it != solver_.problem ().constraints ().end (); ++it)
         {
-          shared_ptr<TwiceDifferentiableFunction> g;
-          if (it->which () == LINEAR)
-            g = get<shared_ptr<linearFunction_t> > (*it);
-          else
-            g = get<shared_ptr<nonLinearFunction_t> > (*it);
+          TwiceDifferentiableFunction* g = (*it)->castInto<TwiceDifferentiableFunction>();
           h += lambda[i++] * g->hessian (x, 0);
         }
     }
@@ -517,7 +473,7 @@ namespace roboptim
      bool, Index ROBOPTIM_DEBUG_ONLY(nele_hess), Index* iRow,
      Index* jCol, Number* values)
     {
-      ROBOPTIM_DEBUG_ONLY(function_t::size_type n_ = static_cast<function_t::size_type> (n));
+      ROBOPTIM_DEBUG_ONLY(GenericFunction<traits_t>::size_type n_ = static_cast<GenericFunction<traits_t>::size_type> (n));
 
       assert (solver_.problem ().function ().inputSize () == n_);
       assert (constraintsOutputSize () == m);
