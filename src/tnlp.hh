@@ -163,20 +163,20 @@ namespace roboptim
       /// \brief Current state of the solver (used by the callback function).
       solverState_t solverState_;
 
-      /// \brief Cost function type for this problem.
-      typedef typename solver_t::problem_t::function_t function_t;
+      /// \brief Traits of the cost function of this problem
+      typedef typename solver_t::problem_t::function_t::traits_t traits_t;
 
       /// \brief Cost function buffer.
-      boost::optional<typename function_t::result_t> cost_;
+      boost::optional<typename GenericFunction<traits_t>::result_t> cost_;
 
       /// \brief Cost gradient buffer.
-      boost::optional<typename function_t::gradient_t> costGradient_;
+      boost::optional<typename GenericDifferentiableFunction<traits_t>::gradient_t> costGradient_;
 
       /// \brief Constraints buffer.
-      boost::optional<typename function_t::result_t> constraints_;
+      boost::optional<typename GenericFunction<traits_t>::result_t> constraints_;
 
       /// \brief Constraints jacobian buffer.
-      boost::optional<typename function_t::matrix_t> jacobian_;
+      boost::optional<typename GenericDifferentiableFunction<traits_t>::matrix_t> jacobian_;
     };
   } // end of namespace detail.
 } // end of namespace roboptim.

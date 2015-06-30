@@ -55,14 +55,11 @@ namespace roboptim
   /// to provide hessians in your function's problems.
   class ROBOPTIM_DLLEXPORT IpoptSolverTd
     : public IpoptSolverCommon<
-    Solver <TwiceDifferentiableFunction,
-	    boost::mpl::vector<LinearFunction, TwiceDifferentiableFunction> > >
+    Solver <EigenMatrixDense> >
   {
   public:
     /// \brief RobOptim solver type.
-    typedef Solver<TwiceDifferentiableFunction,
-      boost::mpl::vector<LinearFunction,
-			 TwiceDifferentiableFunction> > solver_t;
+    typedef Solver<EigenMatrixDense> solver_t;
 
     /// \brief Parent type.
     typedef IpoptSolverCommon<solver_t> parent_t;

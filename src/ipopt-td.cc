@@ -34,10 +34,7 @@
 
 namespace roboptim
 {
-  typedef Solver<TwiceDifferentiableFunction,
-		 boost::mpl::vector<LinearFunction,
-				    TwiceDifferentiableFunction> >
-  solver_ipopt_td_t;
+  typedef Solver<EigenMatrixDense> solver_ipopt_td_t;
 
   template class IpoptSolverCommon<solver_ipopt_td_t>;
 

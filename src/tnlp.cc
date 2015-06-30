@@ -45,7 +45,7 @@ namespace roboptim
       n = static_cast<Index> (solver_.problem ().function ().inputSize ());
       m = static_cast<Index> (constraintsOutputSize ());
 
-      function_t::vector_t x (n);
+      GenericFunction<EigenMatrixSparse>::vector_t x (n);
       if (solver_.problem ().startingPoint ())
         x = *(solver_.problem ().startingPoint ());
       else
@@ -61,13 +61,7 @@ namespace roboptim
       for (citer_t it = solver_.problem ().constraints ().begin ();
 	   it != solver_.problem ().constraints ().end (); ++it)
 	{
-	  shared_ptr<solver_t::commonConstraintFunction_t> g;
-	  if (it->which () == LINEAR)
-	    g = get<shared_ptr<linearFunction_t> > (*it);
-	  else
-	    g = get<shared_ptr<nonLinearFunction_t> > (*it);
-
-	  nnz_jac_g += g->jacobian (x).nonZeros ();
+	  nnz_jac_g += (*it)->castInto<GenericDifferentiableFunction<traits_t> >()->jacobian (x).nonZeros ();
 	}
 
 
@@ -86,14 +80,14 @@ namespace roboptim
     {
       using namespace boost;
       ROBOPTIM_DEBUG_ONLY
-	(function_t::size_type n_ = static_cast<function_t::size_type> (n));
+	(SparseFunction::size_type n_ = static_cast<SparseFunction::size_type> (n));
       assert (solver_.problem ().function ().inputSize () == n_);
       assert (constraintsOutputSize () == m);
 
       if (!jacobian_)
 	{
-	  jacobian_ = function_t::jacobian_t
-	    (static_cast<function_t::matrix_t::Index> (constraintsOutputSize ()),
+	  jacobian_ = GenericDifferentiableFunction<EigenMatrixSparse>::jacobian_t
+	    (static_cast<GenericDifferentiableFunction<EigenMatrixSparse>::matrix_t::Index> (constraintsOutputSize ()),
 	     solver_.problem ().function ().inputSize ());
 	  jacobian_->reserve (nele_jac);
 	}
@@ -127,12 +121,12 @@ namespace roboptim
 		 "Compute jacobian of constraint id = " << constraintId
 		 << "to count for non-zeros elements");
 
-	      function_t::vector_t x (n);
+	      SparseFunction::vector_t x (n);
 	      // Look for a place to evaluate the jacobian of the
 	      // current constraint.
 	      // If we do not have an initial guess...
 	      if (!solver_.problem ().startingPoint ())
-                for (function_t::vector_t::Index i = 0; i < x.size (); ++i)
+                for (SparseFunction::vector_t::Index i = 0; i < x.size (); ++i)
                   {
                     std::size_t ii = static_cast<std::size_t> (i);
 
@@ -159,16 +153,11 @@ namespace roboptim
 		  }
 	      else // other use initial guess.
 		x = *(solver_.problem ().startingPoint ());
+        GenericDifferentiableFunction<EigenMatrixSparse>* g = (*it)->castInto<GenericDifferentiableFunction<EigenMatrixSparse> >();
 
-	      shared_ptr<solver_t::commonConstraintFunction_t> g;
-	      if (it->which () == LINEAR)
-		g = get<shared_ptr<linearFunction_t> > (*it);
-	      else
-		g = get<shared_ptr<nonLinearFunction_t> > (*it);
-
-	      function_t::jacobian_t jacobian = g->jacobian (x);
+	      GenericDifferentiableFunction<EigenMatrixSparse>::jacobian_t jacobian = g->jacobian (x);
 	      for (int k = 0; k < jacobian.outerSize (); ++k)
-		for (function_t::jacobian_t::InnerIterator
+		for (GenericDifferentiableFunction<EigenMatrixSparse>::jacobian_t::InnerIterator
 		       it (jacobian, k); it; ++it)
 		  {
                     const int row = static_cast<int> (idx + it.row ());
@@ -190,7 +179,7 @@ namespace roboptim
 	  idx = 0;
 
 	  for (int k = 0; k < jacobian_->outerSize (); ++k)
-	    for (function_t::jacobian_t::InnerIterator it (*jacobian_, k);
+	    for (GenericDifferentiableFunction<EigenMatrixSparse>::jacobian_t::InnerIterator it (*jacobian_, k);
 		 it; ++it)
 	      {
 		iRow[idx] = it.row (), jCol[idx] = it.col ();
@@ -206,7 +195,7 @@ namespace roboptim
 	  return true;
 	}
 
-      Eigen::Map<const function_t::vector_t> x_ (x, n);
+      Eigen::Map<const SparseFunction::vector_t> x_ (x, n);
 
       typedef solver_t::problem_t::constraints_t::const_iterator
 	citer_t;
@@ -216,11 +205,7 @@ namespace roboptim
       for (citer_t it = solver_.problem ().constraints ().begin ();
 	   it != solver_.problem ().constraints ().end (); ++it)
 	{
-	  shared_ptr<solver_t::commonConstraintFunction_t> g;
-	  if (it->which () == LINEAR)
-	    g = get<shared_ptr<linearFunction_t> > (*it);
-	  else
-	    g = get<shared_ptr<nonLinearFunction_t> > (*it);
+	  GenericDifferentiableFunction<EigenMatrixSparse>* g = (*it)->castInto<GenericDifferentiableFunction<EigenMatrixSparse> >();
 
 	  // TODO: use middleRows once Eigen is fixed
 	  // TODO: avoid allocation here (may be solved with
@@ -236,7 +221,7 @@ namespace roboptim
       // Copy jacobian values from internal sparse matrix.
       idx = 0;
       for (int k = 0; k < jacobian_->outerSize (); ++k)
-	for (function_t::jacobian_t::InnerIterator it (*jacobian_, k);
+	for (GenericDifferentiableFunction<EigenMatrixSparse>::jacobian_t::InnerIterator it (*jacobian_, k);
 	     it; ++it)
 	  {
 	    assert (idx < nele_jac);
