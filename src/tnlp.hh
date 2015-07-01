@@ -163,20 +163,56 @@ namespace roboptim
       /// \brief Current state of the solver (used by the callback function).
       solverState_t solverState_;
 
-      /// \brief Cost function type for this problem.
-      typedef typename solver_t::problem_t::function_t function_t;
+      /// \brief Traits of the cost function of this problem
+      typedef typename solver_t::problem_t::function_t::traits_t traits_t;
+
+      /// \brief Function type of this problem
+      typedef GenericFunction<traits_t> function_t;
+
+      /// \brief Differentiable function type of this problem
+      typedef GenericDifferentiableFunction<traits_t> differentiableFunction_t;
+
+      /// \brief Twice Differentiable function type of this problem
+      typedef GenericTwiceDifferentiableFunction<traits_t> twiceDifferentiableFunction_t;
+
+      /// \brief Function pointer type of this problem
+      typedef boost::shared_ptr<const function_t> functionPtr_t;
+
+      /// \brief Differentiable function pointer type of this problem
+      typedef boost::shared_ptr<const differentiableFunction_t> differentiableFunctionPtr_t;
+
+      /// \brief Twice Differentiable function pointer type of this problem
+      typedef boost::shared_ptr<const twiceDifferentiableFunction_t> twiceDifferentiableFunctionPtr_t;
+
+      /// \brief Cost function
+      const function_t* costFunction_;
+
+      /// \brief Differentiable cost function
+      const differentiableFunction_t* differentiableCostFunction_;
+
+      /// \brief Twice Differentiable cost function
+      const twiceDifferentiableFunction_t* twiceDifferentiableCostFunction_;
+
+      /// \brief Constraints
+      std::vector<functionPtr_t> constraintFunctions_;
+
+      /// \brief Differentiable Constraints
+      std::vector<differentiableFunctionPtr_t> differentiableConstraintFunctions_;
+
+      /// \brief Twice Differentiable Constraints
+      std::vector<twiceDifferentiableFunctionPtr_t> twiceDifferentiableConstraintFunctions_;
 
       /// \brief Cost function buffer.
       boost::optional<typename function_t::result_t> cost_;
 
       /// \brief Cost gradient buffer.
-      boost::optional<typename function_t::gradient_t> costGradient_;
+      boost::optional<typename differentiableFunction_t::gradient_t> costGradient_;
 
       /// \brief Constraints buffer.
       boost::optional<typename function_t::result_t> constraints_;
 
       /// \brief Constraints jacobian buffer.
-      boost::optional<typename function_t::matrix_t> jacobian_;
+      boost::optional<typename differentiableFunction_t::matrix_t> jacobian_;
     };
   } // end of namespace detail.
 } // end of namespace roboptim.

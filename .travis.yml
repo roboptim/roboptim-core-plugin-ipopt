@@ -6,7 +6,7 @@ env:
   global:
   - APT_DEPENDENCIES="doxygen doxygen-latex libltdl-dev libboost-all-dev liblog4cxx10-dev coinor-libipopt-dev libblas-dev liblapack-dev libmumps-seq-dev gfortran"
   - HOMEBREW_DEPENDENCIES="doxygen libtool boost log4cxx ipopt openblas mumps"
-  - GIT_DEPENDENCIES="roboptim/roboptim-core"
+  - GIT_DEPENDENCIES="roboptim/roboptim-core:dev"
   - DEBSIGN_KEYID=5AE5CD75
   - PPA_URI="roboptim/ppa"
   - GH_USERNAME=thomas-moulard
@@ -24,6 +24,7 @@ notifications:
 branches:
   only:
   - master
+  - dev
   - debian
   - travis
   - coverity_scan
