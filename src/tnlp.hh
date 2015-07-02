@@ -17,6 +17,9 @@
 
 #ifndef ROBOPTIM_CORE_IPOPT_TNLP_HH
 # define ROBOPTIM_CORE_IPOPT_TNLP_HH
+
+# include <vector>
+
 # include <boost/mpl/at.hpp>
 # include <boost/optional.hpp>
 
@@ -177,6 +180,12 @@ namespace roboptim
 
       /// \brief Constraints jacobian buffer.
       boost::optional<typename function_t::matrix_t> jacobian_;
+
+      /// \brief Constraint Jacobian matrices buffer for the sparse case.
+      /// Since we cannot just rely on Eigen::Ref in the sparse case, temporary
+      /// Jacobian matrices are used for each constraint.
+      typedef std::vector<typename function_t::matrix_t> constraintJacobians_t;
+      constraintJacobians_t constraintJacobians_;
     };
   } // end of namespace detail.
 } // end of namespace roboptim.

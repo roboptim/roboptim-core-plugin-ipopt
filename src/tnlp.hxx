@@ -135,7 +135,8 @@ namespace roboptim
 	cost_ (),
 	costGradient_ (),
 	constraints_ (),
-	jacobian_ ()
+	jacobian_ (),
+	constraintJacobians_ ()
     {
       BOOST_MPL_ASSERT_RELATION
 	( (boost::mpl::size<

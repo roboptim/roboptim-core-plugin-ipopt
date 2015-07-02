@@ -166,10 +166,12 @@ namespace roboptim
 	      else
 		g = get<shared_ptr<nonLinearFunction_t> > (*it);
 
-	      function_t::jacobian_t jacobian = g->jacobian (x);
-	      for (int k = 0; k < jacobian.outerSize (); ++k)
+	      constraintJacobians_.push_back (g->jacobian (x));
+	      function_t::jacobian_t& tmp_jac = constraintJacobians_.back ();
+	      tmp_jac.makeCompressed ();
+	      for (int k = 0; k < tmp_jac.outerSize (); ++k)
 		for (function_t::jacobian_t::InnerIterator
-		       it (jacobian, k); it; ++it)
+		       it (tmp_jac, k); it; ++it)
 		  {
                     const int row = static_cast<int> (idx + it.row ());
                     const int col = static_cast<int> (it.col ());
@@ -211,7 +213,6 @@ namespace roboptim
       typedef solver_t::problem_t::constraints_t::const_iterator
 	citer_t;
 
-      int idx = 0;
       int constraintId = 0;
       for (citer_t it = solver_.problem ().constraints ().begin ();
 	   it != solver_.problem ().constraints ().end (); ++it)
@@ -222,26 +223,34 @@ namespace roboptim
 	  else
 	    g = get<shared_ptr<nonLinearFunction_t> > (*it);
 
-	  // TODO: use middleRows once Eigen is fixed
-	  // TODO: avoid allocation here (may be solved with
-	  // http://eigen.tuxfamily.org/bz/show_bug.cgi?id=910)
-	  copySparseBlock (*jacobian_, g->jacobian (x_), idx, 0);
-	  idx += g->outputSize ();
+	  typename function_t::matrix_t& jac = constraintJacobians_[constraintId];
+	  // Set the Jacobian to 0 while keeping its structure
+	  jac *= 0.;
+	  g->jacobian (jac, x_);
 
 	  IpoptCheckGradient
 	    (*g, 0, x_,
 	     constraintId++, solver_);
 	}
 
-      // Copy jacobian values from internal sparse matrix.
-      idx = 0;
-      for (int k = 0; k < jacobian_->outerSize (); ++k)
-	for (function_t::jacobian_t::InnerIterator it (*jacobian_, k);
-	     it; ++it)
-	  {
-	    assert (idx < nele_jac);
-	    values[idx++] = it.value ();
-	  }
+      // Copy jacobian values from internal sparse matrices.
+      int idx = 0;
+      for (int k = 0;
+           k < ((StorageOrder == Eigen::ColMajor)?
+                solver_.problem ().function ().inputSize ()
+                : solver_.problem ().function ().outputSize ());
+           ++k)
+      for (constraintJacobians_t::const_iterator
+           g  = constraintJacobians_.begin ();
+           g != constraintJacobians_.end (); ++g)
+      {
+          for (function_t::jacobian_t::InnerIterator it (*g, k);
+               it; ++it)
+          {
+            assert (idx < nele_jac);
+            values[idx++] = it.value ();
+          }
+      }
 
       return true;
     }
