@@ -213,9 +213,9 @@ namespace roboptim
       typedef solver_t::problem_t::constraints_t::const_iterator
 	citer_t;
 
-      int constraintId = 0;
+      size_t constraintId = 0;
       for (citer_t it = solver_.problem ().constraints ().begin ();
-	   it != solver_.problem ().constraints ().end (); ++it)
+	   it != solver_.problem ().constraints ().end (); ++it, constraintId++)
 	{
 	  shared_ptr<solver_t::commonConstraintFunction_t> g;
 	  if (it->which () == LINEAR)
@@ -229,8 +229,7 @@ namespace roboptim
 	  g->jacobian (jac, x_);
 
 	  IpoptCheckGradient
-	    (*g, 0, x_,
-	     constraintId++, solver_);
+	    (*g, 0, x_, static_cast<int> (constraintId), solver_);
 	}
 
       // Copy jacobian values from internal sparse matrices.
