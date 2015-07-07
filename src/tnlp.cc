@@ -234,22 +234,35 @@ namespace roboptim
 
       // Copy jacobian values from internal sparse matrices.
       int idx = 0;
-      for (int k = 0;
-           k < ((StorageOrder == Eigen::ColMajor)?
-                solver_.problem ().function ().inputSize ()
-                : solver_.problem ().function ().outputSize ());
-           ++k)
-      for (constraintJacobians_t::const_iterator
-           g  = constraintJacobians_.begin ();
-           g != constraintJacobians_.end (); ++g)
-      {
-          for (function_t::jacobian_t::InnerIterator it (*g, k);
-               it; ++it)
-          {
-            assert (idx < nele_jac);
-            values[idx++] = it.value ();
-          }
-      }
+
+      if (StorageOrder == Eigen::ColMajor)
+	{
+	  for (int k = 0; k < solver_.problem ().function ().inputSize (); ++k)
+	    for (constraintJacobians_t::const_iterator
+		   g  = constraintJacobians_.begin ();
+		 g != constraintJacobians_.end (); ++g)
+	      {
+		for (function_t::jacobian_t::InnerIterator it (*g, k);
+		     it; ++it)
+		  {
+		    assert (idx < nele_jac);
+		    values[idx++] = it.value ();
+		  }
+	      }
+	}
+      else
+	{
+	  for (constraintJacobians_t::const_iterator
+		 g  = constraintJacobians_.begin ();
+	       g != constraintJacobians_.end (); ++g)
+	    for (int k = 0; k < g->outerSize(); ++k)
+	      for (function_t::jacobian_t::InnerIterator it (*g, k);
+		   it; ++it)
+		{
+		  assert (idx < nele_jac);
+		  values[idx++] = it.value ();
+		}
+	}
 
       return true;
     }
