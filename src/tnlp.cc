@@ -104,9 +104,12 @@ namespace roboptim
 	    (logger, "Looking for non-zeros elements.");
 	  LOG4CXX_TRACE (logger, "nele_jac = " << nele_jac);
 
+	  // Clear just in case
+	  constraintJacobians_.clear ();
+
 	  // Emptying iRow/jCol arrays.
-	  memset (iRow, 0, static_cast<std::size_t> (nele_jac) * sizeof (Index));
-	  memset (jCol, 0, static_cast<std::size_t> (nele_jac) * sizeof (Index));
+	  std::memset (iRow, 0, static_cast<std::size_t> (nele_jac) * sizeof (Index));
+	  std::memset (jCol, 0, static_cast<std::size_t> (nele_jac) * sizeof (Index));
 
 	  // First evaluate the constraints in zero to build the
 	  // constraints jacobian.
