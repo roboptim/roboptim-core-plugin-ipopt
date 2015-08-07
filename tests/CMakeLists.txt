@@ -20,7 +20,7 @@ INCLUDE(shared-tests/tests.cmake)
 # Schittkowski problems that are expected to fail
 SET(SCHITTKOWSKI_PROBLEMS_FAIL
   13 16
-  20 25 28
+  20 25
   44
   55 56
   )
