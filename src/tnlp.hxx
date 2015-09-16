@@ -91,12 +91,11 @@ namespace roboptim
      const DerivableFunction::vector_t& x);
 
     template  <typename T>
-    Function::size_type
-    computeConstraintsOutputSize (const T& solver)
+    typename Tnlp<T>::size_type computeConstraintsOutputSize (const T& solver)
     {
       using namespace boost;
 
-      Function::size_type result = 0;
+      typename Tnlp<T>::size_type result = 0;
       typedef typename T::problem_t::constraints_t::const_iterator citer_t;
       for (citer_t it = solver.problem ().constraints ().begin ();
 	   it != solver.problem ().constraints ().end (); ++it)
@@ -147,8 +146,7 @@ namespace roboptim
     }
 
     template <typename T>
-    Function::size_type
-    Tnlp<T>::constraintsOutputSize ()
+    typename Tnlp<T>::size_type Tnlp<T>::constraintsOutputSize ()
     {
       return computeConstraintsOutputSize (solver_);
     }
@@ -253,7 +251,7 @@ namespace roboptim
 	  LinearityType type =
 	    ((*it)->template asType<GenericLinearFunction<traits_t> >()) ? TNLP::LINEAR : TNLP::NON_LINEAR;
 
-	  for (Function::size_type j = 0; j < (*it)->outputSize (); ++j)
+	  for (size_type j = 0; j < (*it)->outputSize (); ++j)
 	    const_types[idx++] = type;
 	}
       return true;
@@ -351,8 +349,7 @@ namespace roboptim
 		     Index m, Number* g)
     {
       using namespace boost;
-      ROBOPTIM_DEBUG_ONLY(typename function_t::size_type n_ =
-			  static_cast<typename function_t::size_type> (n));
+      ROBOPTIM_DEBUG_ONLY(size_type n_ = static_cast<size_type> (n));
 
       assert ((*costFunction_).inputSize () == n_);
       assert (constraintsOutputSize () == m);
@@ -369,7 +366,7 @@ namespace roboptim
 
       typedef typename constraints_t::const_iterator citer_t;
 
-      typename function_t::size_type idx = 0;
+      size_type idx = 0;
       for (citer_t it = constraints_.begin ();
 	   it != constraints_.end (); ++it)
 	{
@@ -399,8 +396,7 @@ namespace roboptim
     {
       using namespace boost;
 
-      ROBOPTIM_DEBUG_ONLY(typename function_t::size_type n_ =
-			  static_cast<typename function_t::size_type> (n));
+      ROBOPTIM_DEBUG_ONLY(size_type n_ = static_cast<size_type> (n));
       assert ((*costFunction_).inputSize () == n_);
       assert (constraintsOutputSize () == m);
 
@@ -442,7 +438,7 @@ namespace roboptim
 
 	  typedef typename differentiableConstraints_t::const_iterator citer_t;
 
-	  typename function_t::size_type idx = 0;
+	  size_type idx = 0;
 	  int constraintId = 0;
 	  for (citer_t it = differentiableConstraints_.begin ();
 	       it != differentiableConstraints_.end (); ++it)
@@ -495,7 +491,7 @@ namespace roboptim
      bool, Index ROBOPTIM_DEBUG_ONLY(nele_hess), Index* iRow,
      Index* jCol, Number* values)
     {
-      ROBOPTIM_DEBUG_ONLY(function_t::size_type n_ = static_cast<function_t::size_type> (n));
+      ROBOPTIM_DEBUG_ONLY(size_type n_ = static_cast<size_type> (n));
 
       assert ((*costFunction_).inputSize () == n_);
       assert (constraintsOutputSize () == m);

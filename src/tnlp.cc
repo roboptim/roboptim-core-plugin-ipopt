@@ -79,7 +79,7 @@ namespace roboptim
     {
       using namespace boost;
       ROBOPTIM_DEBUG_ONLY
-	(function_t::size_type n_ = static_cast<function_t::size_type> (n));
+	(size_type n_ = static_cast<size_type> (n));
       assert (costFunction_->inputSize () == n_);
       assert (constraintsOutputSize () == m);
 
@@ -202,7 +202,7 @@ namespace roboptim
 
       typedef differentiableConstraints_t::const_iterator citer_t;
 
-      int constraintId = 0;
+      size_t constraintId = 0;
       for (citer_t it = differentiableConstraints_.begin ();
 	   it != differentiableConstraints_.end (); ++it, constraintId++)
 	{

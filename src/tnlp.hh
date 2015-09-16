@@ -46,10 +46,11 @@ namespace roboptim
     public:
       typedef T solver_t;
       typedef SolverState<typename solver_t::problem_t> solverState_t;
+      typedef Function::size_type size_type;
 
       Tnlp (const typename solver_t::problem_t& pb, solver_t& solver);
 
-      Function::size_type constraintsOutputSize ();
+      size_type constraintsOutputSize ();
 
       virtual bool
       get_nlp_info (Index& n, Index& m, Index& nnz_jac_g,
