@@ -56,10 +56,9 @@ namespace roboptim
 
       // compute number of non zeros elements in jacobian constraint.
       nnz_jac_g = 0;
-      typedef std::vector<differentiableFunctionPtr_t>::const_iterator
-	citer_t;
-      for (citer_t it = differentiableConstraintFunctions_.begin ();
-	   it != differentiableConstraintFunctions_.end (); ++it)
+      typedef differentiableConstraints_t::const_iterator citer_t;
+      for (citer_t it = differentiableConstraints_.begin ();
+	   it != differentiableConstraints_.end (); ++it)
 	{
 	  nnz_jac_g += (*it)->jacobian (x).nonZeros ();
 	}
@@ -84,12 +83,12 @@ namespace roboptim
       assert (costFunction_->inputSize () == n_);
       assert (constraintsOutputSize () == m);
 
-      if (!jacobian_)
+      if (!jacobianBuf_)
 	{
-	  jacobian_ = differentiableFunction_t::jacobian_t
+	  jacobianBuf_ = differentiableFunction_t::jacobian_t
 	    (static_cast<differentiableFunction_t::matrix_t::Index> (constraintsOutputSize ()),
 	     costFunction_->inputSize ());
-	  jacobian_->reserve (nele_jac);
+	  jacobianBuf_->reserve (nele_jac);
 	}
 
       if (!values)
@@ -98,22 +97,24 @@ namespace roboptim
 	    (logger, "Looking for non-zeros elements.");
 	  LOG4CXX_TRACE (logger, "nele_jac = " << nele_jac);
 
+	  // Clear just in case
+	  constraintJacobians_.clear ();
+
 	  // Emptying iRow/jCol arrays.
-	  memset (iRow, 0, static_cast<std::size_t> (nele_jac) * sizeof (Index));
-	  memset (jCol, 0, static_cast<std::size_t> (nele_jac) * sizeof (Index));
+	  std::memset (iRow, 0, static_cast<std::size_t> (nele_jac) * sizeof (Index));
+	  std::memset (jCol, 0, static_cast<std::size_t> (nele_jac) * sizeof (Index));
 
 	  // First evaluate the constraints in zero to build the
 	  // constraints jacobian.
 	  int idx = 0;
-	  typedef std::vector<differentiableFunctionPtr_t>::const_iterator
-	    citer_t;
+	  typedef differentiableConstraints_t::const_iterator citer_t;
 	  unsigned constraintId = 0;
 
 	  typedef Eigen::Triplet<double> triplet_t;
 	  std::vector<triplet_t> coefficients;
 
-	  for (citer_t it = differentiableConstraintFunctions_.begin ();
-	       it != differentiableConstraintFunctions_.end ();
+	  for (citer_t it = differentiableConstraints_.begin ();
+	       it != differentiableConstraints_.end ();
 	       ++it, ++constraintId)
 	    {
 	      LOG4CXX_TRACE
@@ -154,10 +155,13 @@ namespace roboptim
 	      else // other use initial guess.
 		x = *(solver_.problem ().startingPoint ());
 
-	      differentiableFunction_t::jacobian_t jacobian = (*it)->jacobian (x);
-	      for (int k = 0; k < jacobian.outerSize (); ++k)
+	      constraintJacobians_.push_back ((*it)->jacobian (x));
+	      differentiableFunction_t::jacobian_t& tmp_jac = constraintJacobians_.back ();
+	      tmp_jac.makeCompressed ();
+
+	      for (int k = 0; k < tmp_jac.outerSize (); ++k)
 		for (differentiableFunction_t::jacobian_t::InnerIterator
-		       it (jacobian, k); it; ++it)
+		       it (tmp_jac, k); it; ++it)
 		  {
                     const int row = static_cast<int> (idx + it.row ());
                     const int col = static_cast<int> (it.col ());
@@ -167,18 +171,18 @@ namespace roboptim
 	      idx += (*it)->outputSize ();
 	    }
 
-	  jacobian_->setFromTriplets
+	  jacobianBuf_->setFromTriplets
 	    (coefficients.begin (), coefficients.end ());
 
 	  LOG4CXX_TRACE
-	    (logger, "full problem jacobian...\n" << *jacobian_);
+	    (logger, "full problem jacobian...\n" << *jacobianBuf_);
 
 	  // Then look for non-zero values.
 	  LOG4CXX_TRACE (logger, "filling iRow and jCol...");
 	  idx = 0;
 
-	  for (int k = 0; k < jacobian_->outerSize (); ++k)
-	    for (differentiableFunction_t::jacobian_t::InnerIterator it (*jacobian_, k);
+	  for (int k = 0; k < jacobianBuf_->outerSize (); ++k)
+	    for (differentiableFunction_t::jacobian_t::InnerIterator it (*jacobianBuf_, k);
 		 it; ++it)
 	      {
 		iRow[idx] = it.row (), jCol[idx] = it.col ();
@@ -196,34 +200,53 @@ namespace roboptim
 
       Eigen::Map<const function_t::vector_t> x_ (x, n);
 
-      typedef std::vector<differentiableFunctionPtr_t>::const_iterator
-	citer_t;
+      typedef differentiableConstraints_t::const_iterator citer_t;
 
-      int idx = 0;
       int constraintId = 0;
-      for (citer_t it = differentiableConstraintFunctions_.begin ();
-	   it != differentiableConstraintFunctions_.end (); ++it)
+      for (citer_t it = differentiableConstraints_.begin ();
+	   it != differentiableConstraints_.end (); ++it, constraintId++)
 	{
-	  // TODO: use middleRows once Eigen is fixed
-	  // TODO: avoid allocation here (may be solved with
-	  // http://eigen.tuxfamily.org/bz/show_bug.cgi?id=910)
-	  copySparseBlock (*jacobian_, (*it)->jacobian (x_), idx, 0);
-	  idx += (*it)->outputSize ();
+	  typename differentiableFunction_t::matrix_t& jac = constraintJacobians_[constraintId];
+	  // Set the Jacobian to 0 while keeping its structure
+	  jac *= 0.;
+	  (*it)->jacobian (jac, x_);
 
 	  IpoptCheckGradient
 	    (*(*it), 0, x_,
-	     constraintId++, solver_);
+             static_cast<int> (constraintId), solver_);
 	}
 
-      // Copy jacobian values from internal sparse matrix.
-      idx = 0;
-      for (int k = 0; k < jacobian_->outerSize (); ++k)
-	for (differentiableFunction_t::jacobian_t::InnerIterator it (*jacobian_, k);
-	     it; ++it)
-	  {
-	    assert (idx < nele_jac);
-	    values[idx++] = it.value ();
-	  }
+      // Copy jacobian values from internal sparse matrices.
+      int idx = 0;
+
+      if (StorageOrder == Eigen::ColMajor)
+	{
+	  for (int k = 0; k < solver_.problem ().function ().inputSize (); ++k)
+	    for (constraintJacobians_t::const_iterator
+		   g  = constraintJacobians_.begin ();
+		 g != constraintJacobians_.end (); ++g)
+	      {
+		for (differentiableFunction_t::jacobian_t::InnerIterator it (*g, k);
+		     it; ++it)
+		  {
+		    assert (idx < nele_jac);
+		    values[idx++] = it.value ();
+		  }
+	      }
+	}
+      else
+	{
+	  for (constraintJacobians_t::const_iterator
+		 g  = constraintJacobians_.begin ();
+	       g != constraintJacobians_.end (); ++g)
+	    for (int k = 0; k < g->outerSize(); ++k)
+	      for (differentiableFunction_t::jacobian_t::InnerIterator it (*g, k);
+		   it; ++it)
+		{
+		  assert (idx < nele_jac);
+		  values[idx++] = it.value ();
+		}
+	}
 
       return true;
     }

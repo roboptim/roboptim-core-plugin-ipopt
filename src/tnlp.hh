@@ -190,29 +190,38 @@ namespace roboptim
       /// \brief Differentiable cost function
       const differentiableFunction_t* differentiableCostFunction_;
 
-      /// \brief Twice Differentiable cost function
+      /// \brief Twice-differentiable cost function
       const twiceDifferentiableFunction_t* twiceDifferentiableCostFunction_;
 
       /// \brief Constraints
-      std::vector<functionPtr_t> constraintFunctions_;
+      typedef std::vector<functionPtr_t> constraints_t;
+      constraints_t constraints_;
 
-      /// \brief Differentiable Constraints
-      std::vector<differentiableFunctionPtr_t> differentiableConstraintFunctions_;
+      /// \brief Differentiable constraints
+      typedef std::vector<differentiableFunctionPtr_t> differentiableConstraints_t;
+      differentiableConstraints_t differentiableConstraints_;
 
-      /// \brief Twice Differentiable Constraints
-      std::vector<twiceDifferentiableFunctionPtr_t> twiceDifferentiableConstraintFunctions_;
+      /// \brief Twice-differentiable constraints
+      typedef std::vector<twiceDifferentiableFunctionPtr_t> twiceDifferentiableConstraints_t;
+      twiceDifferentiableConstraints_t twiceDifferentiableConstraints_;
 
       /// \brief Cost function buffer.
-      boost::optional<typename function_t::result_t> cost_;
+      boost::optional<typename function_t::result_t> costBuf_;
 
       /// \brief Cost gradient buffer.
-      boost::optional<typename differentiableFunction_t::gradient_t> costGradient_;
+      boost::optional<typename differentiableFunction_t::gradient_t> costGradientBuf_;
 
       /// \brief Constraints buffer.
-      boost::optional<typename function_t::result_t> constraints_;
+      boost::optional<typename function_t::result_t> constraintsBuf_;
 
       /// \brief Constraints jacobian buffer.
-      boost::optional<typename differentiableFunction_t::matrix_t> jacobian_;
+      boost::optional<typename differentiableFunction_t::jacobian_t> jacobianBuf_;
+
+      /// \brief Constraint Jacobian matrices buffer for the sparse case.
+      /// Since we cannot just rely on Eigen::Ref in the sparse case, temporary
+      /// Jacobian matrices are used for each constraint.
+      typedef std::vector<typename differentiableFunction_t::jacobian_t> constraintJacobians_t;
+      constraintJacobians_t constraintJacobians_;
     };
   } // end of namespace detail.
 } // end of namespace roboptim.

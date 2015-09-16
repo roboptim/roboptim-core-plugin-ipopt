@@ -20,7 +20,7 @@ INCLUDE(shared-tests/tests.cmake)
 # Schittkowski problems that are expected to fail
 SET(SCHITTKOWSKI_PROBLEMS_FAIL
   13 16
-  20 25 28
+  20 25
   44
   55 56
   )
@@ -47,6 +47,7 @@ SET(COST_FUNCTION_TYPE ::roboptim::GenericDifferentiableFunction)
 BUILD_COMMON_TESTS()
 BUILD_ROBOPTIM_PROBLEMS()
 BUILD_QP_PROBLEMS()
+BUILD_BENCHMARK_PROBLEMS()
 
 SET(SOLVER_NAME "ipopt-sparse")
 SET(FUNCTION_TYPE ::roboptim::EigenMatrixSparse)
@@ -55,3 +56,4 @@ SET(COST_FUNCTION_TYPE ::roboptim::GenericDifferentiableFunction)
 BUILD_COMMON_TESTS()
 BUILD_ROBOPTIM_PROBLEMS()
 BUILD_QP_PROBLEMS()
+BUILD_BENCHMARK_PROBLEMS()

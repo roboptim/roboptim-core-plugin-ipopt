@@ -113,13 +113,14 @@ namespace roboptim
 	costFunction_ (&pb.function()),
 	differentiableCostFunction_ (),
 	twiceDifferentiableCostFunction_ (),
-	constraintFunctions_ (),
-	differentiableConstraintFunctions_ (),
-	twiceDifferentiableConstraintFunctions_ (),
-	cost_ (),
-	costGradient_ (),
 	constraints_ (),
-	jacobian_ ()
+	differentiableConstraints_ (),
+	twiceDifferentiableConstraints_ (),
+	costBuf_ (),
+	costGradientBuf_ (),
+	constraintsBuf_ (),
+	jacobianBuf_ (),
+	constraintJacobians_ ()
     {
       if (pb.function().template asType<differentiableFunction_t>())
       {
@@ -137,11 +138,11 @@ namespace roboptim
         {
           if ((*(*it)).template asType<twiceDifferentiableFunction_t>())
           {
-            twiceDifferentiableConstraintFunctions_.push_back(boost::static_pointer_cast<twiceDifferentiableFunction_t>(*it));
+            twiceDifferentiableConstraints_.push_back(boost::static_pointer_cast<twiceDifferentiableFunction_t>(*it));
           }
-            differentiableConstraintFunctions_.push_back(boost::static_pointer_cast<differentiableFunction_t>(*it));
+            differentiableConstraints_.push_back(boost::static_pointer_cast<differentiableFunction_t>(*it));
         }
-        constraintFunctions_.push_back(*it);
+        constraints_.push_back(*it);
       }
     }
 
@@ -242,12 +243,11 @@ namespace roboptim
 
       assert (constraintsOutputSize () - m == 0);
 
-      typedef typename std::vector<functionPtr_t>::const_iterator
-	citer_t;
+      typedef typename constraints_t::const_iterator citer_t;
 
       unsigned idx = 0;
-      for (citer_t it = constraintFunctions_.begin();
-	   it != constraintFunctions_.end (); ++it)
+      for (citer_t it = constraints_.begin();
+	   it != constraints_.end (); ++it)
 
 	{
 	  LinearityType type =
@@ -316,11 +316,11 @@ namespace roboptim
     {
       assert ((*costFunction_).inputSize () - n == 0);
 
-      cost_ = typename function_t::vector_t (1);
+      costBuf_ = typename function_t::vector_t (1);
       Eigen::Map<const typename function_t::argument_t> x_ (x, n);
-      (*costFunction_) (*cost_, x_);
+      (*costFunction_) (*costBuf_, x_);
 
-      obj_value = (*cost_)[0];
+      obj_value = (*costBuf_)[0];
       return true;
     }
 
@@ -330,18 +330,18 @@ namespace roboptim
     {
       assert ((*costFunction_).inputSize () - n == 0);
 
-      if (!costGradient_)
-	costGradient_ = typename differentiableFunction_t::gradient_t
+      if (!costGradientBuf_)
+	costGradientBuf_ = typename differentiableFunction_t::gradient_t
 	  ((*costFunction_).inputSize ());
 
       Eigen::Map<const typename function_t::argument_t> x_ (x, n);
-      differentiableCostFunction_->gradient (*costGradient_, x_, 0);
+      differentiableCostFunction_->gradient (*costGradientBuf_, x_, 0);
 
       IpoptCheckGradient
         (differentiableCostFunction_, 0, x_, -1, solver_);
 
       Eigen::Map<typename function_t::vector_t> grad_f_ (grad_f, n);
-      grad_f_ =  *costGradient_;
+      grad_f_ =  *costGradientBuf_;
       return true;
     }
 
@@ -357,8 +357,8 @@ namespace roboptim
       assert ((*costFunction_).inputSize () == n_);
       assert (constraintsOutputSize () == m);
 
-      if (!constraints_)
-	constraints_ =
+      if (!constraintsBuf_)
+	constraintsBuf_ =
 	  typename function_t::result_t (constraintsOutputSize ());
 
 #ifndef ROBOPTIM_DO_NOT_CHECK_ALLOCATION
@@ -367,19 +367,18 @@ namespace roboptim
 
       Eigen::Map<const typename function_t::argument_t> x_ (x, n);
 
-      typedef typename std::vector<functionPtr_t>::const_iterator
-	citer_t;
+      typedef typename constraints_t::const_iterator citer_t;
 
       typename function_t::size_type idx = 0;
-      for (citer_t it = constraintFunctions_.begin ();
-	   it != constraintFunctions_.end (); ++it)
+      for (citer_t it = constraints_.begin ();
+	   it != constraints_.end (); ++it)
 	{
-	  constraints_->segment (idx, (*it)->outputSize ()) = (*(*it)) (x_);
+	  constraintsBuf_->segment (idx, (*it)->outputSize ()) = (*(*it)) (x_);
 	  idx += (*it)->outputSize ();
         }
 
       Eigen::Map<typename function_t::result_t> g_ (g, m, 1);
-      g_ =  *constraints_;
+      g_ =  *constraintsBuf_;
       return true;
     }
 
@@ -431,26 +430,24 @@ namespace roboptim
 	}
       else
 	{
-	  if (!jacobian_)
+	  if (!jacobianBuf_)
 	    {
-	      jacobian_ = typename differentiableFunction_t::matrix_t
+	      jacobianBuf_ = typename differentiableFunction_t::matrix_t
 		(constraintsOutputSize (),
 		 (*costFunction_).inputSize ());
-	      jacobian_->setZero ();
+	      jacobianBuf_->setZero ();
 	    }
 
 	  Eigen::Map<const typename function_t::vector_t> x_ (x, n);
 
-	  typedef typename
-	    std::vector<differentiableFunctionPtr_t>::const_iterator
-	    citer_t;
+	  typedef typename differentiableConstraints_t::const_iterator citer_t;
 
 	  typename function_t::size_type idx = 0;
 	  int constraintId = 0;
-	  for (citer_t it = differentiableConstraintFunctions_.begin ();
-	       it != differentiableConstraintFunctions_.end (); ++it)
+	  for (citer_t it = differentiableConstraints_.begin ();
+	       it != differentiableConstraints_.end (); ++it)
 	    {
-	      (*it)->jacobian (jacobian_->block (idx, 0, (*it)->outputSize (), n), x_);
+	      (*it)->jacobian (jacobianBuf_->block (idx, 0, (*it)->outputSize (), n), x_);
 	      idx += (*it)->outputSize ();
 
 	      IpoptCheckGradient
@@ -459,7 +456,7 @@ namespace roboptim
 	    }
 
 	  Eigen::Map<typename differentiableFunction_t::jacobian_t> values_ (values, m, n);
-	  values_ =  *jacobian_;
+	  values_ =  *jacobianBuf_;
 	}
 
       return true;
@@ -476,15 +473,15 @@ namespace roboptim
     {
       using namespace boost;
 
-      typedef std::vector<twiceDifferentiableFunctionPtr_t>::const_iterator citer_t;
+      typedef twiceDifferentiableConstraints_t::const_iterator citer_t;
 
       TwiceDifferentiableFunction::hessian_t fct_h =
         twiceDifferentiableCostFunction_->hessian (x, 0);
       h = obj_factor * fct_h;
 
       int i = 0;
-      for (citer_t it = twiceDifferentiableConstraintFunctions_.begin();
-           it != twiceDifferentiableConstraintFunctions_.end (); ++it)
+      for (citer_t it = twiceDifferentiableConstraints_.begin();
+           it != twiceDifferentiableConstraints_.end (); ++it)
         {
           h += lambda[i++] * (*it)->hessian (x, 0);
         }

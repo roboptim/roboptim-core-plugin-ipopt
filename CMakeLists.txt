@@ -24,6 +24,9 @@ SET(PROJECT_NAME roboptim-core-plugin-ipopt)
 SET(PROJECT_DESCRIPTION "RobOptim core IPOPT plug-in")
 SET(PROJECT_URL "http://github.com/roboptim/roboptim-core-plugin-ipopt")
 
+# Use MathJax for Doxygen formulae
+SET(DOXYGEN_USE_MATHJAX "YES")
+
 SET(HEADERS
   ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt/ipopt-common.hh
   ${CMAKE_SOURCE_DIR}/include/roboptim/core/plugin/ipopt/ipopt-parameters-updater.hh
