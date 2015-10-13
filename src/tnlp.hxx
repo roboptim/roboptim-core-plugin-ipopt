@@ -83,6 +83,46 @@ namespace roboptim
     {}
 #endif //!ROBOPTIM_CORE_IPOPT_PLUGIN_CHECK_GRADIENT
 
+    template <typename T>
+    void fillMultipliers (Function::vector_t& multipliers,
+                          const Function::value_type* z_L,
+                          const Function::value_type* z_U,
+                          const Function::value_type* lambda,
+                          Function::size_type n,
+                          Function::size_type m,
+                          const Solver<T>& solver)
+    {
+      const Eigen::Map<const Function::argument_t> map_zL (z_L, n);
+      const Eigen::Map<const Function::argument_t> map_zU (z_U, n);
+      const Eigen::Map<const Function::argument_t> map_lambda (lambda, m);
+
+      multipliers.resize (n + m + 1);
+      multipliers.setZero ();
+
+      // First, argument bounds multipliers
+      Function::size_type i = 0;
+      typedef IpoptSolver::problem_t::intervals_t::const_iterator citer_t;
+      for (citer_t it = solver.problem ().argumentBounds ().begin ();
+           it != solver.problem ().argumentBounds ().end (); ++it)
+      {
+        // Active lower bound
+        // Note: we expect λ < 0 if active lower bound constraint, and λ > 0 if
+        // active upper bound constraint
+        if ((*it).first != -Function::infinity () && map_zL[i] > map_zU[i])
+          multipliers[i] = -map_zL[i];
+        // Active upper bound
+        else if ((*it).second != Function::infinity () && map_zU[i] >= map_zL[i])
+          multipliers[i] = map_zU[i];
+
+        i++;
+      }
+
+      // Then constraint multipliers
+      multipliers.segment (n, m) = map_lambda;
+
+      // Finally, for 1D objective function: 1
+      multipliers[n+m] = 1.;
+    }
 
     void
     jacobianFromGradients
@@ -541,12 +581,11 @@ namespace roboptim
       return false;
     }
 
-#define FILL_RESULT()                           \
-    array_to_vector (res.x, x);			\
-    res.constraints.resize (m);			\
-    array_to_vector (res.constraints, g);       \
-    res.lambda.resize (m);                      \
-    array_to_vector (res.lambda, lambda);       \
+#define FILL_RESULT()							\
+    res.x = Eigen::Map<const Function::argument_t> (x, n);		\
+    res.constraints = Eigen::Map<const Function::vector_t> (g, m);	\
+    res.lambda = Eigen::Map<const Function::vector_t> (lambda, m);	\
+    fillMultipliers (res.lambda, z_L, z_U, lambda, n, m, solver_);	\
     res.value (0) = obj_value
 
 #define SWITCH_ERROR(NAME, ERROR)			\
@@ -599,8 +638,8 @@ namespace roboptim
     void
     Tnlp<T>::finalize_solution
     (SolverReturn status,
-     Index n, const Number* x, const Number*,
-     const Number*, Index m, const Number* g,
+     Index n, const Number* x, const Number* z_L,
+     const Number* z_U, Index m, const Number* g,
      const Number* lambda, Number obj_value,
      const IpoptData*,
      IpoptCalculatedQuantities*)
