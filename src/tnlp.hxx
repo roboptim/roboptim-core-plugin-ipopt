@@ -328,7 +328,7 @@ namespace roboptim
       if (!solver_.problem ().startingPoint ())
 	return true;
 
-      Eigen::Map<Function::result_t> x_ (x, n);
+      Eigen::Map<Function::argument_t> x_ (x, n);
       x_ = *solver_.problem ().startingPoint ();
       return true;
     }
@@ -552,8 +552,7 @@ namespace roboptim
 	}
       else
 	{
-	  solver_t::vector_t x_ (n);
-	  array_to_vector (x_, x);
+	  Eigen::Map<const function_t::argument_t> x_ (x, n);
 
 	  TwiceDifferentiableFunction::hessian_t h
 	    ((*costFunction_).inputSize (),
