@@ -123,6 +123,9 @@ namespace roboptim
     /// \brief Intermediate callback (called at each end
     /// of iteration).
     callback_t callback_;
+
+    /// \brief Number of times the solve method was called.
+    int solveCounter_;
   };
 
   /// @}

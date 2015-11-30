@@ -47,7 +47,8 @@ namespace roboptim
     : parent_t (pb),
       nlp_ (tnlp),
       app_ (IpoptApplicationFactory ()),
-      callback_ ()
+      callback_ (),
+      solveCounter_ (0)
   {
     app_->Jnlst()->DeleteAllJournals();
 
@@ -80,7 +81,12 @@ namespace roboptim
 #define SWITCH_OK(NAME, CASES)			\
   case NAME:					\
   {						\
-    int status = app_->OptimizeTNLP (nlp_);	\
+    int status;					\
+    if (solveCounter_ == 0)			\
+      status = app_->OptimizeTNLP (nlp_);	\
+    else					\
+      status = app_->ReOptimizeTNLP (nlp_);	\
+    solveCounter_++;				\
     switch (status)				\
       {						\
 	CASES;					\
