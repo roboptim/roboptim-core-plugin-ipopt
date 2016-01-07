@@ -68,7 +68,7 @@ IF (NOT LTDL_H_FOUND)
 ENDIF()
 
 # Search for roboptim-core.
-ADD_REQUIRED_DEPENDENCY("roboptim-core >= 3.1")
+ADD_REQUIRED_DEPENDENCY("roboptim-core >= 3.2")
 
 # Workaround Ipopt package issue.
 # It does not define HAVE_STDDEF even when it is needed, so we will do
