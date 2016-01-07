@@ -398,10 +398,6 @@ namespace roboptim
 	constraintsBuf_ =
 	  typename function_t::result_t (constraintsOutputSize ());
 
-#ifndef ROBOPTIM_DO_NOT_CHECK_ALLOCATION
-      Eigen::internal::set_is_malloc_allowed (true);
-#endif //! ROBOPTIM_DO_NOT_CHECK_ALLOCATION
-
       Eigen::Map<const typename function_t::argument_t> x_ (x, n);
 
       typedef typename constraints_t::const_iterator citer_t;
