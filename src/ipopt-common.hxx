@@ -22,6 +22,7 @@
 # include <roboptim/core/portability.hh>
 
 # include <stdexcept>
+# include <string>
 
 # include <boost/mpl/vector.hpp>
 
@@ -134,7 +135,7 @@ namespace roboptim
   {
     // Read parameters and forward them to Ipopt.
     updateParameters ();
-    Ipopt::ApplicationReturnStatus status = app_->Initialize ("");
+    Ipopt::ApplicationReturnStatus status = app_->Initialize (std::string (""));
 
     switch (status)
       {
