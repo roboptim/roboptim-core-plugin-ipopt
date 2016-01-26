@@ -98,6 +98,11 @@ IF(CMAKE_SYSTEM_NAME MATCHES "Linux"
   ENDIF()
 ENDIF()
 
+# Enable SIGFPE signal to detect arithmetic errors in tests
+OPTION(ENABLE_SIGFPE "Enable floating-point exceptions" ON)
+IF(ENABLE_SIGFPE)
+  ADD_DEFINITIONS(-DENABLE_SIGFPE)
+ENDIF()
 
 # patch for ipopt: in the .pc file, the header path may be IpoptPath/include/coin
 #  for clarity, we want to have IpoptPath/include/ instead
