@@ -62,6 +62,10 @@ namespace roboptim
 
     // Initialize parameters.
     initializeParameters ();
+
+    // Initialize starting point.
+    initializeStartingPoint ();
+    assert (this->problem ().startingPoint ());
   }
 
   template<typename T>
@@ -133,6 +137,10 @@ namespace roboptim
   void IpoptSolverCommon<T>::
   solve ()
   {
+    // Initialize starting point.
+    initializeStartingPoint ();
+    assert (this->problem ().startingPoint ());
+
     // Read parameters and forward them to Ipopt.
     updateParameters ();
     Ipopt::ApplicationReturnStatus status = app_->Initialize (std::string (""));
@@ -274,6 +282,41 @@ namespace roboptim
     boost::apply_visitor
       (IpoptParametersUpdater
        (app_, "max_iter"), this->parameters_["max-iterations"].value);
+  }
+
+  template<typename T>
+  void IpoptSolverCommon<T>::initializeStartingPoint ()
+  {
+    if (!this->problem ().startingPoint ())
+      {
+	function_t::vector_t x (this->problem ().function ().inputSize ());
+	for (function_t::vector_t::Index i = 0; i < x.size (); ++i)
+	  {
+	    std::size_t ii = static_cast<std::size_t> (i);
+
+	    // if constraint is in an interval, evaluate at middle.
+	    if (this->problem ().boundsVector ()[constraintId][ii].first
+		!= -Function::infinity ()
+		&&
+		this->problem ().boundsVector ()[constraintId][ii].second
+		!= Function::infinity ())
+	      x[i] =
+		(this->problem ().boundsVector ()
+		 [constraintId][ii].second
+		 - this->problem ().boundsVector ()
+		 [constraintId][ii].first) / 2.;
+	    // otherwise use the non-infinite bound.
+	    else if (this->problem ().boundsVector ()
+		     [constraintId][ii].first
+		     != -Function::infinity ())
+	      x[i] = this->problem ().boundsVector ()
+		[constraintId][ii].first;
+	    else
+	      x[i] = this->problem ().boundsVector ()
+		[constraintId][ii].second;
+	  }
+	this->problem ().startingPoint () = x;
+      }
   }
 } // end of namespace roboptim
 

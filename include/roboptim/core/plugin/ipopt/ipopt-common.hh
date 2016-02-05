@@ -115,6 +115,9 @@ namespace roboptim
     /// Called before solving problem.
     void updateParameters ();
 
+    /// \brief Initialize starting point.
+    void initializeStartingPoint ();
+
     /// \brief Smart pointer to the Ipopt non linear problem description.
     Ipopt::SmartPtr<Ipopt::TNLP> nlp_;
     /// \brief Smart pointer to the Ipopt application instance.
