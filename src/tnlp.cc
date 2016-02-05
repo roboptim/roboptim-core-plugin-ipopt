@@ -207,9 +207,15 @@ namespace roboptim
       for (citer_t it = differentiableConstraints_.begin ();
 	   it != differentiableConstraints_.end (); ++it, constraintId++)
 	{
-	  typename differentiableFunction_t::matrix_t& jac = constraintJacobians_[constraintId];
-	  // Set the Jacobian to 0 while keeping its structure
-	  jac *= 0.;
+	  typename differentiableFunction_t::matrix_t&
+	    jac = constraintJacobians_[constraintId];
+	  // Set the Jacobian to 0 while keeping its structure (thus do not
+	  // call setZero on the full matrix).
+	  if (jac.isCompressed ())
+	    {
+	      Eigen::Map<Eigen::VectorXd> jacValues (jac.valuePtr (), jac.nonZeros ());
+	      jacValues.setZero ();
+	    }
 	  (*it)->jacobian (jac, x_);
 
 	  IpoptCheckGradient
