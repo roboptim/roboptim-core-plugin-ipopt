@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with roboptim.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <stdexcept>
+
 #include <boost/shared_ptr.hpp>
 
 #include <coin/IpIpoptApplication.hpp>
@@ -45,24 +47,23 @@ namespace roboptim
       n = static_cast<Index> (costFunction_->inputSize ());
       m = static_cast<Index> (constraintsOutputSize ());
 
-      function_t::vector_t x (n);
-      if (solver_.problem ().startingPoint ())
-        x = *(solver_.problem ().startingPoint ());
-      else
-	{
-	  // FIXME: should make sure we are in the bounds.
-	  x.setZero ();
-	}
+      const function_t::vector_t& x = solver_.startingPoint ();
 
-      // compute number of non zeros elements in jacobian constraint.
+      // Clear just in case
+      constraintJacobians_.clear ();
+
+      // Compute number of nonzeros in constraint Jacobian, and store its value
+      // for the first iteration of the solver.
       nnz_jac_g = 0;
       typedef differentiableConstraints_t::const_iterator citer_t;
       for (citer_t it = differentiableConstraints_.begin ();
 	   it != differentiableConstraints_.end (); ++it)
 	{
-	  nnz_jac_g += (*it)->jacobian (x).nonZeros ();
+          constraintJacobians_.push_back ((*it)->jacobian (x));
+          differentiableFunction_t::jacobian_t& jac = constraintJacobians_.back ();
+          jac.makeCompressed ();
+	  nnz_jac_g += jac.nonZeros ();
 	}
-
 
       nnz_h_lag = 0; // unused
       index_style = TNLP::C_STYLE;
@@ -97,9 +98,6 @@ namespace roboptim
 	    (logger, "Looking for non-zeros elements.");
 	  LOG4CXX_TRACE (logger, "nele_jac = " << nele_jac);
 
-	  // Clear just in case
-	  constraintJacobians_.clear ();
-
 	  // Emptying iRow/jCol arrays.
 	  std::memset (iRow, 0, static_cast<std::size_t> (nele_jac) * sizeof (Index));
 	  std::memset (jCol, 0, static_cast<std::size_t> (nele_jac) * sizeof (Index));
@@ -113,6 +111,9 @@ namespace roboptim
 	  typedef Eigen::Triplet<double> triplet_t;
 	  std::vector<triplet_t> coefficients;
 
+          assert (constraintJacobians_.size () ==
+                  differentiableConstraints_.size ());
+
 	  for (citer_t it = differentiableConstraints_.begin ();
 	       it != differentiableConstraints_.end ();
 	       ++it, ++constraintId)
@@ -122,42 +123,9 @@ namespace roboptim
 		 "Compute jacobian of constraint id = " << constraintId
 		 << "to count for non-zeros elements");
 
-	      function_t::vector_t x (n);
-	      // Look for a place to evaluate the jacobian of the
-	      // current constraint.
-	      // If we do not have an initial guess...
-	      if (!solver_.problem ().startingPoint ())
-                for (function_t::vector_t::Index i = 0; i < x.size (); ++i)
-                  {
-                    std::size_t ii = static_cast<std::size_t> (i);
-
-		    // if constraint is in an interval, evaluate at middle.
-                    if (solver_.problem ().boundsVector ()[constraintId][ii].first
-			!= -Function::infinity ()
-			&&
-                        solver_.problem ().boundsVector ()[constraintId][ii].second
-			!= Function::infinity ())
-                      x[i] =
-			(solver_.problem ().boundsVector ()
-                         [constraintId][ii].second
-			 - solver_.problem ().boundsVector ()
-                         [constraintId][ii].first) / 2.;
-		    // otherwise use the non-infinite bound.
-		    else if (solver_.problem ().boundsVector ()
-                             [constraintId][ii].first
-			     != -Function::infinity ())
-		      x[i] = solver_.problem ().boundsVector ()
-                        [constraintId][ii].first;
-		    else
-		      x[i] = solver_.problem ().boundsVector ()
-                        [constraintId][ii].second;
-		  }
-	      else // other use initial guess.
-		x = *(solver_.problem ().startingPoint ());
-
-	      constraintJacobians_.push_back ((*it)->jacobian (x));
-	      differentiableFunction_t::jacobian_t& tmp_jac = constraintJacobians_.back ();
-	      tmp_jac.makeCompressed ();
+              // Using the values already computed in get_nlp_info
+	      differentiableFunction_t::jacobian_t&
+                tmp_jac = constraintJacobians_[constraintId];
 
 	      for (int k = 0; k < tmp_jac.outerSize (); ++k)
 		for (differentiableFunction_t::jacobian_t::InnerIterator
@@ -199,7 +167,7 @@ namespace roboptim
 	  return true;
 	}
 
-      Eigen::Map<const function_t::vector_t> x_ (x, n);
+      const Eigen::Map<const function_t::argument_t> x_ (x, n);
 
       typedef differentiableConstraints_t::const_iterator citer_t;
 

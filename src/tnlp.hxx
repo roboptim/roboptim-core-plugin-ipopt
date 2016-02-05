@@ -49,7 +49,7 @@ namespace roboptim
     template <typename T, typename F>
     void IpoptCheckGradient (const F& function,
 			     unsigned functionId,
-			     Eigen::Map<const Function::vector_t>& x,
+			     const Eigen::Map<const Function::vector_t>& x,
 			     int constraintId,
 			     T& solver)
     {
@@ -77,7 +77,7 @@ namespace roboptim
     template <typename T, typename F>
     void IpoptCheckGradient (const F&,
 			     unsigned,
-			     Eigen::Map<const Function::vector_t>&,
+			     const Eigen::Map<const Function::vector_t>&,
 			     int,
 			     T&)
     {}
@@ -372,7 +372,7 @@ namespace roboptim
 	costGradientBuf_ = typename differentiableFunction_t::gradient_t
 	  ((*costFunction_).inputSize ());
 
-      Eigen::Map<const typename function_t::argument_t> x_ (x, n);
+      const Eigen::Map<const typename function_t::argument_t> x_ (x, n);
       differentiableCostFunction_->gradient (*costGradientBuf_, x_, 0);
 
       IpoptCheckGradient

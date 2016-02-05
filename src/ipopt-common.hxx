@@ -49,7 +49,8 @@ namespace roboptim
       nlp_ (tnlp),
       app_ (IpoptApplicationFactory ()),
       callback_ (),
-      solveCounter_ (0)
+      solveCounter_ (0),
+      startingPoint_ (pb.function ().inputSize ())
   {
     app_->Jnlst()->DeleteAllJournals();
 
@@ -62,10 +63,6 @@ namespace roboptim
 
     // Initialize parameters.
     initializeParameters ();
-
-    // Initialize starting point.
-    initializeStartingPoint ();
-    assert (this->problem ().startingPoint ());
   }
 
   template<typename T>
@@ -139,7 +136,6 @@ namespace roboptim
   {
     // Initialize starting point.
     initializeStartingPoint ();
-    assert (this->problem ().startingPoint ());
 
     // Read parameters and forward them to Ipopt.
     updateParameters ();
@@ -287,36 +283,30 @@ namespace roboptim
   template<typename T>
   void IpoptSolverCommon<T>::initializeStartingPoint ()
   {
-    if (!this->problem ().startingPoint ())
-      {
-	function_t::vector_t x (this->problem ().function ().inputSize ());
-	for (function_t::vector_t::Index i = 0; i < x.size (); ++i)
-	  {
-	    std::size_t ii = static_cast<std::size_t> (i);
+    if (this->problem ().startingPoint ())
+    {
+      startingPoint_ = *(this->problem ().startingPoint ());
+      return;
+    }
 
-	    // if constraint is in an interval, evaluate at middle.
-	    if (this->problem ().boundsVector ()[constraintId][ii].first
-		!= -Function::infinity ()
-		&&
-		this->problem ().boundsVector ()[constraintId][ii].second
-		!= Function::infinity ())
-	      x[i] =
-		(this->problem ().boundsVector ()
-		 [constraintId][ii].second
-		 - this->problem ().boundsVector ()
-		 [constraintId][ii].first) / 2.;
-	    // otherwise use the non-infinite bound.
-	    else if (this->problem ().boundsVector ()
-		     [constraintId][ii].first
-		     != -Function::infinity ())
-	      x[i] = this->problem ().boundsVector ()
-		[constraintId][ii].first;
-	    else
-	      x[i] = this->problem ().boundsVector ()
-		[constraintId][ii].second;
-	  }
-	this->problem ().startingPoint () = x;
-      }
+    for (typename function_t::vector_t::Index i = 0;
+         i < startingPoint_.size (); ++i)
+    {
+      std::size_t ii = static_cast<std::size_t> (i);
+      const typename function_t::interval_t&
+        bounds = this->problem ().argumentBounds ()[ii];
+
+      // if constraint is in an interval, evaluate at middle.
+      if (bounds.first != -Function::infinity ()
+          && bounds.second != Function::infinity ())
+        startingPoint_[i] = (bounds.second - bounds.first) / 2.;
+      // otherwise use the non-infinite bound.
+      else if (bounds.first != -Function::infinity ())
+        startingPoint_[i] = bounds.first;
+      else if (bounds.second != Function::infinity ())
+        startingPoint_[i] = bounds.second;
+      else startingPoint_[i] = 0.;
+    }
   }
 } // end of namespace roboptim
 

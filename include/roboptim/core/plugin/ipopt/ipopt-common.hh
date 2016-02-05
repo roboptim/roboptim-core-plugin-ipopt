@@ -75,6 +75,8 @@ namespace roboptim
 
     typedef typename T::callback_t callback_t;
     typedef typename T::problem_t problem_t;
+    typedef typename problem_t::function_t function_t;
+    typedef typename problem_t::argument_t argument_t;
 
     /// \brief Instantiate the solver from a problem.
     ///
@@ -104,6 +106,12 @@ namespace roboptim
     {
       return callback_;
     }
+
+    const argument_t& startingPoint () const
+    {
+      return startingPoint_;
+    }
+
   private:
     /// \brief Initialize parameters.
     ///
@@ -129,6 +137,9 @@ namespace roboptim
 
     /// \brief Number of times the solve method was called.
     int solveCounter_;
+
+    /// \brief Starting point.
+    argument_t startingPoint_;
   };
 
   /// @}
