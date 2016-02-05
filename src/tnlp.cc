@@ -133,7 +133,7 @@ namespace roboptim
 
 		    // if constraint is in an interval, evaluate at middle.
                     if (solver_.problem ().boundsVector ()[constraintId][ii].first
-			!= Function::infinity ()
+			!= -Function::infinity ()
 			&&
                         solver_.problem ().boundsVector ()[constraintId][ii].second
 			!= Function::infinity ())
@@ -145,7 +145,7 @@ namespace roboptim
 		    // otherwise use the non-infinite bound.
 		    else if (solver_.problem ().boundsVector ()
                              [constraintId][ii].first
-			     != Function::infinity ())
+			     != -Function::infinity ())
 		      x[i] = solver_.problem ().boundsVector ()
                         [constraintId][ii].first;
 		    else
