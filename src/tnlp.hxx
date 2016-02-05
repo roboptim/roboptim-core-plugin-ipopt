@@ -599,7 +599,6 @@ namespace roboptim
       FILL_RESULT ();					\
       res.warnings.push_back (SolverWarning (WARNING)); \
       solver_.result_ = res;				\
-      break;						\
     }                                                   \
     break
 
