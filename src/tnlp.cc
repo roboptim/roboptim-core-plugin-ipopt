@@ -173,6 +173,7 @@ namespace roboptim
 
 	  jacobianBuf_->setFromTriplets
 	    (coefficients.begin (), coefficients.end ());
+	  jacobianBuf_->makeCompressed ();
 
 	  LOG4CXX_TRACE
 	    (logger, "full problem jacobian...\n" << *jacobianBuf_);
