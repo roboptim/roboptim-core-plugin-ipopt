@@ -50,7 +50,8 @@ namespace roboptim
       app_ (IpoptApplicationFactory ()),
       callback_ (),
       solveCounter_ (0),
-      startingPoint_ (pb.function ().inputSize ())
+      startingPoint_ (pb.function ().inputSize ()),
+      userScaling_ (false)
   {
     app_->Jnlst()->DeleteAllJournals();
 
@@ -278,6 +279,15 @@ namespace roboptim
     boost::apply_visitor
       (IpoptParametersUpdater
        (app_, "max_iter"), this->parameters_["max-iterations"].value);
+
+    // Get whether user-scaling is being used
+    {
+      typename parent_t::parameters_t::const_iterator
+        it = this->parameters_.find (prefix + "nlp_scaling_method");
+      if (it != this->parameters_.end ())
+        userScaling_ = (boost::get<std::string> (it->second.value)
+                        == "user-scaling");
+    }
   }
 
   template<typename T>

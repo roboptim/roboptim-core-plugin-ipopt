@@ -112,6 +112,12 @@ namespace roboptim
       return startingPoint_;
     }
 
+    /// \brief Whether user scaling is used.
+    bool userScaling () const
+    {
+      return userScaling_;
+    }
+
   private:
     /// \brief Initialize parameters.
     ///
@@ -140,6 +146,9 @@ namespace roboptim
 
     /// \brief Starting point.
     argument_t startingPoint_;
+
+    /// \brief Whether user scaling is used.
+    bool userScaling_;
   };
 
   /// @}
