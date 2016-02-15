@@ -701,8 +701,14 @@ namespace roboptim
       Ipopt::TNLPAdapter* tnlp_adapter = dynamic_cast<TNLPAdapter*>
 	(GetRawPtr (orignlp->nlp ()));
 
-      // current optimization parameters
-      tnlp_adapter->ResortX (*ip_data->curr ()->x (), &(solverState_.x ())[0]);
+      // current scaled optimization parameters
+      tnlp_adapter->ResortX (*ip_data->curr ()->x (), solverState_.x ().data ());
+
+      // unscale x
+      const Eigen::Map<const typename T::argument_t>
+        scaling (solver_.problem ().argumentScaling ().data (),
+                 solver_.problem ().function ().inputSize ());
+      solverState_.x ().array () /= scaling.array ();
 
       // unscaled objective value at the current point
       solverState_.cost () = obj_value;

@@ -39,7 +39,8 @@ namespace roboptim
     typedef Ipopt::Number Number;
 
     /// \internal
-    /// Ipopt non linear problem definition.
+    /// Ipopt nonlinear problem definition.
+    /// \tparam T solver type.
     template <typename T>
     class Tnlp : public Ipopt::TNLP
     {
