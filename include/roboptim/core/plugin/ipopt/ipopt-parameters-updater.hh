@@ -17,7 +17,14 @@
 
 #ifndef ROBOPTIM_CORE_IPOPT_PARAMETERS_UPDATER_HH
 # define ROBOPTIM_CORE_IPOPT_PARAMETERS_UPDATER_HH
+
+# include <string>
+
+# include <boost/variant/static_visitor.hpp>
+
 # include <coin/IpSmartPtr.hpp>
+
+# include <roboptim/core/function.hh>
 
 namespace roboptim
 {
