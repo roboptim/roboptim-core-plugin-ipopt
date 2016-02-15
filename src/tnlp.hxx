@@ -236,28 +236,39 @@ namespace roboptim
 
     template <typename T>
     bool
-    Tnlp<T>::get_scaling_parameters (Number&,
+    Tnlp<T>::get_scaling_parameters (Number& obj_scaling,
                                      bool& use_x_scaling,
                                      Index ROBOPTIM_DEBUG_ONLY(n),
                                      Number* x_scaling,
                                      bool& use_g_scaling, Index m,
                                      Number* g_scaling)
     {
+      typedef typename solver_t::problem_t::scalingVect_t scalingVect_t;
       ROBOPTIM_DEBUG_ONLY(std::size_t n_ = static_cast<std::size_t> (n));
-      std::size_t m_ = static_cast<std::size_t> (m);
+      ROBOPTIM_DEBUG_ONLY(std::size_t m_ = static_cast<std::size_t> (m));
+
+      // TODO: add support for objective scaling in roboptim-core
+      obj_scaling = 1.;
 
       assert (solver_.problem ().argumentScaling ().size () == n_);
 
-      use_x_scaling = true, use_g_scaling = true;
+      use_x_scaling = true;
       std::copy (solver_.problem ().argumentScaling ().begin (),
 		 solver_.problem ().argumentScaling ().end (),
 		 x_scaling);
 
+      std::size_t i = 0;
+      use_g_scaling = (m > 0);
+      for (typename scalingVect_t::const_iterator
+	     c  = solver_.problem ().scalingVector ().begin ();
+           c != solver_.problem ().scalingVector ().end (); ++c)
+	{
+	  for (std::size_t j = 0; j < c->size (); ++j)
+	    g_scaling[i++] = (*c)[j];
+	}
 
-      for (std::size_t i = 0; i < m_; ++i)
-        for (std::size_t j = 0;
-             j < solver_.problem ().scalingVector ()[i].size (); ++j)
-          g_scaling[i] = solver_.problem ().scalingVector ()[i][j];
+      assert (i == m_);
+
       return true;
     }
 
