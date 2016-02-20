@@ -83,8 +83,3 @@ extern "C"
     delete p;
   }
 }
-
-
-// Local Variables:
-// compile-command: "make -k -C ../_build"
-// End:
