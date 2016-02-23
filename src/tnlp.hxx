@@ -590,6 +590,8 @@ namespace roboptim
 #define FILL_RESULT()							\
     res.x = Eigen::Map<const Function::argument_t> (x, n);		\
     res.constraints = Eigen::Map<const Function::vector_t> (g, m);	\
+    res.constraint_violation = ip_cq->unscaled_curr_nlp_constraint_violation \
+                                 (Ipopt::NORM_MAX);			\
     res.lambda = Eigen::Map<const Function::vector_t> (lambda, m);	\
     fillMultipliers (res.lambda, z_L, z_U, lambda, n, m, solver_);	\
     res.value (0) = obj_value
@@ -647,7 +649,7 @@ namespace roboptim
      const Number* z_U, Index m, const Number* g,
      const Number* lambda, Number obj_value,
      const IpoptData*,
-     IpoptCalculatedQuantities*)
+     IpoptCalculatedQuantities* ip_cq)
     {
       assert ((*costFunction_).inputSize () - n == 0);
       assert (constraintsOutputSize () - m == 0);
@@ -717,7 +719,8 @@ namespace roboptim
       solverState_.cost () = obj_value;
 
       // unscaled constraint violation at the current point
-      solverState_.constraintViolation () = ip_cq->unscaled_curr_nlp_constraint_violation (Ipopt::NORM_MAX);
+      solverState_.constraintViolation ()
+        = ip_cq->unscaled_curr_nlp_constraint_violation (Ipopt::NORM_MAX);
 
       // handle extra relevant parameters
       solverState_.parameters()["ipopt.mode"].value =
