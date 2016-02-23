@@ -99,7 +99,7 @@ IF(CMAKE_SYSTEM_NAME MATCHES "Linux"
 ENDIF()
 
 # Enable SIGFPE signal to detect arithmetic errors in tests
-OPTION(ENABLE_SIGFPE "Enable floating-point exceptions" ON)
+OPTION(ENABLE_SIGFPE "Enable floating-point exceptions" OFF)
 IF(ENABLE_SIGFPE)
   ADD_DEFINITIONS(-DENABLE_SIGFPE)
 ENDIF()
