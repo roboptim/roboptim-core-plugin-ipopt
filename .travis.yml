@@ -1,7 +1,7 @@
 language: cpp
 env:
   global:
-  - APT_DEPENDENCIES="doxygen libltdl-dev libboost-all-dev liblog4cxx10-dev coinor-libipopt-dev libblas-dev liblapack-dev libmumps-seq-dev gfortran"
+  - APT_DEPENDENCIES="doxygen libltdl-dev libboost-all-dev liblog4cxx10-dev libblas-dev liblapack-dev libmumps-seq-dev gfortran"
   - HOMEBREW_DEPENDENCIES="doxygen log4cxx ipopt openblas mumps"
   - GIT_DEPENDENCIES="roboptim/roboptim-core"
   - DEBSIGN_KEYID=5AE5CD75
@@ -35,7 +35,8 @@ after_failure: ./.travis/run after_failure
 before_install:
   - pip install --user codecov
   - ./.travis/dependencies/eigen-3.2
-  - ./.travis/run  before_install
+  - ./.travis/run before_install
+  - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then CC=gcc CXX=g++ ./.travis/dependencies/ipopt; fi
 
 matrix:
   allow_failures:
