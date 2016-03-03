@@ -65,6 +65,8 @@ Available packages
  * Mac OS X Homebrew Formula (Git HEAD):
    https://www.github.com/roboptim/homebrew-roboptim
 
+[badge-license]: https://img.shields.io/badge/license-LGPL_3-green.svg
+
 [doxygen-documentation]: http://www.roboptim.net/roboptim-core-plugin-ipopt/doxygen/HEAD/
 
 [git-submodules]: http://git-scm.com/book/en/Git-Tools-Submodules
