@@ -1,7 +1,7 @@
 language: cpp
 env:
   global:
-  - APT_DEPENDENCIES="doxygen libltdl-dev libboost-all-dev liblog4cxx10-dev libblas-dev liblapack-dev libmumps-seq-dev gfortran"
+  - APT_DEPENDENCIES="doxygen libltdl-dev libboost-all-dev liblog4cxx10-dev"
   - HOMEBREW_DEPENDENCIES="doxygen log4cxx ipopt openblas mumps"
   - GIT_DEPENDENCIES="roboptim/roboptim-core"
   - DEBSIGN_KEYID=5AE5CD75
