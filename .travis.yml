@@ -43,8 +43,6 @@ matrix:
     - compiler: clang
     - env: COVERITY_SCAN_BRANCH=1
     - os: osx
-    - os: linux
-      dist: trusty
   include:
     - os: linux
       dist: trusty
