@@ -13,11 +13,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with roboptim-core.  If not, see <http://www.gnu.org/licenses/>.
 
-# Which linear solver should Ipopt use (unless explicitly set)?
-# Default: mumps (open-source linear solver)
-SET(IPOPT_DEFAULT_LINEAR_SOLVER "mumps"
-    CACHE STRING "Which linear solver should be used by Ipopt by default?")
-
 # Define the directory where plug-ins will be installed.
 SET(PLUGINDIR ${CMAKE_INSTALL_LIBDIR}/${ROBOPTIM_CORE_RELPLUGINDIR})
 MESSAGE("-- Plug-in directory: ${PLUGINDIR}")

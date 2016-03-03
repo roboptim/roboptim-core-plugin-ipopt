@@ -85,16 +85,31 @@ IF(HAVE_STDDEF_H)
 ENDIF()
 ADD_REQUIRED_DEPENDENCY("ipopt")
 
+
+# Which linear solver should Ipopt use (unless explicitly set)?
+# Default: mumps (open-source linear solver)
+SET(IPOPT_DEFAULT_LINEAR_SOLVER "mumps"
+  CACHE STRING "Which linear solver should be used by Ipopt by default?")
+
 # Make sure the MPI version of mumps is not used.
 #
 # This is a workaround for a bug in the pkg-config file provided by some
 # Ubuntu releases where pkg-config always provides information about
 # how to link with the MPI version of MUMPS.
-IF(CMAKE_SYSTEM_NAME MATCHES "Linux"
-    AND EXISTS "/etc/debian_version"
-    AND IPOPT_PREFIX MATCHES "/usr")
-  IF(NOT IPOPT_LDFLAGS MATCHES "-ldmumps_seq")
-    STRING(REPLACE "-ldmumps" "-ldmumps_seq" IPOPT_LDFLAGS "${IPOPT_LDFLAGS}")
+IF(CMAKE_SYSTEM_NAME MATCHES "Linux")
+  IF(IPOPT_DEFAULT_LINEAR_SOLVER STREQUAL "mumps")
+    # Check that Ipopt was compiled with MUMPS support.
+    IF(NOT IPOPT_LDFLAGS MATCHES "mumps")
+      MESSAGE(FATAL_ERROR "Ipopt was not compiled with MUMPS support, yet it is "
+        "set as the default linear solver.")
+    ENDIF()
+
+    # Fix for some older Ubuntu packages (14.04 and before).
+    IF(EXISTS "/etc/debian_version"
+       AND IPOPT_PREFIX MATCHES "/usr"
+       AND NOT IPOPT_LDFLAGS MATCHES "-ldmumps_seq")
+        STRING(REPLACE "-ldmumps" "-ldmumps_seq" IPOPT_LDFLAGS "${IPOPT_LDFLAGS}")
+    ENDIF()
   ENDIF()
 ENDIF()
 
