@@ -1,12 +1,11 @@
 roboptim-core-plugin-ipopt
 ==========================
 
+[![License LGPL 3][badge-license]](http://www.gnu.org/licenses/lgpl-3.0.txt)
 [![Build Status](https://travis-ci.org/roboptim/roboptim-core-plugin-ipopt.png?branch=master)](https://travis-ci.org/roboptim/roboptim-core-plugin-ipopt)
 [![Coverage Status](https://coveralls.io/repos/roboptim/roboptim-core-plugin-ipopt/badge.png)](https://coveralls.io/r/roboptim/roboptim-core-plugin-ipopt)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/877/badge.svg)](https://scan.coverity.com/projects/877)
 [![Join the chat at https://gitter.im/roboptim/development](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/roboptim/development?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-![LGPL-3](https://www.gnu.org/graphics/lgplv3-88x31.png)
 
 
 [![Zenodo](https://zenodo.org/badge/doi/10.5281/zenodo.10332.png)](http://zenodo.org/record/10332)
