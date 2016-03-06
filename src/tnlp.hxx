@@ -329,18 +329,14 @@ namespace roboptim
 	    z_L[i] = 1., z_U[i] = 1.;
 	}
 
-      // Set the starting point.
-      if (!solver_.problem ().startingPoint () && init_x)
+      if (init_x)
 	{
-	  solver_.result_ =
-	    SolverError ("Ipopt method needs a starting point.");
-	  return false;
+	  // Set the starting point.
+	  // Note: we use the one defined in IpoptSolverCommon.
+	  Eigen::Map<Function::argument_t> x_ (x, n);
+	  x_ = solver_.startingPoint ();
 	}
-      if (!solver_.problem ().startingPoint ())
-	return true;
 
-      Eigen::Map<Function::argument_t> x_ (x, n);
-      x_ = *solver_.problem ().startingPoint ();
       return true;
     }
 

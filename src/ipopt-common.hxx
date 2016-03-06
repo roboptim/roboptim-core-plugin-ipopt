@@ -309,7 +309,7 @@ namespace roboptim
       // if constraint is in an interval, evaluate at middle.
       if (bounds.first != -Function::infinity ()
           && bounds.second != Function::infinity ())
-        startingPoint_[i] = (bounds.second - bounds.first) / 2.;
+        startingPoint_[i] = (bounds.first + bounds.second) / 2.;
       // otherwise use the non-infinite bound.
       else if (bounds.first != -Function::infinity ())
         startingPoint_[i] = bounds.first;
