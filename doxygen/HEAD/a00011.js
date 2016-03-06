@@ -1,6 +1,6 @@
 var a00011 =
 [
-    [ "ipopt_solver_t", "a00021.html#a0847778d19f94c0ea2c07c3d551db95b", null ],
+    [ "ipopt_solver_t", "a00011.html#a0847778d19f94c0ea2c07c3d551db95b", null ],
     [ "solver_t", "a00011.html#aad0576ddcd5b2becbaa3798b8bfe0b31", null ],
     [ "create", "a00011.html#a8e51f6ecd35b72760de333797165366d", null ],
     [ "destroy", "a00011.html#af992438f02837bfe836ba0a937747829", null ],
