@@ -3,7 +3,7 @@ roboptim-core-plugin-ipopt
 
 [![License LGPL 3][badge-license]](http://www.gnu.org/licenses/lgpl-3.0.txt)
 [![Build Status](https://travis-ci.org/roboptim/roboptim-core-plugin-ipopt.png?branch=master)](https://travis-ci.org/roboptim/roboptim-core-plugin-ipopt)
-[![Coverage Status](https://coveralls.io/repos/roboptim/roboptim-core-plugin-ipopt/badge.png)](https://coveralls.io/r/roboptim/roboptim-core-plugin-ipopt)
+[![codecov.io](https://codecov.io/github/roboptim/roboptim-core-plugin-ipopt/coverage.svg?branch=master)](https://codecov.io/github/roboptim/roboptim-core-plugin-ipopt?branch=master)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/877/badge.svg)](https://scan.coverity.com/projects/877)
 [![Join the chat at https://gitter.im/roboptim/development](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/roboptim/development?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -41,7 +41,7 @@ Getting Help
 
 Support is provided through:
  * the RobOptim mailing-list: roboptim@googlegroups.com
- * the following HipChat room: http://www.hipchat.com/gh4wQrZeV
+ * the following Gitter room: https://gitter.im/roboptim/development
 
 
 Contributing
