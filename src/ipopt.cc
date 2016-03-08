@@ -27,6 +27,7 @@
 
 #include <roboptim/core/util.hh>
 
+#include "roboptim/core/plugin/ipopt/config.hh"
 #include "roboptim/core/plugin/ipopt/ipopt.hh"
 #include "roboptim/core/plugin/ipopt/ipopt-parameters-updater.hh"
 #include "ipopt-common.hxx"
@@ -58,33 +59,32 @@ extern "C"
   using namespace roboptim;
   typedef IpoptSolver::solver_t solver_t;
 
-  ROBOPTIM_DLLEXPORT unsigned getSizeOfProblem ();
-  ROBOPTIM_DLLEXPORT const char* getTypeIdOfConstraintsList ();
-  ROBOPTIM_DLLEXPORT solver_t* create (const IpoptSolver::problem_t& pb);
-  ROBOPTIM_DLLEXPORT void destroy (solver_t* p);
+  ROBOPTIM_CORE_PLUGIN_IPOPT_DLLEXPORT unsigned getSizeOfProblem ();
 
-  ROBOPTIM_DLLEXPORT unsigned getSizeOfProblem ()
+  ROBOPTIM_CORE_PLUGIN_IPOPT_DLLEXPORT const char* getTypeIdOfConstraintsList ();
+
+  ROBOPTIM_CORE_PLUGIN_IPOPT_DLLEXPORT
+  solver_t* create (const IpoptSolver::problem_t& pb);
+
+  ROBOPTIM_CORE_PLUGIN_IPOPT_DLLEXPORT void destroy (solver_t* p);
+
+  unsigned getSizeOfProblem ()
   {
     return sizeof (IpoptSolver::problem_t);
   }
 
-  ROBOPTIM_DLLEXPORT const char* getTypeIdOfConstraintsList ()
+  const char* getTypeIdOfConstraintsList ()
   {
     return typeid (IpoptSolver::problem_t::constraintsList_t).name ();
   }
 
-  ROBOPTIM_DLLEXPORT solver_t* create (const IpoptSolver::problem_t& pb)
+  solver_t* create (const IpoptSolver::problem_t& pb)
   {
     return new IpoptSolver (pb);
   }
 
-  ROBOPTIM_DLLEXPORT void destroy (solver_t* p)
+  void destroy (solver_t* p)
   {
     delete p;
   }
 }
-
-
-// Local Variables:
-// compile-command: "make -k -C ../_build"
-// End:

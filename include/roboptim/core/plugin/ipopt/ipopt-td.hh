@@ -17,13 +17,12 @@
 
 #ifndef ROBOPTIM_CORE_IPOPT_TD_HH
 # define ROBOPTIM_CORE_IPOPT_TD_HH
-# include <roboptim/core/sys.hh>
-# include <roboptim/core/portability.hh>
 
 # include <boost/mpl/vector.hpp>
 
 # include <coin/IpSmartPtr.hpp>
 
+# include <roboptim/core/plugin/ipopt/config.hh>
 # include <roboptim/core/solver.hh>
 # include <roboptim/core/twice-derivable-function.hh>
 # include <roboptim/core/plugin/ipopt/ipopt-common.hh>
@@ -53,9 +52,8 @@ namespace roboptim
   ///
   /// \warning Ipopt needs twice derivable functions, so be sure
   /// to provide hessians in your function's problems.
-  class ROBOPTIM_DLLEXPORT IpoptSolverTd
-    : public IpoptSolverCommon<
-    Solver <EigenMatrixDense> >
+  class ROBOPTIM_CORE_PLUGIN_IPOPT_DLLAPI IpoptSolverTd
+    : public IpoptSolverCommon<Solver <EigenMatrixDense> >
   {
   public:
     /// \brief RobOptim solver type.

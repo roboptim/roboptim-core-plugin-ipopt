@@ -18,9 +18,6 @@
 #ifndef ROBOPTIM_CORE_IPOPT_COMMON_HXX
 # define ROBOPTIM_CORE_IPOPT_COMMON_HXX
 
-# include <roboptim/core/sys.hh>
-# include <roboptim/core/portability.hh>
-
 # include <stdexcept>
 # include <string>
 

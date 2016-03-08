@@ -17,8 +17,6 @@
 
 #ifndef ROBOPTIM_CORE_IPOPT_COMMON_HH
 # define ROBOPTIM_CORE_IPOPT_COMMON_HH
-# include <roboptim/core/sys.hh>
-# include <roboptim/core/portability.hh>
 
 # include <boost/mpl/vector.hpp>
 # include <boost/optional.hpp>
