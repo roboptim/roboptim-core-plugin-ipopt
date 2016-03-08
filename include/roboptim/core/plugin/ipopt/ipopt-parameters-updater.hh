@@ -30,43 +30,38 @@ namespace roboptim
 {
   namespace
   {
-    struct IpoptParametersUpdater
-      : public boost::static_visitor<>
+    struct IpoptParametersUpdater : public boost::static_visitor<bool>
     {
       explicit IpoptParametersUpdater
       (const Ipopt::SmartPtr<Ipopt::IpoptApplication>& app,
        const std::string& key)
-	: app (app),
+	: boost::static_visitor<bool> (),
+	  app (app),
 	  key (key)
-
       {}
-      void
-      operator () (const Function::value_type& val) const
+
+      bool operator () (const Function::value_type& val) const
       {
-	app->Options ()->SetNumericValue (key, val);
+	return app->Options ()->SetNumericValue (key, val);
       }
 
-      void
-      operator () (const int& val) const
+      bool operator () (const int& val) const
       {
-	app->Options ()->SetIntegerValue (key, val);
+	return app->Options ()->SetIntegerValue (key, val);
       }
 
-      void
-      operator () (const std::string& val) const
+      bool operator () (const std::string& val) const
       {
-	app->Options ()->SetStringValue (key, val);
+	return app->Options ()->SetStringValue (key, val);
       }
 
-      void
-      operator () (const bool& val) const
+      bool operator () (const bool& val) const
       {
-	app->Options ()->SetStringValue (key, val? "yes" : "no");
+	return app->Options ()->SetStringValue (key, val? "yes" : "no");
       }
 
       template <typename T>
-      void
-      operator () (const T&) const
+      bool operator () (const T&) const
       {
         throw std::runtime_error ("option type not supported by Ipopt.");
       }
