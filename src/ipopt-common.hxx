@@ -75,8 +75,7 @@ namespace roboptim
 
 #define SWITCH_FATAL(NAME, ERROR)		\
   case NAME:					\
-  throw std::runtime_error (ERROR);		\
-  break
+  throw std::runtime_error (ERROR)
 
 #define SWITCH_OK(NAME, CASES)			\
   case NAME:					\
