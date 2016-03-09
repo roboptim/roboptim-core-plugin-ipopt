@@ -5,10 +5,7 @@ var a00002 =
     [ "function_t", "a00002.html#a6d0d9efd6dc46e32ca99207fe27c2f38", null ],
     [ "parent_t", "a00002.html#ab5609f257d552dcf5e6d43cb5590e7d3", null ],
     [ "problem_t", "a00002.html#a657d8b77b25eb0db371991b14a4f8e84", null ],
-    [ "ConstraintType", "a00002.html#a7a6a605f0771854eb9ef6e15a63f3027", [
-      [ "LINEAR", "a00002.html#a7a6a605f0771854eb9ef6e15a63f3027a5d7020b859c2e8264104097ec1debf1c", null ],
-      [ "NONLINEAR", "a00002.html#a7a6a605f0771854eb9ef6e15a63f3027a5b183c5ecc85120b6e26a155f3dc1a26", null ]
-    ] ],
+    [ "ConstraintType", "a00002.html#a7a6a605f0771854eb9ef6e15a63f3027", null ],
     [ "IpoptSolverCommon", "a00002.html#a9cfffe1de75141c7bfa992ab5e477e8b", null ],
     [ "~IpoptSolverCommon", "a00002.html#ad5e70946ac9a4c3e5e960d5852f1401a", null ],
     [ "callback", "a00002.html#aaab2d4c528e8cae385a2f52f53472d10", null ],
