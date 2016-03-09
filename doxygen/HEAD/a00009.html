@@ -259,10 +259,10 @@ Macros</h2></td></tr>
 <div class="line"><a class="code" href="a00009.html#adbaea363c26f0140966c80122bd19f76">	 MAP_IPOPT_FATALS</a>(<a class="code" href="a00009.html#a4958dbe919c2557113e31cf2d7b36926">SWITCH_FATAL</a>));        \</div>
 <div class="line">  MACRO (Ipopt::User_Requested_Stop, <a class="code" href="a00009.html#a25022b885198970781b6c6205b562bc3">MAP_IPOPT_ERRORS</a>(<a class="code" href="a00009.html#ac2223e7c9508ceda166a6162f34139cd">SWITCH_ERROR</a>);  <a class="code" href="a00009.html#adbaea363c26f0140966c80122bd19f76">\</a></div>
 <div class="line"><a class="code" href="a00009.html#adbaea363c26f0140966c80122bd19f76">	 MAP_IPOPT_FATALS</a>(<a class="code" href="a00009.html#a4958dbe919c2557113e31cf2d7b36926">SWITCH_FATAL</a>))</div>
-<div class="ttc" id="a00009_html_a25022b885198970781b6c6205b562bc3"><div class="ttname"><a href="a00009.html#a25022b885198970781b6c6205b562bc3">MAP_IPOPT_ERRORS</a></div><div class="ttdeci">#define MAP_IPOPT_ERRORS(MACRO)</div><div class="ttdef"><b>Definition:</b> ipopt-common.hxx:97</div></div>
+<div class="ttc" id="a00009_html_a25022b885198970781b6c6205b562bc3"><div class="ttname"><a href="a00009.html#a25022b885198970781b6c6205b562bc3">MAP_IPOPT_ERRORS</a></div><div class="ttdeci">#define MAP_IPOPT_ERRORS(MACRO)</div><div class="ttdef"><b>Definition:</b> ipopt-common.hxx:96</div></div>
 <div class="ttc" id="a00009_html_a4958dbe919c2557113e31cf2d7b36926"><div class="ttname"><a href="a00009.html#a4958dbe919c2557113e31cf2d7b36926">SWITCH_FATAL</a></div><div class="ttdeci">#define SWITCH_FATAL(NAME, ERROR)</div><div class="ttdef"><b>Definition:</b> ipopt-common.hxx:76</div></div>
 <div class="ttc" id="a00009_html_ac2223e7c9508ceda166a6162f34139cd"><div class="ttname"><a href="a00009.html#ac2223e7c9508ceda166a6162f34139cd">SWITCH_ERROR</a></div><div class="ttdeci">#define SWITCH_ERROR(NAME, ERROR)</div><div class="ttdef"><b>Definition:</b> ipopt-common.hxx:72</div></div>
-<div class="ttc" id="a00009_html_adbaea363c26f0140966c80122bd19f76"><div class="ttname"><a href="a00009.html#adbaea363c26f0140966c80122bd19f76">MAP_IPOPT_FATALS</a></div><div class="ttdeci">#define MAP_IPOPT_FATALS(MACRO)</div><div class="ttdef"><b>Definition:</b> ipopt-common.hxx:118</div></div>
+<div class="ttc" id="a00009_html_adbaea363c26f0140966c80122bd19f76"><div class="ttname"><a href="a00009.html#adbaea363c26f0140966c80122bd19f76">MAP_IPOPT_FATALS</a></div><div class="ttdeci">#define MAP_IPOPT_FATALS(MACRO)</div><div class="ttdef"><b>Definition:</b> ipopt-common.hxx:117</div></div>
 </div><!-- fragment -->
 <p>Referenced by <a class="el" href="a00002.html#a070a25a8f1f2f6cb39ce04c7c220730f">roboptim::IpoptSolverCommon&lt; T &gt;::solve()</a>.</p>
 
@@ -322,8 +322,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">case</span> NAME:          \</div>
-<div class="line">  throw std::runtime_error (ERROR);   \</div>
-<div class="line">  break</div>
+<div class="line">  throw std::runtime_error (ERROR)</div>
 </div><!-- fragment -->
 <p>Referenced by <a class="el" href="a00002.html#a070a25a8f1f2f6cb39ce04c7c220730f">roboptim::IpoptSolverCommon&lt; T &gt;::solve()</a>.</p>
 
@@ -378,7 +377,7 @@ Macros</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_38f50bf45ae707b9f9f81c206e5b0ad4.html">src</a></li><li class="navelem"><a class="el" href="a00009.html">ipopt-common.hxx</a></li>
-    <li class="footer">Generated on Wed Mar 9 2016 05:33:07 for roboptim-core-plugin-ipopt by
+    <li class="footer">Generated on Wed Mar 9 2016 06:18:06 for roboptim-core-plugin-ipopt by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
