@@ -28,6 +28,7 @@
 # include <roboptim/core/plugin/ipopt/ipopt-td.hh>
 # include <roboptim/core/plugin/ipopt/ipopt-sparse.hh>
 # include <roboptim/core/debug.hh>
+# include <roboptim/core/result.hh>
 
 # include <coin/IpIpoptCalculatedQuantities.hpp>
 # include <coin/IpIpoptData.hpp>
@@ -604,7 +605,7 @@ namespace roboptim
 #define SWITCH_WARNING(NAME, WARNING)			\
     case NAME:                                          \
     {                                                   \
-      ResultWithWarnings res (n, 1);			\
+      Result res (n, 1);				\
       FILL_RESULT ();					\
       res.warnings.push_back (SolverWarning (WARNING)); \
       solver_.result_ = res;				\
