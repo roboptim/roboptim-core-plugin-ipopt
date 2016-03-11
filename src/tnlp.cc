@@ -15,7 +15,9 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with roboptim.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <cstring>
 #include <stdexcept>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 
@@ -94,15 +96,14 @@ namespace roboptim
 
       if (!values)
 	{
-	  LOG4CXX_TRACE
-	    (logger, "Looking for non-zeros elements.");
+	  LOG4CXX_TRACE (logger, "Looking for nonzero elements.");
 	  LOG4CXX_TRACE (logger, "nele_jac = " << nele_jac);
 
 	  // Emptying iRow/jCol arrays.
 	  std::memset (iRow, 0, static_cast<std::size_t> (nele_jac) * sizeof (Index));
 	  std::memset (jCol, 0, static_cast<std::size_t> (nele_jac) * sizeof (Index));
 
-	  // First evaluate the constraints in zero to build the
+	  // First evaluate the constraints at the starting point to build the
 	  // constraints jacobian.
 	  int idx = 0;
 	  typedef differentiableConstraints_t::const_iterator citer_t;
@@ -121,10 +122,10 @@ namespace roboptim
 	      LOG4CXX_TRACE
 		(logger,
 		 "Compute jacobian of constraint id = " << constraintId
-		 << "to count for non-zeros elements");
+		 << "to count for nonzero elements");
 
               // Using the values already computed in get_nlp_info
-	      differentiableFunction_t::jacobian_t&
+	      const differentiableFunction_t::jacobian_t&
                 tmp_jac = constraintJacobians_[constraintId];
 
 	      for (int k = 0; k < tmp_jac.outerSize (); ++k)

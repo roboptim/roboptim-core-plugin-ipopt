@@ -406,7 +406,7 @@ namespace roboptim
 	constraintsBuf_ =
 	  typename function_t::result_t (constraintsOutputSize ());
 
-      Eigen::Map<const typename function_t::argument_t> x_ (x, n);
+      const Eigen::Map<const typename function_t::argument_t> x_ (x, n);
 
       typedef typename constraints_t::const_iterator citer_t;
 
