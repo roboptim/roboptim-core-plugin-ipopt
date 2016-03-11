@@ -248,10 +248,11 @@ namespace roboptim
       ROBOPTIM_DEBUG_ONLY(std::size_t n_ = static_cast<std::size_t> (n));
       ROBOPTIM_DEBUG_ONLY(std::size_t m_ = static_cast<std::size_t> (m));
 
-      // TODO: add support for objective scaling in roboptim-core
-      obj_scaling = 1.;
-
+      assert (solver_.problem ().objectiveScaling ().size ()
+              == static_cast<size_t> (solver_.problem ().function ().outputSize ()));
       assert (solver_.problem ().argumentScaling ().size () == n_);
+
+      obj_scaling = solver_.problem ().objectiveScaling ()[0];
 
       use_x_scaling = true;
       std::copy (solver_.problem ().argumentScaling ().begin (),
