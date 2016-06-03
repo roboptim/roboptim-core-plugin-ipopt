@@ -30,7 +30,7 @@ MACRO(IPOPT_PLUGIN NAME)
   INSTALL(TARGETS roboptim-core-plugin-${NAME}
     DESTINATION ${PLUGINDIR})
   PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-${NAME} ipopt)
-  PKG_CONFIG_USE_COMPILE_DEPENDENCY(roboptim-core-plugin-${NAME} roboptim-core)
+  PKG_CONFIG_USE_DEPENDENCY(roboptim-core-plugin-${NAME} roboptim-core)
 
   # Make sure all symbols are defined.
   # See:
