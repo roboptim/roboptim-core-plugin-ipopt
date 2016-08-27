@@ -96,9 +96,6 @@ namespace roboptim
 
       if (!values)
 	{
-	  LOG4CXX_TRACE (logger, "Looking for nonzero elements.");
-	  LOG4CXX_TRACE (logger, "nele_jac = " << nele_jac);
-
 	  // Emptying iRow/jCol arrays.
 	  std::memset (iRow, 0, static_cast<std::size_t> (nele_jac) * sizeof (Index));
 	  std::memset (jCol, 0, static_cast<std::size_t> (nele_jac) * sizeof (Index));
@@ -119,11 +116,6 @@ namespace roboptim
 	       it != differentiableConstraints_.end ();
 	       ++it, ++constraintId)
 	    {
-	      LOG4CXX_TRACE
-		(logger,
-		 "Compute jacobian of constraint id = " << constraintId
-		 << "to count for nonzero elements");
-
               // Using the values already computed in get_nlp_info
 	      const differentiableFunction_t::jacobian_t&
                 tmp_jac = constraintJacobians_[constraintId];
@@ -144,11 +136,7 @@ namespace roboptim
 	    (coefficients.begin (), coefficients.end ());
 	  jacobianBuf_->makeCompressed ();
 
-	  LOG4CXX_TRACE
-	    (logger, "full problem jacobian...\n" << *jacobianBuf_);
-
 	  // Then look for non-zero values.
-	  LOG4CXX_TRACE (logger, "filling iRow and jCol...");
 	  idx = 0;
 
 	  for (int k = 0; k < jacobianBuf_->outerSize (); ++k)
@@ -156,12 +144,6 @@ namespace roboptim
 		 it; ++it)
 	      {
 		iRow[idx] = it.row (), jCol[idx] = it.col ();
-		LOG4CXX_TRACE
-		  (logger, "row: " << it.row ()
-		   << " / col: " << it.col ()
-		   << " / index: " << it.index ()
-		   << " / value: " << it.value ()
-		   << "\nidx: " << idx);
 		++idx;
 	      }
 
