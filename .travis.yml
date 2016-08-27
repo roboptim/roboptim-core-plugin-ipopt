@@ -1,7 +1,8 @@
+sudo: required
 language: cpp
 env:
   global:
-  - APT_DEPENDENCIES="doxygen libltdl-dev libboost-all-dev liblog4cxx10-dev"
+  - APT_DEPENDENCIES="cmake cmake-data doxygen libltdl-dev libboost-all-dev liblog4cxx10-dev"
   - HOMEBREW_DEPENDENCIES="doxygen log4cxx ipopt openblas mumps"
   - GIT_DEPENDENCIES="roboptim/roboptim-core"
   - DEBSIGN_KEYID=5AE5CD75
@@ -40,9 +41,11 @@ before_install:
 
 matrix:
   allow_failures:
-    - compiler: clang
-    - env: COVERITY_SCAN_BRANCH=1
+    - os: linux
+      compiler: clang
     - os: osx
+      compiler: gcc
+    - env: COVERITY_SCAN_BRANCH=1
   include:
     - os: linux
       dist: trusty
@@ -53,9 +56,11 @@ matrix:
     - os: linux
       dist: precise
       compiler: gcc
+      env: MASTER_PPA="george-edison55/precise-backports"
     - os: linux
       dist: precise
       compiler: clang
+      env: MASTER_PPA="george-edison55/precise-backports"
     - os: osx
       compiler: clang
     - os: osx
