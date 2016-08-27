@@ -27,8 +27,9 @@ branches:
   - travis
   - coverity_scan
 script:
-- export LD_LIBRARY_PATH=`pkg-config --variable=plugindir roboptim-core`:$LD_LIBRARY_PATH;
-- if [ "${COVERITY_SCAN_BRANCH}" != "1" ]; then ./.travis/run build; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then export LD_LIBRARY_PATH=`pkg-config --variable=plugindir roboptim-core`:$LD_LIBRARY_PATH; fi
+  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then export DYLD_LIBRARY_PATH=`pkg-config --variable=plugindir roboptim-core`:$DYLD_LIBRARY_PATH; fi
+  - if [ "${COVERITY_SCAN_BRANCH}" != "1" ]; then ./.travis/run build; fi
 after_success:
   - ./.travis/run after_success
   - codecov --gcov-root=/tmp/_ci/build

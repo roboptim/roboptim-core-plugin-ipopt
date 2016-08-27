@@ -21,6 +21,11 @@ MACRO(IPOPT_PLUGIN NAME)
   ADD_LIBRARY(roboptim-core-plugin-${NAME} MODULE
     ${NAME}.cc tnlp.cc tnlp.hh tnlp.hxx doc.hh ${HEADERS}
     )
+
+  IF(APPLE)
+    SET(CMAKE_SHARED_MODULE_CREATE_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS} -undefined dynamic_lookup")
+  ENDIF()
+
   SET_TARGET_PROPERTIES(roboptim-core-plugin-${NAME} PROPERTIES
     COMPILE_DEFINITIONS
       IPOPT_DEFAULT_LINEAR_SOLVER="${IPOPT_DEFAULT_LINEAR_SOLVER}"
@@ -36,12 +41,11 @@ MACRO(IPOPT_PLUGIN NAME)
   PKG_CONFIG_USE_COMPILE_DEPENDENCY(roboptim-core-plugin-${NAME} roboptim-core)
 
   # Make sure all symbols are defined.
-  # See:
-  # http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=592752
+  # See: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=592752
   IF(CMAKE_SYSTEM_NAME MATCHES "Linux"
     AND EXISTS "/etc/debian_version"
     AND IPOPT_PREFIX MATCHES "/usr")
-  TARGET_LINK_LIBRARIES(roboptim-core-plugin-${NAME} dmumps_seq)
+    TARGET_LINK_LIBRARIES(roboptim-core-plugin-${NAME} dmumps_seq)
   ENDIF()
 ENDMACRO()
 
@@ -49,5 +53,5 @@ ENDMACRO()
 IPOPT_PLUGIN(ipopt)
 # Ipopt plug-in (with only gradient computation and sparse matrices).
 IPOPT_PLUGIN(ipopt-sparse)
-# Ipopt twice differentiable (td) plug-in (require hessian computation).
+# Ipopt twice-differentiable (td) plug-in (requires hessian computation).
 IPOPT_PLUGIN(ipopt-td)
