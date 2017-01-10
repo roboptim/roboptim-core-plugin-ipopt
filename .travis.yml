@@ -10,6 +10,7 @@ env:
   - GH_USERNAME=thomas-moulard
   - GH_REPO=roboptim/roboptim-core-plugin-ipopt
   - LCOV_IGNORE_RULES="*tests*"
+  - EIGEN_MAJOR=3.2
   - secure: fURGUkCIPnZZ4G+Gaf9wMPH2P8sXiDA0kA1S6qVdCbenIyilRNnLmPiqHoqwtVEl4pqpdmRoFnMbJMGIuh+61gdo23+MZ1TBeNUp86nkH4v+qVRw5n1Nm2cKJZiqiuRHcTF3jVCVgx7eUvDkPAjJ9ff4vxB8sQhOQkQeGilJyak=
   - secure: TBMOOJtRFuQK9NWIlKuBg+/LiuTa8Hz+8PsnZB/vGlc4FpoRJkz7DmnQS/sCDxunhaXZX6rac7THzCn6lrp5wksXNRRqUwRiv+JixyE1WbAnn22JBEouhs4o4fjRtwPvvkH0+EpAxuSebltCESrdxfjjkeLine4CZvV0e6HPquw=
   - secure: ALE6izEg9T+fqCBUvvhKEgOgCnR+43DSOFT/DDBIj2hCXlf9R9dQ8upaG/6JXl08i5hwVRvQMK9+zJfU25cTTM/xpC8O/5G8t7pG9Y+/QeVOMbOCQnHMDe7dB8azO8CHnC91pP00ychf8KSL2Exz+o1k1fha/9BaZZDo5zCrKKU=
@@ -36,7 +37,7 @@ after_success:
 after_failure: ./.travis/run after_failure
 before_install:
   - pip install --user codecov
-  - ./.travis/dependencies/eigen-3.2
+  - ./.travis/dependencies/eigen-${EIGEN_MAJOR}
   - ./.travis/run before_install
   - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then CC=gcc CXX=g++ ./.travis/dependencies/ipopt; fi
 
@@ -54,6 +55,10 @@ matrix:
     - os: linux
       dist: trusty
       compiler: clang
+    - os: linux
+      dist: trusty
+      compiler: gcc
+      env: EIGEN_MAJOR=3.3
     - os: linux
       dist: precise
       compiler: gcc
