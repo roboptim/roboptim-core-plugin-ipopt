@@ -64,7 +64,7 @@ namespace roboptim
           constraintJacobians_.push_back ((*it)->jacobian (x));
           differentiableFunction_t::jacobian_t& jac = constraintJacobians_.back ();
           jac.makeCompressed ();
-	  nnz_jac_g += jac.nonZeros ();
+	  nnz_jac_g += static_cast<Index> (jac.nonZeros ());
 	}
 
       nnz_h_lag = 0; // unused
@@ -129,7 +129,7 @@ namespace roboptim
 		    coefficients.push_back
 		      (triplet_t (row, col, it.value ()));
 		  }
-	      idx += (*it)->outputSize ();
+	      idx += static_cast<int> ((*it)->outputSize ());
 	    }
 
 	  jacobianBuf_->setFromTriplets
@@ -143,7 +143,7 @@ namespace roboptim
 	    for (differentiableFunction_t::jacobian_t::InnerIterator it (*jacobianBuf_, k);
 		 it; ++it)
 	      {
-		iRow[idx] = it.row (), jCol[idx] = it.col ();
+		iRow[idx] = static_cast<Index> (it.row ()), jCol[idx] = static_cast<Index> (it.col ());
 		++idx;
 	      }
 
