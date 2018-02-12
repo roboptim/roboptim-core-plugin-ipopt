@@ -41,10 +41,6 @@ namespace roboptim
 
   namespace detail
   {
-    template <typename T>
-    log4cxx::LoggerPtr Tnlp<T>::logger
-    (log4cxx::Logger::getLogger ("roboptim.ipopt"));
-
     /// \internal
 #ifdef ROBOPTIM_CORE_IPOPT_PLUGIN_CHECK_GRADIENT
     template <typename T, typename F>
