@@ -36,6 +36,8 @@ after_success:
   - codecov --gcov-root=/tmp/_ci/build
 after_failure: ./.travis/run after_failure
 before_install:
+  # Avoid bug on CI with OSX, see https://github.com/travis-ci/travis-ci/issues/8552
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update ; fi
   - pip install --user codecov
   - ./.travis/dependencies/eigen-${EIGEN_MAJOR}
   - ./.travis/run before_install

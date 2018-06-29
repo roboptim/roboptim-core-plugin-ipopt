@@ -77,6 +77,5 @@ Available packages
 [Eigen]: http://eigen.tuxfamily.org/
 [Git]: http://git-scm.com/
 [Libtool]: https://www.gnu.org/software/libtool/
-[log4cxx]: https://logging.apache.org/log4cxx/
 [pkg-config]: http://www.freedesktop.org/wiki/Software/pkg-config/
 [RobotPkg]: http://robotpkg.openrobots.org/
