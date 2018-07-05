@@ -3,7 +3,7 @@ language: cpp
 env:
   global:
   - APT_DEPENDENCIES="cmake cmake-data doxygen libltdl-dev libboost-all-dev liblog4cxx10-dev"
-  - HOMEBREW_DEPENDENCIES="doxygen log4cxx ipopt openblas mumps"
+  - HOMEBREW_DEPENDENCIES="doxygen log4cxx brewsci/science/ipopt openblas mumps"
   - GIT_DEPENDENCIES="roboptim/roboptim-core"
   - DEBSIGN_KEYID=5AE5CD75
   - PPA_URI="roboptim/ppa"
@@ -33,12 +33,12 @@ script:
   - if [ "${COVERITY_SCAN_BRANCH}" != "1" ]; then ./.travis/run build; fi
 after_success:
   - ./.travis/run after_success
-  - codecov --gcov-root=/tmp/_ci/build
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then codecov --gcov-root=/tmp/_ci/build; fi
 after_failure: ./.travis/run after_failure
 before_install:
   # Avoid bug on CI with OSX, see https://github.com/travis-ci/travis-ci/issues/8552
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update ; fi
-  - pip install --user codecov
+  - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then pip install --user codecov; fi
   - ./.travis/dependencies/eigen-${EIGEN_MAJOR}
   - ./.travis/run before_install
   - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then CC=gcc CXX=g++ ./.travis/dependencies/ipopt; fi
