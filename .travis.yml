@@ -49,6 +49,8 @@ matrix:
       compiler: clang
     - os: osx
       compiler: gcc
+    - os: osx
+      compiler: clang
     - env: COVERITY_SCAN_BRANCH=1
   include:
     - os: linux
